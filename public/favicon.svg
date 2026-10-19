@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hampi">
+    <defs>
+        <linearGradient id="hampi-g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#14b8a6"/>
+            <stop offset="1" stop-color="#0f766e"/>
+        </linearGradient>
+    </defs>
+    <rect width="64" height="64" rx="18" fill="url(#hampi-g)"/>
+    <path d="M32 47s-13-7.6-13-17.2A8.4 8.4 0 0 1 27.4 21c2.1 0 3.7.9 4.6 2.1A5.6 5.6 0 0 1 36.6 21 8.4 8.4 0 0 1 45 29.8C45 39.4 32 47 32 47Z"
+          fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M22 33h5.2l1.6-3.2 3 6.4 2.4-8.2 2.2 5h5.6" fill="none" stroke="#0f172a" stroke-width="0" />
+    <path d="M22 32.5h4.6l1.7-3.4 3 6.6 2.3-7.6 2.2 4.4h5.7" fill="none" stroke="#ffffff" stroke-width="3.6"
+          stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -6,5 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cita extends Model
 {
-       protected $guarded = [];
+    protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'fecha_hora' => 'datetime',
+        ];
+    }
+
+    public function ciudadano()
+    {
+        return $this->belongsTo(Ciudadano::class);
+    }
+
+    public function posta()
+    {
+        return $this->belongsTo(Posta::class);
+    }
 }

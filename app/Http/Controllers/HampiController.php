@@ -19,7 +19,17 @@ class HampiController extends Controller
     {
         // Limpiar cualquier sesión anterior
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
-        return view('hampi.login');
+
+        // Indicadores reales para la portada (sin datos inventados)
+        $stats = [
+            'turnos' => TurnoMedico::count(),
+            'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
+            'postas' => Posta::where('estado_activo', true)->count(),
+        ];
+
+        $postaPrincipal = Posta::where('estado_activo', true)->first();
+
+        return view('hampi.login', compact('stats', 'postaPrincipal'));
     }
 
     // Validación e ingreso con DNI (Sin redirección)
@@ -39,21 +49,36 @@ class HampiController extends Controller
 
         Session::put('ciudadano_dni', $ciudadano->dni);
 
-        return view('hampi.panel_paciente', compact('ciudadano'));
+        $citas = Cita::with('posta')
+            ->where('ciudadano_id', $ciudadano->id)
+            ->orderBy('fecha_hora')
+            ->get();
+
+        return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
     }
 
     // Pantalla 2: Panel del Paciente
     public function panelCiudadano()
     {
         $dni = Session::get('ciudadano_dni', '72345678');
-        
-        $ciudadano = Ciudadano::where('dni', $dni)->first() ?? (object)[
-            'nombres' => 'Rosa Elena',
-            'apellidos' => 'Quispe Mamani',
-            'dni' => $dni
-        ];
 
-        return view('hampi.panel_paciente', compact('ciudadano'));
+        $ciudadano = Ciudadano::where('dni', $dni)->first();
+
+        if ($ciudadano) {
+            $citas = Cita::with('posta')
+                ->where('ciudadano_id', $ciudadano->id)
+                ->orderBy('fecha_hora')
+                ->get();
+        } else {
+            $ciudadano = (object)[
+                'nombres' => 'Rosa Elena',
+                'apellidos' => 'Quispe Mamani',
+                'dni' => $dni
+            ];
+            $citas = collect();
+        }
+
+        return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
     }
 
     // Pantalla 3: Médicos y Turnos del Día
