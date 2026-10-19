@@ -15,13 +15,14 @@ use Illuminate\Support\Facades\Http;
 class HampiController extends Controller
 {
     // Pantalla 1: Acceso / Inicio
-      public function index()
+    public function index()
     {
-        // Limpiar cualquier sesión anterior para no dejar botones flotando
+        // Limpiar cualquier sesión anterior
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
         return view('hampi.login');
     }
-   // Validación e ingreso con DNI (Sin redirección para Codespaces)
+
+    // Validación e ingreso con DNI (Sin redirección)
     public function accesoPorDni(Request $request)
     {
         $dni = $request->input('dni', '72345678');
@@ -40,7 +41,8 @@ class HampiController extends Controller
 
         return view('hampi.panel_paciente', compact('ciudadano'));
     }
-    // Pantalla: Panel del Paciente
+
+    // Pantalla 2: Panel del Paciente
     public function panelCiudadano()
     {
         $dni = Session::get('ciudadano_dni', '72345678');
@@ -80,7 +82,7 @@ class HampiController extends Controller
     public function logoutCiudadano()
     {
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
-        return redirect()->route('inicio');
+        return redirect('/');
     }
 
     // --- Panel de Administración (Enfermería / Admisión) ---
@@ -91,6 +93,7 @@ class HampiController extends Controller
         return view('hampi.admin_dashboard', compact('vacunas', 'turnos'));
     }
 
+        // Guardar aviso en el Pizarrín
     public function storeVacuna(Request $request)
     {
         $request->validate([
@@ -101,27 +104,68 @@ class HampiController extends Controller
         ]);
 
         VacunaAviso::create([
-            'posta_id' => 1, // Por defecto C.S. San Martín de Socabaya
-            'titulo' => $request->titulo,
-            'grupo_objetivo' => $request->grupo_objetivo,
+            'posta_id' => 1,
+            'titulo' => strip_tags($request->titulo), // Elimina cualquier etiqueta <script> o <iframe>
+            'grupo_objetivo' => strip_tags($request->grupo_objetivo),
             'stock_estado' => $request->stock_estado,
-            'requisitos' => $request->requisitos,
+            'requisitos' => strip_tags($request->requisitos),
             'es_urgente' => $request->has('es_urgente')
         ]);
 
-        return back()->with('mensaje', 'Aviso publicado en el Pizarrín exitosamente.');
+        return redirect('/admin/dashboard')->with('mensaje', 'Aviso publicado en el Pizarrín exitosamente.');
     }
 
+    // Eliminar vacuna del Pizarrín
+    public function destroyVacuna($id)
+    {
+        $vacuna = VacunaAviso::findOrFail($id);
+        $vacuna->delete();
+
+        return redirect('/admin/dashboard')->with('mensaje', 'Aviso de vacuna retirado del Pizarrín exitosamente.');
+    }
+
+    // Guardar nuevo médico
+    public function storeTurno(Request $request)
+    {
+        $request->validate([
+            'medico_nombre' => 'required|string|max:100',
+            'especialidad' => 'required|string|max:100',
+            'turno' => 'required|in:Mañana,Tarde',
+            'consultorio' => 'required|string|max:50',
+        ]);
+
+        TurnoMedico::create([
+            'posta_id' => 1,
+            'medico_nombre' => $request->medico_nombre,
+            'especialidad' => $request->especialidad,
+            'turno' => $request->turno,
+            'consultorio' => $request->consultorio,
+            'estado' => 'Atendiendo'
+        ]);
+
+        return redirect('/admin/dashboard')->with('mensaje', 'Médico registrado exitosamente en el rol de hoy.');
+    }
+
+    // Cambiar estado del médico
     public function updateTurnoEstado(Request $request, $id)
     {
         $turno = TurnoMedico::findOrFail($id);
         $turno->estado = $request->estado;
         $turno->save();
 
-        return back()->with('mensaje', 'Estado del médico actualizado.');
+        return redirect('/admin/dashboard')->with('mensaje', 'Estado del médico actualizado.');
     }
-        // API para consultar el DNI en tiempo real
-        // Consulta Real a RENIEC mediante apis.net.pe
+
+    // Eliminar médico del rol
+    public function destroyTurno($id)
+    {
+        $turno = TurnoMedico::findOrFail($id);
+        $turno->delete();
+
+        return redirect('/admin/dashboard')->with('mensaje', 'Médico retirado del rol de hoy.');
+    }
+
+    // Consulta en vivo a RENIEC
     public function consultarDniReniec($dni)
     {
         if (!preg_match('/^[0-9]{8}$/', $dni)) {
@@ -131,7 +175,6 @@ class HampiController extends Controller
         $token = env('RENIEC_API_TOKEN', '');
 
         try {
-            // Petición oficial con tu Token Bearer
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
                 'Referer' => 'https://apis.net.pe/consulta-dni-api',
@@ -149,7 +192,7 @@ class HampiController extends Controller
                 ]);
             }
         } catch (\Exception $e) {
-            // Error de conexión
+            // Error de conexión a la API
         }
 
         return response()->json([
@@ -157,4 +200,6 @@ class HampiController extends Controller
             'mensaje' => 'No se pudo conectar con el servicio de RENIEC. Puedes escribir tus nombres manualmente.'
         ], 404);
     }
+        // Eliminar vacuna o aviso del Pizarrín
+
 }

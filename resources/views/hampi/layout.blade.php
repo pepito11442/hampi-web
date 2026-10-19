@@ -107,7 +107,7 @@
     <!-- FOOTER EN COMPUTADORA -->
     <footer class="hidden md:block bg-white border-t border-slate-200 py-6 mt-auto text-xs text-slate-500">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>© 2024 Hampi · Microred Socabaya (Arequipa). Proyecto Académico Universidad Continental.</p>
+            <p>© 2026 Hampi · Microred Socabaya (Arequipa). Proyecto Académico Universidad Continental.</p>
             <div class="flex items-center space-x-4 text-slate-400">
                 <span>Ley N.° 29733 (Protección de Datos)</span>
                 <span>•</span>

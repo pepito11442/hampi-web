@@ -35,4 +35,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     // Gestión de Turnos de Médicos
     Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('admin.turno.update');
-});
+        // Gestión completa de Médicos y Especialidades (CRUD)
+    Route::post('/turnos/guardar', [HampiController::class, 'storeTurno'])->name('admin.turno.store');
+    Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('admin.turno.update');
+    Route::delete('/turnos/{id}', [HampiController::class, 'destroyTurno'])->name('admin.turno.destroy');
+        // Eliminar aviso de vacuna
+    Route::delete('/pizarrin/{id}', [HampiController::class, 'destroyVacuna'])->name('admin.vacuna.destroy');
+    // Protección contra HYDRA: Máximo 5 intentos por minuto por IP. Al 6to intento, bloquea con HTTP 429
+Route::post('/personal/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+
+// Protección contra DDoS en la API de RENIEC:
+Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec'])->middleware('throttle:15,1');
+
+// Protección contra DDoS en el ingreso de DNI:
+Route::post('/ingreso-dni', [HampiController::class, 'accesoPorDni'])->middleware('throttle:20,1');
+    });
