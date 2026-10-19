@@ -126,7 +126,6 @@ Definidos en `database/seeders/DatabaseSeeder.php`:
 | Ciudadano | DNI `72345678` | — |
 | Personal de salud | `enfermeria@hampi.pe` | `socabaya2024` |
 
-> ⚠️ **Antes de publicar en producción**, cambia la contraseña del usuario de enfermería y cualquier dato personal real.
 
 ### Flujo ciudadano
 
