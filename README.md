@@ -36,7 +36,7 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 
 | Componente                 | Tecnología                                                                         |
 | -------------------------- | ---------------------------------------------------------------------------------- |
-| Backend                    | Laravel 11.57 · PHP 8.2+ con `pdo_mysql`                                           |
+| Backend                    | Laravel 11.57 · PHP 8.2+ con `pdo_mysql` e `intl`                                  |
 | Base de datos              | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción                             |
 | Tests                      | PHPUnit con SQLite `:memory:` (solo pruebas automáticas)                           |
 | Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+                                   |
@@ -52,8 +52,8 @@ SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó
 
 ## Requisitos
 
-- PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`) y **`pdo_mysql`**.
-    - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql`; la sección [Codespaces](#codespaces) explica cómo compilarlo o usar PHP 8.3.
+- PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`), **`pdo_mysql`** e **`intl`**.
+    - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql` ni `intl`; la sección [Codespaces](#codespaces) explica cómo compilarlas o usar PHP 8.3.
 - Composer 2.
 - Node.js **22.12+** (Vite 8) y npm.
 - MySQL 8 o MariaDB 10.4+.
@@ -69,9 +69,10 @@ composer -V
 node -v
 npm -v
 mysql --version
+php -m | grep -i -E 'pdo_mysql|intl'
 ```
 
-En XAMPP, si `php`, `composer` o `mysql` no están en el `PATH`, usa las rutas completas. Por ejemplo, en Windows:
+La salida de `php -m | grep` debe incluir `pdo_mysql` e `intl`. En XAMPP, si `php`, `composer` o `mysql` no están en el `PATH`, usa las rutas completas. Por ejemplo, en Windows:
 
 ```powershell
 C:\xampp\php\php.exe -v
@@ -179,7 +180,9 @@ php artisan serve --port=8001
 
 ## Codespaces
 
-Esta guía deja el proyecto funcionando en **GitHub Codespaces**: PHP, la extensión `pdo_mysql`, MySQL, dependencias de Composer, assets de Vite y el servidor de Laravel.
+Esta guía deja el proyecto funcionando en **GitHub Codespaces**: PHP, las extensiones `pdo_mysql` e `intl`, MySQL, dependencias de Composer, assets de Vite y el servidor de Laravel.
+
+> **Ruta recomendada:** crea el Codespace (paso 1) → verifica las extensiones (paso 2) → compila `pdo_mysql` e `intl` solo si faltan (paso 3) → levanta MySQL (paso 4) → configura Laravel y migra (pasos 5 y 6) → compila assets y abre el puerto 8000 (pasos 7 y 8). Al final tienes el [resumen rápido](#11-resumen-rápido).
 
 > **Codespaces es para desarrollo y demos.** No es un hosting permanente: se suspende por inactividad, consume horas de la cuota y su URL pública es temporal. Para un enlace estable, revisa [Despliegue en producción](#despliegue-en-producción).
 
@@ -202,7 +205,7 @@ composer -V
 node -v
 npm -v
 docker --version
-php -m | grep -i -E 'pdo|mysql'
+php -m | grep -i -E 'pdo|mysql|intl'
 ```
 
 Debes ver al menos:
@@ -211,19 +214,26 @@ Debes ver al menos:
 PDO
 pdo_mysql
 mysqlnd
+intl
 ```
 
-Si **no aparece `pdo_mysql`**, sigue el paso 3. Si ya aparece, salta al paso 4.
+Si **no aparece `pdo_mysql` o `intl`**, sigue el paso 3. Si ya aparecen ambos, salta al paso 4.
 
-Si no aparece `docker`, usa la opción con MariaDB del paso 4.
+> Cuando MySQL esté corriendo, `php artisan db:show` debe listar las 16 tablas y terminar sin errores. Esa orden usa `intl` para formatear los números, así que también sirve como comprobación final.
 
-### 3. Instalar `pdo_mysql` si falta
+Si `docker --version` falla, usa la opción con MariaDB del paso 4.
+
+### 3. Instalar `pdo_mysql` e `intl` si faltan
 
 En algunos Codespaces, PHP viene compilado en `/opt/php/<versión>` y **no es el PHP de Ubuntu**. En ese caso:
 
 - `sudo apt-get install php<versión>-mysql` no funciona si Ubuntu no tiene paquetes para esa versión exacta.
 - `docker-php-ext-install` no existe porque no es la imagen oficial de PHP.
-- Hay que compilar la extensión con `phpize`.
+- Hay que compilar cada extensión con `phpize`.
+
+Las dos se compilan de la misma forma. Empieza por `pdo_mysql`, porque sin ella Laravel no puede conectarse a MySQL.
+
+#### Instalar `pdo_mysql`
 
 Primero comprueba que estén los headers de PHP y de `mysqlnd`:
 
@@ -277,7 +287,46 @@ make -j"$(nproc)"
 sudo make install
 ```
 
-> La extensión se pierde si reconstruyes el Codespace desde cero. Para que quede permanente, se puede agregar un `.devcontainer` con PHP y `pdo_mysql`, o repetir este paso.
+#### Instalar `intl`
+
+`intl` es obligatoria para `php artisan db:show` y para que Laravel formatee números y fechas. Si aparece `The "intl" PHP extension is required...`, compílala así:
+
+```bash
+PHP_VERSION=$(php -r 'echo PHP_VERSION;')
+PHP_CONFIG=$(which php-config)
+EXT_DIR=$($PHP_CONFIG --extension-dir)
+INI_DIR=$(php --ini | sed -n 's/^Scan for additional .ini files in: //p' | tr -d '"')
+
+sudo apt-get update
+sudo apt-get install -y libicu-dev
+
+cd /tmp
+curl -fsSL "https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz" -o "php-${PHP_VERSION}.tar.gz"
+tar -xzf "php-${PHP_VERSION}.tar.gz"
+cd "php-${PHP_VERSION}/ext/intl"
+
+phpize
+./configure --with-php-config="$PHP_CONFIG" --enable-intl
+make -j"$(nproc)"
+sudo make install
+
+echo "extension=$EXT_DIR/intl.so" | sudo tee "$INI_DIR/intl.ini"
+
+php -m | grep -i intl
+php --ri intl
+```
+
+`php --ri intl` debe mostrar `Internationalization support => enabled` y la versión de ICU (por ejemplo, `ICU version => 74.2`). La compilación tarda varios minutos.
+
+Si `configure` no encuentra ICU, repite la configuración indicando la ruta del sistema:
+
+```bash
+./configure --with-php-config="$PHP_CONFIG" --enable-intl --with-icu-dir=/usr
+make -j"$(nproc)"
+sudo make install
+```
+
+> Las extensiones compiladas (`pdo_mysql` e `intl`) se pierden si reconstruyes el Codespace desde cero. Para que queden permanentes, se puede agregar un `.devcontainer` con PHP y ambas extensiones, o repetir estos pasos.
 
 #### Alternativa: usar PHP 8.3 de Ubuntu
 
@@ -285,7 +334,7 @@ Si no quieres compilar, puedes usar el PHP 8.3 que sí está empaquetado en Ubun
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y php8.3-cli php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-mysql
+sudo apt-get install -y php8.3-cli php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-mysql php8.3-intl
 ```
 
 A partir de ahí, ejecuta Artisan con la ruta explícita:
@@ -459,22 +508,23 @@ Puedes agregarlo de dos formas:
 
 ### 10. Problemas comunes en Codespaces
 
-| Síntoma                              | Causa probable                             | Solución                                               |
-| ------------------------------------ | ------------------------------------------ | ------------------------------------------------------ |
-| `could not find driver`              | Falta `pdo_mysql`                          | Compila la extensión o usa `php8.3-mysql` (paso 3).    |
-| `php8.5-mysql` no existe en apt      | El PHP del Codespace no es el de Ubuntu    | Sigue el bloque de compilación del paso 3.             |
-| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto     | `cd /workspaces/hampi-web`.                            |
-| `Connection refused`                 | MySQL no está corriendo o no está listo    | `docker compose ps`, espera y reintenta.               |
-| `Vite manifest not found`            | Assets sin compilar                        | `npm ci && npm run build`.                             |
-| `npm run build` falla por Node       | Versión antigua de Node                    | `nvm install 22 && nvm use 22`.                        |
-| `419 Page Expired`                   | `APP_URL` o sesión desincronizada          | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
-| El puerto 8000 no abre               | Visibilidad del puerto                     | Ponlo en **Public** en la pestaña **Ports**.           |
-| `Permission denied` en storage       | Permisos de escritura                      | `chmod -R ug+rwx storage bootstrap/cache`.             |
-| `docker: command not found`          | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4.                      |
+| Síntoma                                | Causa probable                             | Solución                                               |
+| -------------------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| `could not find driver`                | Falta `pdo_mysql`                          | Compila la extensión o usa `php8.3-mysql` (paso 3).    |
+| `The "intl" PHP extension is required` | Falta `intl`                               | Compila `intl` (paso 3) o usa `php8.3-intl`.           |
+| `php8.5-mysql` no existe en apt        | El PHP del Codespace no es el de Ubuntu    | Sigue el bloque de compilación del paso 3.             |
+| `Could not open input file: artisan`   | Estás fuera de la carpeta del proyecto     | `cd /workspaces/hampi-web`.                            |
+| `Connection refused`                   | MySQL no está corriendo o no está listo    | `docker compose ps`, espera y reintenta.               |
+| `Vite manifest not found`              | Assets sin compilar                        | `npm ci && npm run build`.                             |
+| `npm run build` falla por Node         | Versión antigua de Node                    | `nvm install 22 && nvm use 22`.                        |
+| `419 Page Expired`                     | `APP_URL` o sesión desincronizada          | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
+| El puerto 8000 no abre                 | Visibilidad del puerto                     | Ponlo en **Public** en la pestaña **Ports**.           |
+| `Permission denied` en storage         | Permisos de escritura                      | `chmod -R ug+rwx storage bootstrap/cache`.             |
+| `docker: command not found`            | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4.                      |
 
 ### 11. Resumen rápido
 
-Primera vez, después de resolver `pdo_mysql`:
+Primera vez, después de resolver `pdo_mysql` e `intl`:
 
 ```bash
 cd /workspaces/hampi-web
@@ -485,11 +535,14 @@ php artisan key:generate
 docker compose up -d
 php artisan migrate --seed
 php artisan storage:link
+php artisan db:show
 
 npm ci
 npm run build
 php artisan serve --host=0.0.0.0 --port=8000
 ```
+
+`php artisan db:show` debe mostrar las 16 tablas y terminar sin errores. Si falla, revisa el paso 3.
 
 Para volver a levantar el proyecto en una sesión posterior:
 
@@ -795,6 +848,7 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 | `Unknown database 'hampi'`                  | La base no existe                                    | `CREATE DATABASE hampi ...` o `docker compose up -d`.                                                  |
 | `SQLSTATE[HY000] [1045] Access denied`      | Usuario/contraseña incorrectos                       | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña.                           |
 | `could not find driver`                     | Falta `pdo_mysql`                                    | En local habilítalo en `php.ini` y reinicia PHP/Apache; en Codespaces sigue [Codespaces](#codespaces). |
+| `The "intl" PHP extension is required`      | Falta `intl`                                         | En local habilita `extension=intl` en `php.ini`; en Codespaces compílala (paso 3) o usa `php8.3-intl`. |
 | `php8.5-mysql` no existe en apt             | El PHP del Codespace no es el de Ubuntu              | Compila `pdo_mysql` como se explica en [Codespaces](#codespaces) o usa PHP 8.3.                        |
 | `Could not open input file: artisan`        | Estás fuera de la carpeta del proyecto               | `cd /workspaces/hampi-web`.                                                                            |
 | `Vite manifest not found`                   | Assets sin compilar                                  | `npm ci && npm run build`.                                                                             |
@@ -814,6 +868,7 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): arquitectura, sistema de diseño, recetas y checklist de cambios.
 - [`CHANGELOG.md`](CHANGELOG.md): historial de versiones y cambios relevantes.
+
 ---
 
 ## Créditos y licencias
