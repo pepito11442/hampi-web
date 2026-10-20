@@ -814,8 +814,6 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): arquitectura, sistema de diseño, recetas y checklist de cambios.
 - [`CHANGELOG.md`](CHANGELOG.md): historial de versiones y cambios relevantes.
-- [`AGENTS.md`](AGENTS.md) / [`CLAUDE.md`](CLAUDE.md): instrucciones para asistentes de desarrollo (Laravel Boost).
-
 ---
 
 ## Créditos y licencias
