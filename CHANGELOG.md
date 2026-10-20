@@ -6,6 +6,18 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ## [Sin publicar]
 
+### Añadido
+
+- **Agenda diaria unificada** con `app/Services/AgendaMedica.php` y `MedicoDelDia.php`: los horarios mensuales generados alimentan `/medicos-hoy`, el indicador del inicio y la lista del panel administrativo. El rol manual (`turno_medicos`) se conserva para médicos visitantes o ajustes puntuales.
+- Pruebas de agenda del día: horarios visibles, exclusión de enfermeros e inactivos, turno completo en ambos bloques y deduplicación con el rol manual.
+
+### Corregido
+
+- La vista pública y el panel administrativo ya no muestran únicamente el rol manual antiguo: ahora reflejan los médicos programados para la fecha actual.
+- Los médicos con horario y registro manual se muestran una sola vez; se usa el consultorio manual y el turno del horario mensual.
+- El estado de los médicos programados se calcula según la hora (`Programado`, `Atendiendo`, `Finalizado`) y se actualizaron las horas visibles a 07:00–13:00 y 13:00–19:30.
+- La zona horaria de la aplicación es configurable con `APP_TIMEZONE` y queda en `America/Lima` por defecto, para que “hoy” coincida con la fecha local.
+
 ## [2026-10-19] — Panel del personal, horarios mensuales y migración a MySQL
 
 ### Añadido

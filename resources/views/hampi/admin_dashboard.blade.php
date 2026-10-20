@@ -5,7 +5,6 @@
 
 @section('content')
     @php
-        $turnosAtendiendo = $turnos->where('estado', 'Atendiendo')->count();
         $vacunasDisponibles = $vacunas->where('stock_estado', 'Disponible')->count();
         $vacunasUrgentes = $vacunas->where('es_urgente', true)->count();
     @endphp
@@ -63,7 +62,7 @@
                     <x-icon name="users" class="h-5 w-5" />
                 </span>
                 <div>
-                    <p class="stat-number">{{ $turnos->count() }}</p>
+                    <p class="stat-number">{{ $medicosHoy->count() }}</p>
                     <p class="stat-label">Médicos en rol de hoy</p>
                 </div>
             </div>
@@ -136,12 +135,18 @@
 
         {{-- Gestión de médicos --}}
         <section class="card mt-6 p-6" data-reveal>
-            <div class="border-b border-ink-100 pb-4">
-                <h2 class="flex items-center gap-2 text-base font-bold text-ink-900">
-                    <x-icon name="stethoscope" class="h-5 w-5 text-brand-600" />
-                    Gestión de médicos y turnos del día
-                </h2>
-                <p class="mt-1 text-xs text-ink-500">Agrega especialistas o actualiza su disponibilidad en tiempo real.</p>
+            <div class="flex flex-wrap items-start justify-between gap-3 border-b border-ink-100 pb-4">
+                <div>
+                    <h2 class="flex items-center gap-2 text-base font-bold text-ink-900">
+                        <x-icon name="stethoscope" class="h-5 w-5 text-brand-600" />
+                        Gestión de médicos y turnos del día
+                    </h2>
+                    <p class="mt-1 text-xs text-ink-500">Horario generado y ajustes manuales para la agenda de hoy.</p>
+                </div>
+                <a href="{{ route('admin.horarios.index') }}" class="btn btn-secondary btn-sm">
+                    <x-icon name="calendar" class="h-4 w-4 text-brand-600" />
+                    Gestionar horarios
+                </a>
             </div>
 
             <div class="mt-6 grid gap-6 lg:grid-cols-3">
@@ -151,6 +156,11 @@
                         <x-icon name="user-plus" class="h-4 w-4 text-brand-600" />
                         Registrar nuevo médico
                     </h3>
+                    <p class="mt-2 text-[11px] leading-relaxed text-ink-500">
+                        Para médicos con cuenta y horario mensual, usa
+                        <a href="{{ route('admin.horarios.index') }}" class="font-semibold text-brand-700 hover:text-brand-800">Horarios</a>.
+                        Este formulario es para médicos visitantes o ajustes puntuales.
+                    </p>
 
                     <form action="/admin/turnos/guardar" method="POST" class="mt-4 space-y-3.5">
                         @csrf
@@ -197,15 +207,15 @@
                 {{-- Lista --}}
                 <div class="lg:col-span-2">
                     <div class="mb-3 flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-ink-600">Médicos en rol hoy</h3>
-                        <span class="badge badge-slate">{{ $turnos->count() }}</span>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-ink-600">Médicos de hoy (horario + manual)</h3>
+                        <span class="badge badge-slate">{{ $medicosHoy->count() }}</span>
                     </div>
 
-                    @if ($turnos->isEmpty())
-                        <x-empty-state class="px-4 py-8" icon="stethoscope" title="Sin médicos registrados" description="Agrega el primer médico del día desde el formulario." />
+                    @if ($medicosHoy->isEmpty())
+                        <x-empty-state class="px-4 py-8" icon="stethoscope" title="Sin médicos registrados" description="No hay médicos programados ni manuales para hoy. Genera un horario o agrega un médico visitante." />
                     @else
                         <ul class="space-y-2.5">
-                            @foreach ($turnos as $turno)
+                            @foreach ($medicosHoy as $turno)
                                 <li class="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-4 transition-colors hover:border-brand-200 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="flex items-center gap-3">
                                         <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700">
@@ -214,36 +224,48 @@
                                         <div>
                                             <div class="flex flex-wrap items-center gap-2">
                                                 <h4 class="text-sm font-bold text-ink-900">{{ $turno->medico_nombre }}</h4>
-                                                <span class="badge {{ $turno->turno === 'Mañana' ? 'badge-amber' : 'badge-slate' }}">{{ $turno->turno }}</span>
+                                                <span class="badge {{ in_array($turno->turno, ['Mañana', 'Todo el día', 'Sábado'], true) ? 'badge-amber' : 'badge-slate' }}">{{ $turno->turno }}</span>
+                                                <span class="badge {{ $turno->fuente === 'horario' ? 'badge-teal' : 'badge-slate' }}">{{ $turno->fuente === 'horario' ? 'Horario' : 'Manual' }}</span>
                                             </div>
                                             <p class="mt-0.5 text-xs text-ink-500">
                                                 {{ $turno->especialidad }} · <span class="font-medium text-ink-700">{{ $turno->consultorio }}</span>
+                                                @if ($turno->hora_inicio && $turno->hora_fin)
+                                                    · {{ $turno->hora_inicio }}–{{ $turno->hora_fin }}
+                                                @endif
                                             </p>
                                         </div>
                                     </div>
 
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <form action="/admin/turnos/{{ $turno->id }}/estado" method="POST">
-                                            @csrf
-                                            <select
-                                                name="estado"
-                                                onchange="this.form.submit()"
-                                                aria-label="Cambiar estado de {{ $turno->medico_nombre }}"
-                                                class="cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors {{ $turno->estado === 'Atendiendo' ? 'border-brand-200 bg-brand-50 text-brand-800' : ($turno->estado === 'Turno Completo' ? 'border-ink-200 bg-ink-50 text-ink-700' : 'border-rose-200 bg-rose-50 text-rose-700') }}"
-                                            >
-                                                <option value="Atendiendo" {{ $turno->estado === 'Atendiendo' ? 'selected' : '' }}>Atendiendo</option>
-                                                <option value="Turno Completo" {{ $turno->estado === 'Turno Completo' ? 'selected' : '' }}>Turno Completo</option>
-                                                <option value="Reprogramado" {{ $turno->estado === 'Reprogramado' ? 'selected' : '' }}>Reprogramado</option>
-                                            </select>
-                                        </form>
+                                        @if ($turno->fuente === 'manual' && $turno->manual_id)
+                                            <form action="/admin/turnos/{{ $turno->manual_id }}/estado" method="POST">
+                                                @csrf
+                                                <select
+                                                    name="estado"
+                                                    onchange="this.form.submit()"
+                                                    aria-label="Cambiar estado de {{ $turno->medico_nombre }}"
+                                                    class="cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors {{ $turno->estado === 'Atendiendo' ? 'border-brand-200 bg-brand-50 text-brand-800' : ($turno->estado === 'Turno Completo' ? 'border-ink-200 bg-ink-50 text-ink-700' : 'border-rose-200 bg-rose-50 text-rose-700') }}"
+                                                >
+                                                    <option value="Atendiendo" {{ $turno->estado === 'Atendiendo' ? 'selected' : '' }}>Atendiendo</option>
+                                                    <option value="Turno Completo" {{ $turno->estado === 'Turno Completo' ? 'selected' : '' }}>Turno Completo</option>
+                                                    <option value="Reprogramado" {{ $turno->estado === 'Reprogramado' ? 'selected' : '' }}>Reprogramado</option>
+                                                </select>
+                                            </form>
 
-                                        <form action="/admin/turnos/{{ $turno->id }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este médico del rol?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-ink-200 text-ink-400 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600" title="Eliminar médico" aria-label="Eliminar a {{ $turno->medico_nombre }} del rol">
-                                                <x-icon name="trash-2" class="h-4 w-4" />
-                                            </button>
-                                        </form>
+                                            <form action="/admin/turnos/{{ $turno->manual_id }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este médico del rol?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-ink-200 text-ink-400 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600" title="Eliminar médico" aria-label="Eliminar a {{ $turno->medico_nombre }} del rol">
+                                                    <x-icon name="trash-2" class="h-4 w-4" />
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="badge {{ $turno->estado === 'Atendiendo' ? 'badge-teal' : ($turno->estado === 'Finalizado' ? 'badge-slate' : 'badge-sky') }}">{{ $turno->estado }}</span>
+                                            <a href="{{ route('admin.horarios.index', ['user_id' => $turno->user_id, 'anio' => now()->year, 'mes' => now()->month]) }}" class="btn btn-secondary btn-sm">
+                                                <x-icon name="calendar" class="h-4 w-4 text-brand-600" />
+                                                Ver horario
+                                            </a>
+                                        @endif
                                     </div>
                                 </li>
                             @endforeach

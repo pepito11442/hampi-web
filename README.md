@@ -116,6 +116,8 @@ php artisan key:generate
 Edita `.env` con tus datos de conexión. Para XAMPP/Docker con root sin contraseña:
 
 ```dotenv
+APP_TIMEZONE=America/Lima
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -123,6 +125,8 @@ DB_DATABASE=hampi
 DB_USERNAME=root
 DB_PASSWORD=
 ```
+
+`APP_TIMEZONE` controla la fecha que usa la agenda de médicos. El valor por defecto es `America/Lima`; si despliegas en otra zona, ajústalo para que “hoy” coincida con la fecha local.
 
 Si usas un usuario distinto, cambia `DB_USERNAME` y `DB_PASSWORD`. Nunca subas `.env` al repositorio.
 
@@ -199,6 +203,8 @@ sudo mariadb -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVIL
 Luego configura `.env`:
 
 ```dotenv
+APP_TIMEZONE=America/Lima
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -321,6 +327,16 @@ El servicio `app/Services/HorarioGenerator.php` reparte aleatoriamente días com
 
 El trabajador ve el mismo calendario desde `/empleado/panel`, puede navegar al mes anterior/siguiente y consultar sus horas y turnos. Si se elimina la cuenta, sus horarios se eliminan en cascada.
 
+### Agenda del día
+
+La página pública `/medicos-hoy`, el indicador “Médicos en el rol de hoy” del inicio y la lista del panel administrativo se construyen con `app/Services/AgendaMedica.php`:
+
+- Toma los horarios de `horarios` para la fecha actual y solo incluye cuentas con rol `doctor` y `activo = true`.
+- Conserva el rol manual de `turno_medicos` para médicos visitantes o ajustes puntuales.
+- Si un médico aparece en ambos registros, se muestra una vez y se usa el consultorio del registro manual; el turno y las horas del horario mensual prevalecen.
+- El estado se calcula con la hora de `APP_TIMEZONE` (`Programado`, `Atendiendo`, `Finalizado`). Un turno `completo` aparece en mañana y tarde.
+- Los registros manuales no tienen fecha: representan el rol del día actual.
+
 Los horarios son de demostración y no contemplan feriados, licencias ni cambios de último minuto; esas reglas se pueden agregar más adelante.
 
 ---
@@ -366,6 +382,7 @@ La suite actual cubre:
 
 - Seguridad: inyección SQL en la consulta de DNI, rate limiting del login y hash Bcrypt.
 - Generación de horarios: 150 h exactas, reglas de domingo/sábado y todos los meses de varios años.
+- Agenda del día: los horarios generados alimentan la vista pública y el panel administrativo, se excluyen enfermeros e inactivos y se conserva el rol manual.
 - Login de personal por DNI y acceso a su panel.
 - Bloqueo del panel administrativo para cuentas de personal.
 - Creación de cuentas de trabajadores desde administración.
@@ -426,6 +443,7 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://tu-dominio.example
+   APP_TIMEZONE=America/Lima
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306

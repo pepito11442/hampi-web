@@ -5,12 +5,14 @@
 
 @section('content')
     @php
-        $totalMedicos = $turnosManana->count() + $turnosTarde->count();
-        $atendiendo = $turnosManana->where('estado', 'Atendiendo')->count() + $turnosTarde->where('estado', 'Atendiendo')->count();
+        $totalMedicos = $medicos->count();
+        $atendiendo = $medicos->where('estado', 'Atendiendo')->count();
         $estados = [
             'Atendiendo' => ['badge-teal', 'activity'],
             'Turno Completo' => ['badge-slate', 'clock'],
             'Reprogramado' => ['badge-red', 'calendar'],
+            'Programado' => ['badge-sky', 'clock'],
+            'Finalizado' => ['badge-slate', 'check-circle'],
         ];
     @endphp
 
@@ -44,7 +46,7 @@
                             </span>
                             <div>
                                 <h2 class="text-base font-bold text-ink-900">Turno mañana</h2>
-                                <p class="text-xs text-ink-500">07:30 a 13:30</p>
+                                <p class="text-xs text-ink-500">07:00 a 13:00</p>
                             </div>
                         </div>
                         <span class="badge badge-amber">{{ $turnosManana->count() }} {{ $turnosManana->count() === 1 ? 'médico' : 'médicos' }}</span>
@@ -74,10 +76,15 @@
                                         </span>
                                         <div>
                                             <h3 class="text-sm font-bold text-ink-900">{{ $turno->medico_nombre }}</h3>
-                                            <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-500">
+                                            <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500">
                                                 <span>{{ $turno->especialidad }}</span>
                                                 <span class="text-ink-300" aria-hidden="true">•</span>
                                                 <span class="font-medium text-ink-600">{{ $turno->consultorio }}</span>
+                                                <span class="text-ink-300" aria-hidden="true">•</span>
+                                                <span>{{ $turno->hora_inicio }}–{{ $turno->hora_fin }}</span>
+                                                @if (in_array($turno->turno, ['Todo el día', 'Sábado'], true))
+                                                    <span class="badge badge-amber">{{ $turno->turno }}</span>
+                                                @endif
                                             </p>
                                         </div>
                                     </div>
@@ -100,7 +107,7 @@
                             </span>
                             <div>
                                 <h2 class="text-base font-bold text-ink-900">Turno tarde</h2>
-                                <p class="text-xs text-ink-500">13:30 a 19:30</p>
+                                <p class="text-xs text-ink-500">13:00 a 19:30</p>
                             </div>
                         </div>
                         <span class="badge badge-amber">{{ $turnosTarde->count() }} {{ $turnosTarde->count() === 1 ? 'médico' : 'médicos' }}</span>
@@ -130,10 +137,15 @@
                                         </span>
                                         <div>
                                             <h3 class="text-sm font-bold text-ink-900">{{ $turno->medico_nombre }}</h3>
-                                            <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-500">
+                                            <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500">
                                                 <span>{{ $turno->especialidad }}</span>
                                                 <span class="text-ink-300" aria-hidden="true">•</span>
                                                 <span class="font-medium text-ink-600">{{ $turno->consultorio }}</span>
+                                                <span class="text-ink-300" aria-hidden="true">•</span>
+                                                <span>{{ $turno->hora_inicio }}–{{ $turno->hora_fin }}</span>
+                                                @if (in_array($turno->turno, ['Todo el día', 'Sábado'], true))
+                                                    <span class="badge badge-amber">{{ $turno->turno }}</span>
+                                                @endif
                                             </p>
                                         </div>
                                     </div>
@@ -195,5 +207,9 @@
                 </section>
             </aside>
         </div>
+
+        <p class="mt-4 text-center text-xs text-ink-400">
+            Los médicos con turno de todo el día aparecen en ambos bloques.
+        </p>
     </div>
 @endsection

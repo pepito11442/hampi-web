@@ -36,6 +36,7 @@ routes/web.php → Controlador → Modelo (Eloquent) → Vista Blade (layout + c
 | `app/Http/Controllers/Admin/CampanaController.php` | Crear, publicar/ocultar y eliminar campañas preventivas. |
 | `app/Http/Middleware/EnsureRole.php` | Middleware `role:...`; redirige a cada panel según el rol. |
 | `app/Services/HorarioGenerator.php` | Generador aleatorio que garantiza exactamente 150 h/mes. |
+| `app/Services/AgendaMedica.php` + `MedicoDelDia.php` | Une horarios generados y rol manual para la agenda de médicos del día. |
 | `app/Models/` | `Posta`, `Ciudadano`, `VacunaAviso`, `TurnoMedico`, `Cita`, `User`, `Horario`, `CampanaPreventiva`. |
 | `resources/views/hampi/layout.blade.php` | Header, menú móvil, footer y barra inferior. |
 | `resources/views/hampi/partials/` | `calendario.blade.php` y `admin-nav.blade.php`. |
@@ -389,7 +390,7 @@ Estructura: primera línea corta (≤ 72 caracteres) y, si hace falta, un cuerpo
 
 ## 6. Checklist antes de cada commit
 
-- [ ] `php artisan test` termina en verde (suite completa, 14 pruebas).
+- [ ] `php artisan test` termina en verde (suite completa, 20 pruebas).
 - [ ] `npm run build` termina sin errores.
 - [ ] `php artisan view:clear` si cambiaste vistas (y `php artisan view:cache` si quieres verificar que compilan).
 - [ ] `php artisan route:list --except-vendor` no muestra rutas duplicadas ni errores.

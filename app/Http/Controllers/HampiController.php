@@ -12,20 +12,23 @@ use App\Models\Cita;
 use App\Models\CampanaPreventiva;
 use App\Models\Horario;
 use App\Models\User;
+use App\Services\AgendaMedica;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
 
 class HampiController extends Controller
 {
     // Pantalla 1: Acceso / Inicio
-    public function index()
+    public function index(AgendaMedica $agenda)
     {
         // Limpiar cualquier sesión anterior
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
 
+        $medicosHoy = $agenda->delDia();
+
         // Indicadores reales para la portada (sin datos inventados)
         $stats = [
-            'turnos' => TurnoMedico::count(),
+            'turnos' => $agenda->total($medicosHoy),
             'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
             'postas' => Posta::where('estado_activo', true)->count(),
         ];
@@ -85,12 +88,13 @@ class HampiController extends Controller
     }
 
     // Pantalla 3: Médicos y Turnos del Día
-    public function verMedicos()
+    public function verMedicos(AgendaMedica $agenda)
     {
-        $turnosManana = TurnoMedico::with('posta')->where('turno', 'Mañana')->get();
-        $turnosTarde = TurnoMedico::with('posta')->where('turno', 'Tarde')->get();
+        $medicos = $agenda->delDia();
+        $turnosManana = $agenda->manana($medicos);
+        $turnosTarde = $agenda->tarde($medicos);
 
-        return view('hampi.medicos', compact('turnosManana', 'turnosTarde'));
+        return view('hampi.medicos', compact('medicos', 'turnosManana', 'turnosTarde'));
     }
 
     // Pantalla 4: El Pizarrín Digital de Vacunas
@@ -124,17 +128,24 @@ class HampiController extends Controller
     }
 
     // --- Panel de Administración (Enfermería / Admisión) ---
-    public function adminDashboard()
+    public function adminDashboard(AgendaMedica $agenda)
     {
         $vacunas = VacunaAviso::all();
-        $turnos = TurnoMedico::all();
+        $medicosHoy = $agenda->delDia();
+        $turnosAtendiendo = $agenda->atendiendo($medicosHoy);
         $personalCount = User::whereIn('role', User::ROLES_PERSONAL)->count();
         $horariosMes = Horario::whereBetween('fecha', [
             now()->startOfMonth()->toDateString(),
             now()->endOfMonth()->toDateString(),
         ])->count();
 
-        return view('hampi.admin_dashboard', compact('vacunas', 'turnos', 'personalCount', 'horariosMes'));
+        return view('hampi.admin_dashboard', compact(
+            'vacunas',
+            'medicosHoy',
+            'turnosAtendiendo',
+            'personalCount',
+            'horariosMes'
+        ));
     }
 
         // Guardar aviso en el Pizarrín
