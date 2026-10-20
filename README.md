@@ -34,17 +34,17 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 
 ## Stack tecnológico
 
-| Componente | Tecnología |
-| --- | --- |
-| Backend | Laravel 11.57 · PHP 8.2+ con `pdo_mysql` |
-| Base de datos | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción |
-| Tests | PHPUnit con SQLite `:memory:` (solo pruebas automáticas) |
-| Frontend | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+ |
-| Autenticación | Guard `web`, sesiones de Laravel y middleware de roles |
-| Archivos | Disco `public` de Laravel para fotos de perfil |
-| Entorno de desarrollo | GitHub Codespaces, XAMPP o Docker Compose |
-| API externa | RENIEC vía `apis.net.pe` (opcional; sin token se ingresan los nombres manualmente) |
-| Herramientas de desarrollo | Laravel Boost (dev), Composer, npm |
+| Componente                 | Tecnología                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| Backend                    | Laravel 11.57 · PHP 8.2+ con `pdo_mysql`                                           |
+| Base de datos              | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción                             |
+| Tests                      | PHPUnit con SQLite `:memory:` (solo pruebas automáticas)                           |
+| Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+                                   |
+| Autenticación              | Guard `web`, sesiones de Laravel y middleware de roles                             |
+| Archivos                   | Disco `public` de Laravel para fotos de perfil                                     |
+| Entorno de desarrollo      | GitHub Codespaces, XAMPP o Docker Compose                                          |
+| API externa                | RENIEC vía `apis.net.pe` (opcional; sin token se ingresan los nombres manualmente) |
+| Herramientas de desarrollo | Laravel Boost (dev), Composer, npm                                                 |
 
 SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó de versionarse y la app espera una conexión MySQL/MariaDB. Los tests conservan SQLite en memoria porque es rápido y no requiere un servidor; esa configuración vive en `phpunit.xml`.
 
@@ -53,12 +53,12 @@ SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó
 ## Requisitos
 
 - PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`) y **`pdo_mysql`**.
-  - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql`; la sección [Codespaces](#codespaces) explica cómo compilarlo o usar PHP 8.3.
+    - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql`; la sección [Codespaces](#codespaces) explica cómo compilarlo o usar PHP 8.3.
 - Composer 2.
 - Node.js **22.12+** (Vite 8) y npm.
 - MySQL 8 o MariaDB 10.4+.
-  - En Windows puedes usar XAMPP.
-  - En Linux/macOS puedes instalar MySQL/MariaDB o usar Docker.
+    - En Windows puedes usar XAMPP.
+    - En Linux/macOS puedes instalar MySQL/MariaDB o usar Docker.
 - Opcional: Docker + Docker Compose para levantar MySQL con `docker compose up -d`.
 
 Verifica las versiones:
@@ -459,18 +459,18 @@ Puedes agregarlo de dos formas:
 
 ### 10. Problemas comunes en Codespaces
 
-| Síntoma | Causa probable | Solución |
-| --- | --- | --- |
-| `could not find driver` | Falta `pdo_mysql` | Compila la extensión o usa `php8.3-mysql` (paso 3). |
-| `php8.5-mysql` no existe en apt | El PHP del Codespace no es el de Ubuntu | Sigue el bloque de compilación del paso 3. |
-| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto | `cd /workspaces/hampi-web`. |
-| `Connection refused` | MySQL no está corriendo o no está listo | `docker compose ps`, espera y reintenta. |
-| `Vite manifest not found` | Assets sin compilar | `npm ci && npm run build`. |
-| `npm run build` falla por Node | Versión antigua de Node | `nvm install 22 && nvm use 22`. |
-| `419 Page Expired` | `APP_URL` o sesión desincronizada | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
-| El puerto 8000 no abre | Visibilidad del puerto | Ponlo en **Public** en la pestaña **Ports**. |
-| `Permission denied` en storage | Permisos de escritura | `chmod -R ug+rwx storage bootstrap/cache`. |
-| `docker: command not found` | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4. |
+| Síntoma                              | Causa probable                             | Solución                                               |
+| ------------------------------------ | ------------------------------------------ | ------------------------------------------------------ |
+| `could not find driver`              | Falta `pdo_mysql`                          | Compila la extensión o usa `php8.3-mysql` (paso 3).    |
+| `php8.5-mysql` no existe en apt      | El PHP del Codespace no es el de Ubuntu    | Sigue el bloque de compilación del paso 3.             |
+| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto     | `cd /workspaces/hampi-web`.                            |
+| `Connection refused`                 | MySQL no está corriendo o no está listo    | `docker compose ps`, espera y reintenta.               |
+| `Vite manifest not found`            | Assets sin compilar                        | `npm ci && npm run build`.                             |
+| `npm run build` falla por Node       | Versión antigua de Node                    | `nvm install 22 && nvm use 22`.                        |
+| `419 Page Expired`                   | `APP_URL` o sesión desincronizada          | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
+| El puerto 8000 no abre               | Visibilidad del puerto                     | Ponlo en **Public** en la pestaña **Ports**.           |
+| `Permission denied` en storage       | Permisos de escritura                      | `chmod -R ug+rwx storage bootstrap/cache`.             |
+| `docker: command not found`          | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4.                      |
 
 ### 11. Resumen rápido
 
@@ -511,43 +511,43 @@ npm run build
 
 ### Portal público
 
-| Página | Ruta | Controlador / vista |
-| --- | --- | --- |
-| Inicio y acceso con DNI | `/` · `inicio` | `HampiController@index` · `hampi/login.blade.php` |
-| Panel ciudadano | `/mi-panel` · `ciudadano.panel` | `HampiController@panelCiudadano` |
-| Médicos del día | `/medicos-hoy` · `medicos.index` | `HampiController@verMedicos` |
-| Campañas de vacunación | `/pizarrin-vacunas` · `pizarrin.index` | `HampiController@verPizarrin` |
-| Campañas preventivas | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas` |
-| Directorio de postas | `/directorio-postas` · `postas.index` | `HampiController@verPostas` |
+| Página                  | Ruta                                       | Controlador / vista                               |
+| ----------------------- | ------------------------------------------ | ------------------------------------------------- |
+| Inicio y acceso con DNI | `/` · `inicio`                             | `HampiController@index` · `hampi/login.blade.php` |
+| Panel ciudadano         | `/mi-panel` · `ciudadano.panel`            | `HampiController@panelCiudadano`                  |
+| Médicos del día         | `/medicos-hoy` · `medicos.index`           | `HampiController@verMedicos`                      |
+| Campañas de vacunación  | `/pizarrin-vacunas` · `pizarrin.index`     | `HampiController@verPizarrin`                     |
+| Campañas preventivas    | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas`          |
+| Directorio de postas    | `/directorio-postas` · `postas.index`      | `HampiController@verPostas`                       |
 
 En el menú, **“Vacunas”** lleva al pizarrín de vacunación y **“Campañas preventivas”** a la página de campañas. En la barra inferior móvil se abrevia como **“Preventivas”**. En móvil también está disponible el menú hamburguesa del encabezado. Los enlaces del portal se definen una sola vez en `config/navegacion.php`.
 
 ### Personal de salud
 
-| Acción | Ruta | Protección |
-| --- | --- | --- |
-| Formulario de acceso | `/equipo/login` | Público |
-| Iniciar sesión con DNI | `POST /equipo/login` | Rate limit de 5 intentos/min |
-| Panel y calendario | `/empleado/panel` | `auth` + `role:doctor,enfermero,enfermera` |
-| Actualizar perfil | `POST /empleado/perfil` | `auth` + rol de personal |
-| Mis citas (solo médicos) | `/empleado/citas` · `empleado.citas.index` | `auth` + `role:doctor` |
-| Agendar cita | `/empleado/citas/crear` · `empleado.citas.create` | `auth` + `role:doctor` |
-| Guardar cita | `POST /empleado/citas` · `empleado.citas.store` | `auth` + `role:doctor` |
-| Cerrar cita (atendida/cancelada) | `POST /empleado/citas/{cita}/estado` | `auth` + `role:doctor` |
-| Disponibilidad JSON | `/empleado/citas/disponibilidad` | `auth` + `role:doctor` |
-| Cerrar sesión | `POST /equipo/logout` | `auth` |
+| Acción                           | Ruta                                              | Protección                                 |
+| -------------------------------- | ------------------------------------------------- | ------------------------------------------ |
+| Formulario de acceso             | `/equipo/login`                                   | Público                                    |
+| Iniciar sesión con DNI           | `POST /equipo/login`                              | Rate limit de 5 intentos/min               |
+| Panel y calendario               | `/empleado/panel`                                 | `auth` + `role:doctor,enfermero,enfermera` |
+| Actualizar perfil                | `POST /empleado/perfil`                           | `auth` + rol de personal                   |
+| Mis citas (solo médicos)         | `/empleado/citas` · `empleado.citas.index`        | `auth` + `role:doctor`                     |
+| Agendar cita                     | `/empleado/citas/crear` · `empleado.citas.create` | `auth` + `role:doctor`                     |
+| Guardar cita                     | `POST /empleado/citas` · `empleado.citas.store`   | `auth` + `role:doctor`                     |
+| Cerrar cita (atendida/cancelada) | `POST /empleado/citas/{cita}/estado`              | `auth` + `role:doctor`                     |
+| Disponibilidad JSON              | `/empleado/citas/disponibilidad`                  | `auth` + `role:doctor`                     |
+| Cerrar sesión                    | `POST /equipo/logout`                             | `auth`                                     |
 
 El trabajador solo ve **su propio** horario, su perfil y sus propias citas. Un médico o enfermero que intente entrar a `/admin/*` es redirigido a su panel. La agenda de citas está reservada al rol `doctor`; enfermería no puede crear ni cerrar citas.
 
 ### Administración
 
-| Acción | Ruta | Protección |
-| --- | --- | --- |
-| Login administrativo por correo | `/personal/login` | Público |
-| Panel general | `/admin/dashboard` | `auth` + `role:admin,admision` |
-| Equipo de salud | `/admin/equipo` | Administración |
-| Horarios mensuales | `/admin/horarios` | Administración |
-| Campañas preventivas | `/admin/campanas` | Administración |
+| Acción                          | Ruta               | Protección                     |
+| ------------------------------- | ------------------ | ------------------------------ |
+| Login administrativo por correo | `/personal/login`  | Público                        |
+| Panel general                   | `/admin/dashboard` | `auth` + `role:admin,admision` |
+| Equipo de salud                 | `/admin/equipo`    | Administración                 |
+| Horarios mensuales              | `/admin/horarios`  | Administración                 |
+| Campañas preventivas            | `/admin/campanas`  | Administración                 |
 
 Las rutas del panel administrativo conservan los flujos existentes de rol de médicos y pizarrín de vacunas. La subnavegación `Panel · Equipo de salud · Horarios · Campañas preventivas` se comparte mediante `hampi/partials/admin-nav.blade.php`.
 
@@ -557,18 +557,18 @@ Las rutas del panel administrativo conservan los flujos existentes de rol de mé
 
 ### Administración
 
-| Nombre | Correo | Contraseña | Dónde ingresar |
-| --- | --- | --- | --- |
+| Nombre             | Correo                | Contraseña     | Dónde ingresar    |
+| ------------------ | --------------------- | -------------- | ----------------- |
 | Lic. Carmen Alfaro | `enfermeria@hampi.pe` | `socabaya2024` | `/personal/login` |
 
 ### Personal de salud (ingreso por DNI)
 
-| Nombre | DNI | Contraseña | Rol |
-| --- | --- | --- | --- |
-| Dr. Eduardo Flores Quispe | `45678912` | `socabaya2024` | Médico |
-| Dra. María Paredes Salas | `41234567` | `socabaya2024` | Médico |
-| Lic. Rosa Mendoza Vargas | `47891234` | `socabaya2024` | Enfermero/a |
-| Téc. Luis Huamán Ríos | `46789123` | `socabaya2024` | Enfermero/a |
+| Nombre                    | DNI        | Contraseña     | Rol         |
+| ------------------------- | ---------- | -------------- | ----------- |
+| Dr. Eduardo Flores Quispe | `45678912` | `socabaya2024` | Médico      |
+| Dra. María Paredes Salas  | `41234567` | `socabaya2024` | Médico      |
+| Lic. Rosa Mendoza Vargas  | `47891234` | `socabaya2024` | Enfermero/a |
+| Téc. Luis Huamán Ríos     | `46789123` | `socabaya2024` | Enfermero/a |
 
 Ingresan en `/equipo/login` con su **DNI** y la contraseña. La administración puede crear nuevas cuentas y cambiar contraseñas desde `/admin/equipo`.
 
@@ -587,9 +587,9 @@ Ingresan en `/equipo/login` con su **DNI** y la contraseña. La administración 
 ### Reglas de negocio
 
 - **Lunes a viernes:**
-  - Mañana: `07:00–13:00` → 6 h.
-  - Tarde: `13:00–19:30` → 6.5 h.
-  - Todo el día: `07:00–19:00` → 12 h.
+    - Mañana: `07:00–13:00` → 6 h.
+    - Tarde: `13:00–19:30` → 6.5 h.
+    - Todo el día: `07:00–19:00` → 12 h.
 - **Sábados:** solo turno completo `07:00–15:00` → 8 h.
 - **Domingos:** sin atención. No se generan turnos.
 - **Meta mensual:** exactamente **150 horas** por médico/enfermero.
@@ -714,10 +714,10 @@ npm run build
 
 ### Tablas nuevas
 
-| Tabla | Propósito |
-| --- | --- |
-| `horarios` | Turnos mensuales por trabajador y fecha (con horas, inicio y fin). |
-| `campanas_preventivas` | Campañas preventivas publicadas por administración. |
+| Tabla                  | Propósito                                                          |
+| ---------------------- | ------------------------------------------------------------------ |
+| `horarios`             | Turnos mensuales por trabajador y fecha (con horas, inicio y fin). |
+| `campanas_preventivas` | Campañas preventivas publicadas por administración.                |
 
 La tabla `citas` recibió `user_id` (nullable, FK a `users` con `nullOnDelete`) para asignar cada cita al médico que la agenda. Las citas antiguas conservan `user_id = null` y siguen visibles para el ciudadano.
 
@@ -747,29 +747,29 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 1. Configura `.env` de producción:
 
-   ```dotenv
-   APP_ENV=production
-   APP_DEBUG=false
-   APP_URL=https://tu-dominio.example
-   APP_TIMEZONE=America/Lima
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=hampi
-   DB_USERNAME=hampi
-   DB_PASSWORD=una-contraseña-segura
-   ```
+    ```dotenv
+    APP_ENV=production
+    APP_DEBUG=false
+    APP_URL=https://tu-dominio.example
+    APP_TIMEZONE=America/Lima
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=hampi
+    DB_USERNAME=hampi
+    DB_PASSWORD=una-contraseña-segura
+    ```
 
 2. Instala dependencias y compila:
 
-   ```bash
-   composer install --no-dev --optimize-autoloader
-   npm ci
-   npm run build
-   php artisan migrate --force
-   php artisan storage:link
-   php artisan optimize
-   ```
+    ```bash
+    composer install --no-dev --optimize-autoloader
+    npm ci
+    npm run build
+    php artisan migrate --force
+    php artisan storage:link
+    php artisan optimize
+    ```
 
 3. Asegura permisos de escritura en `storage/` y `bootstrap/cache/`.
 
@@ -789,24 +789,24 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 ## Solución rápida de problemas
 
-| Síntoma | Causa probable | Solución |
-| --- | --- | --- |
-| `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | Inicia MySQL (XAMPP/Docker/servicio) y revisa `DB_HOST`/`DB_PORT`. |
-| `Unknown database 'hampi'` | La base no existe | `CREATE DATABASE hampi ...` o `docker compose up -d`. |
-| `SQLSTATE[HY000] [1045] Access denied` | Usuario/contraseña incorrectos | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña. |
-| `could not find driver` | Falta `pdo_mysql` | En local habilítalo en `php.ini` y reinicia PHP/Apache; en Codespaces sigue [Codespaces](#codespaces). |
-| `php8.5-mysql` no existe en apt | El PHP del Codespace no es el de Ubuntu | Compila `pdo_mysql` como se explica en [Codespaces](#codespaces) o usa PHP 8.3. |
-| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto | `cd /workspaces/hampi-web`. |
-| `Vite manifest not found` | Assets sin compilar | `npm ci && npm run build`. |
-| Los estilos nuevos no aparecen | Build antiguo o clase no escaneada | Vuelve a ejecutar `npm run build`. |
-| `419 Page Expired` | Falta `@csrf` o sesión vencida | Añade `@csrf`; limpia configuración/caché si cambiaste el dominio. |
-| `403` o redirección al entrar a `/admin` | La cuenta no tiene rol administrativo | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel. |
-| No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI | Entra en `/equipo/login` con DNI y contraseña. |
-| `429 Too Many Requests` | Rate limit del login | Espera un minuto o limpia la caché del rate limiter. |
-| Foto de perfil 404 | Falta el enlace de storage | `php artisan storage:link`. |
-| Error al generar 150 h | Combinación inválida o mes sin días hábiles | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12. |
-| El puerto 8000 no abre en Codespaces | Visibilidad del puerto | Abre la pestaña **Ports** y pon el puerto en público. |
-| `npm run build` falla por versión de Node | Node antiguo | Usa Node 22.12+ (Vite 8). |
+| Síntoma                                     | Causa probable                                       | Solución                                                                                               |
+| ------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | Inicia MySQL (XAMPP/Docker/servicio) y revisa `DB_HOST`/`DB_PORT`.                                     |
+| `Unknown database 'hampi'`                  | La base no existe                                    | `CREATE DATABASE hampi ...` o `docker compose up -d`.                                                  |
+| `SQLSTATE[HY000] [1045] Access denied`      | Usuario/contraseña incorrectos                       | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña.                           |
+| `could not find driver`                     | Falta `pdo_mysql`                                    | En local habilítalo en `php.ini` y reinicia PHP/Apache; en Codespaces sigue [Codespaces](#codespaces). |
+| `php8.5-mysql` no existe en apt             | El PHP del Codespace no es el de Ubuntu              | Compila `pdo_mysql` como se explica en [Codespaces](#codespaces) o usa PHP 8.3.                        |
+| `Could not open input file: artisan`        | Estás fuera de la carpeta del proyecto               | `cd /workspaces/hampi-web`.                                                                            |
+| `Vite manifest not found`                   | Assets sin compilar                                  | `npm ci && npm run build`.                                                                             |
+| Los estilos nuevos no aparecen              | Build antiguo o clase no escaneada                   | Vuelve a ejecutar `npm run build`.                                                                     |
+| `419 Page Expired`                          | Falta `@csrf` o sesión vencida                       | Añade `@csrf`; limpia configuración/caché si cambiaste el dominio.                                     |
+| `403` o redirección al entrar a `/admin`    | La cuenta no tiene rol administrativo                | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel.                         |
+| No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI                    | Entra en `/equipo/login` con DNI y contraseña.                                                         |
+| `429 Too Many Requests`                     | Rate limit del login                                 | Espera un minuto o limpia la caché del rate limiter.                                                   |
+| Foto de perfil 404                          | Falta el enlace de storage                           | `php artisan storage:link`.                                                                            |
+| Error al generar 150 h                      | Combinación inválida o mes sin días hábiles          | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12.                                   |
+| El puerto 8000 no abre en Codespaces        | Visibilidad del puerto                               | Abre la pestaña **Ports** y pon el puerto en público.                                                  |
+| `npm run build` falla por versión de Node   | Node antiguo                                         | Usa Node 22.12+ (Vite 8).                                                                              |
 
 ---
 
