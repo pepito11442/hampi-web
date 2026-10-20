@@ -162,10 +162,100 @@ function initStockFilters() {
     applyFilter('all');
 }
 
+/* -------------------------------------------------------------------------- */
+/* Horarios disponibles al agendar una cita                                     */
+/* -------------------------------------------------------------------------- */
+function initCitaSlots() {
+    const form = document.querySelector('[data-citas-form]');
+    if (!form) return;
+
+    const fecha = form.querySelector('[data-citas-fecha]');
+    const hora = form.querySelector('[data-citas-hora]');
+    const resumen = form.querySelector('[data-citas-resumen]');
+    const submit = form.querySelector('[data-citas-submit]');
+    const url = hora?.dataset.disponibilidadUrl;
+
+    if (!fecha || !hora || !url) return;
+
+    let request;
+
+    const setStatus = (message) => {
+        if (resumen) resumen.textContent = message;
+    };
+
+    const setDisabled = (disabled) => {
+        hora.disabled = disabled;
+        if (submit) submit.disabled = disabled;
+    };
+
+    const renderOptions = (slots) => {
+        hora.innerHTML = '';
+
+        if (!Array.isArray(slots) || !slots.length) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Sin horarios disponibles';
+            hora.appendChild(option);
+            return false;
+        }
+
+        slots.forEach((slot) => {
+            const option = document.createElement('option');
+            option.value = slot.hora;
+            option.textContent = slot.etiqueta;
+            hora.appendChild(option);
+        });
+
+        return true;
+    };
+
+    const cargar = async () => {
+        if (!fecha.value) return;
+
+        request?.abort();
+        request = new AbortController();
+        setDisabled(true);
+        setStatus('Consultando horarios…');
+
+        try {
+            const response = await fetch(`${url}?fecha=${encodeURIComponent(fecha.value)}`, {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+                signal: request.signal,
+            });
+
+            if (!response.ok) throw new Error('No se pudo consultar la disponibilidad.');
+
+            const data = await response.json();
+            const haySlots = renderOptions(data.slots);
+
+            if (haySlots) {
+                setDisabled(false);
+                setStatus(
+                    data.turno && data.horario
+                        ? `Turno ${data.turno}: ${data.horario}`
+                        : 'Horarios actualizados.'
+                );
+            } else {
+                setDisabled(true);
+                setStatus(data.mensaje || 'No hay horarios disponibles para esa fecha.');
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+
+            setDisabled(true);
+            setStatus('No se pudieron cargar los horarios. Vuelve a intentarlo.');
+        }
+    };
+
+    fecha.addEventListener('change', cargar);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
     initHeaderScroll();
     initReveal();
     initPasswordToggles();
     initStockFilters();
+    initCitaSlots();
 });

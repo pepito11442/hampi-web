@@ -5,7 +5,9 @@
 
 @section('content')
     @php
-        $proxima = $citas->first(fn ($cita) => $cita->fecha_hora && $cita->fecha_hora->isFuture());
+        $proxima = $citas->first(fn ($cita) => $cita->fecha_hora
+            && $cita->fecha_hora->isFuture()
+            && in_array($cita->estado, ['Confirmada', 'Pendiente'], true));
         $citasOrdenadas = $citas->sortByDesc('fecha_hora');
         $estados = [
             'Confirmada' => 'badge-teal',
@@ -56,6 +58,13 @@
                                 <x-icon name="building-2" class="h-4 w-4 shrink-0" />
                                 {{ $proxima->posta->nombre ?? 'Establecimiento de la Microred Socabaya' }}
                             </p>
+
+                            @if ($proxima->medico)
+                                <p class="mt-1 flex items-center gap-2 text-sm text-white/80">
+                                    <x-icon name="stethoscope" class="h-4 w-4 shrink-0" />
+                                    {{ $proxima->medico->name }}
+                                </p>
+                            @endif
 
                             <div class="mt-6 grid gap-3 sm:grid-cols-2">
                                 <div class="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur">
@@ -123,6 +132,9 @@
                                                 {{ $cita->fecha_hora ? $cita->fecha_hora->locale('es')->isoFormat('ddd D MMM YYYY, h:mm a') : 'Fecha por confirmar' }}
                                                 @if ($cita->posta)
                                                     · {{ $cita->posta->nombre }}
+                                                @endif
+                                                @if ($cita->medico)
+                                                    · {{ $cita->medico->name }}
                                                 @endif
                                             </p>
                                         </div>

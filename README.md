@@ -19,13 +19,14 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 5. [Uso y rutas](#uso-y-rutas)
 6. [Credenciales demo](#credenciales-demo)
 7. [Horarios mensuales](#horarios-mensuales)
-8. [Campañas preventivas](#campañas-preventivas)
-9. [Compilar assets](#compilar-assets)
-10. [Tests](#tests)
-11. [Base de datos](#base-de-datos)
-12. [Despliegue en producción](#despliegue-en-producción)
-13. [Solución rápida de problemas](#solución-rápida-de-problemas)
-14. [Documentación adicional](#documentación-adicional)
+8. [Citas médicas](#citas-médicas)
+9. [Campañas preventivas](#campañas-preventivas)
+10. [Compilar assets](#compilar-assets)
+11. [Tests](#tests)
+12. [Base de datos](#base-de-datos)
+13. [Despliegue en producción](#despliegue-en-producción)
+14. [Solución rápida de problemas](#solución-rápida-de-problemas)
+15. [Documentación adicional](#documentación-adicional)
 
 ---
 
@@ -255,9 +256,14 @@ En el menú de escritorio, **“Campañas”** lleva al pizarrín de vacunación
 | Iniciar sesión con DNI | `POST /equipo/login` | Rate limit de 5 intentos/min |
 | Panel y calendario | `/empleado/panel` | `auth` + `role:doctor,enfermero,enfermera` |
 | Actualizar perfil | `POST /empleado/perfil` | `auth` + rol de personal |
+| Mis citas (solo médicos) | `/empleado/citas` · `empleado.citas.index` | `auth` + `role:doctor` |
+| Agendar cita | `/empleado/citas/crear` · `empleado.citas.create` | `auth` + `role:doctor` |
+| Guardar cita | `POST /empleado/citas` · `empleado.citas.store` | `auth` + `role:doctor` |
+| Cerrar cita (atendida/cancelada) | `POST /empleado/citas/{cita}/estado` | `auth` + `role:doctor` |
+| Disponibilidad JSON | `/empleado/citas/disponibilidad` | `auth` + `role:doctor` |
 | Cerrar sesión | `POST /equipo/logout` | `auth` |
 
-El trabajador solo ve **su propio** horario y su perfil. Un médico o enfermero que intente entrar a `/admin/*` es redirigido a su panel.
+El trabajador solo ve **su propio** horario, su perfil y sus propias citas. Un médico o enfermero que intente entrar a `/admin/*` es redirigido a su panel. La agenda de citas está reservada al rol `doctor`; enfermería no puede crear ni cerrar citas.
 
 ### Administración
 
@@ -341,6 +347,31 @@ Los horarios son de demostración y no contemplan feriados, licencias ni cambios
 
 ---
 
+## Citas médicas
+
+Solo los usuarios con rol `doctor` pueden agendar citas a sus pacientes desde el panel del personal. El flujo es:
+
+1. El médico entra a `/empleado/citas` o pulsa **Mis citas** en `/empleado/panel`.
+2. Busca al paciente por DNI en `/empleado/citas/crear`.
+3. Si el paciente ya existe, se muestra su ficha. Si no existe, el médico completa nombres, apellidos y teléfono; la ficha se crea al confirmar la cita.
+4. Elige el establecimiento, la fecha y uno de los bloques libres de 30 minutos.
+5. Al confirmar, la cita queda en estado **Confirmada** y aparece de inmediato en `/mi-panel` del ciudadano.
+
+Reglas de disponibilidad y seguridad:
+
+- El horario se toma de `horarios` para el médico autenticado. Si no tiene turno ese día (incluidos los domingos), no se muestran bloques.
+- Cada cita ocupa **30 minutos** dentro del turno y no puede estar en el pasado.
+- No se permiten dos citas activas del mismo médico en el mismo bloque ni dos citas activas del mismo paciente a la misma hora.
+- Los estados que ocupan agenda son `Confirmada` y `Pendiente`; al **Cancelar**, el bloque vuelve a quedar disponible.
+- En **Mis citas** el médico puede marcar una cita como **Atendida** cuando su hora ya pasó, o **Cancelar** una cita activa. Las citas cerradas quedan en el historial.
+- El panel ciudadano muestra el nombre del médico y la especialidad de la próxima atención.
+- Si RENIEC no responde, el acceso ciudadano conserva los nombres y apellidos que registró el médico; no los reemplaza por datos de respaldo.
+- Si administración intenta regenerar o eliminar un mes con citas futuras activas, la operación se bloquea para no dejar citas fuera de turno. Primero deben cancelarse o reprogramarse.
+
+La cita guarda una instantánea de la especialidad del médico en `citas.especialidad`, y `citas.user_id` (nullable) lo relaciona con su agenda. Las citas antiguas sin médico se conservan sin cambios.
+
+---
+
 ## Campañas preventivas
 
 - Página pública: `/campanas-preventivas`.
@@ -383,6 +414,7 @@ La suite actual cubre:
 - Seguridad: inyección SQL en la consulta de DNI, rate limiting del login y hash Bcrypt.
 - Generación de horarios: 150 h exactas, reglas de domingo/sábado y todos los meses de varios años.
 - Agenda del día: los horarios generados alimentan la vista pública y el panel administrativo, se excluyen enfermeros e inactivos y se conserva el rol manual.
+- Citas médicas: búsqueda por DNI, registro de paciente nuevo, bloques de 30 minutos, conflictos de agenda, cierre de citas, visibilidad del médico en el panel ciudadano y bloqueo de regeneración de horarios con citas futuras.
 - Login de personal por DNI y acceso a su panel.
 - Bloqueo del panel administrativo para cuentas de personal.
 - Creación de cuentas de trabajadores desde administración.
@@ -412,6 +444,8 @@ npm run build
 | --- | --- |
 | `horarios` | Turnos mensuales por trabajador y fecha (con horas, inicio y fin). |
 | `campanas_preventivas` | Campañas preventivas publicadas por administración. |
+
+La tabla `citas` recibió `user_id` (nullable, FK a `users` con `nullOnDelete`) para asignar cada cita al médico que la agenda. Las citas antiguas conservan `user_id = null` y siguen visibles para el ciudadano.
 
 La tabla `users` se amplió con `dni`, `telefono`, `especialidad`, `biografia`, `titulos`, `experiencia`, `foto_perfil` y `activo`. El campo `role` pasó de un enum cerrado a un string que admite `admin`, `admision`, `doctor`, `enfermero` y `enfermera`.
 

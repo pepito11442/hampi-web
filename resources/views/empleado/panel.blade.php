@@ -26,6 +26,12 @@
         icon="user-check"
     >
         <x-slot:actions>
+            @if ($user->role === \App\Models\User::ROL_DOCTOR)
+                <a href="{{ route('empleado.citas.index') }}" class="btn btn-primary btn-sm">
+                    <x-icon name="calendar-check" class="h-4 w-4" />
+                    Mis citas
+                </a>
+            @endif
             <a href="/" class="btn btn-secondary btn-sm">
                 <x-icon name="home" class="h-4 w-4 text-brand-600" />
                 Ir al portal

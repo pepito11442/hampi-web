@@ -20,6 +20,11 @@ class Cita extends Model
         return $this->belongsTo(Ciudadano::class);
     }
 
+    public function medico()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function posta()
     {
         return $this->belongsTo(Posta::class);

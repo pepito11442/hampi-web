@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CampanaController as AdminCampanaController;
 use App\Http\Controllers\Admin\EquipoController as AdminEquipoController;
 use App\Http\Controllers\Admin\HorarioController as AdminHorarioController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmpleadoCitaController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\HampiController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,23 @@ Route::middleware(['auth', 'role:doctor,enfermero,enfermera'])
     ->group(function () {
         Route::get('/panel', [EmpleadoController::class, 'panel'])->name('panel');
         Route::post('/perfil', [EmpleadoController::class, 'updatePerfil'])->name('perfil.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Agenda de citas del médico
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:doctor'])
+    ->prefix('empleado/citas')
+    ->name('empleado.citas.')
+    ->group(function () {
+        Route::get('/', [EmpleadoCitaController::class, 'index'])->name('index');
+        Route::get('/crear', [EmpleadoCitaController::class, 'create'])->name('create');
+        Route::post('/', [EmpleadoCitaController::class, 'store'])->name('store');
+        Route::get('/disponibilidad', [EmpleadoCitaController::class, 'disponibilidad'])->name('disponibilidad');
+        Route::post('/{cita}/estado', [EmpleadoCitaController::class, 'actualizarEstado'])->name('estado');
     });
 
 /*

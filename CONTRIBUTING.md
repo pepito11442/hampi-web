@@ -31,16 +31,18 @@ routes/web.php → Controlador → Modelo (Eloquent) → Vista Blade (layout + c
 | `app/Http/Controllers/HampiController.php` | Portada, acceso ciudadano, páginas públicas y panel administrativo general. |
 | `app/Http/Controllers/AuthController.php` | Login/logout administrativo por correo y rate limiting. |
 | `app/Http/Controllers/EmpleadoController.php` | Login por DNI, panel y perfil del personal de salud. |
+| `app/Http/Controllers/EmpleadoCitaController.php` | Agenda de citas del médico: búsqueda de paciente, disponibilidad y cierre de citas. |
 | `app/Http/Controllers/Admin/EquipoController.php` | CRUD de cuentas de médicos y enfermeros. |
 | `app/Http/Controllers/Admin/HorarioController.php` | Consulta, generación y eliminación de horarios mensuales. |
 | `app/Http/Controllers/Admin/CampanaController.php` | Crear, publicar/ocultar y eliminar campañas preventivas. |
 | `app/Http/Middleware/EnsureRole.php` | Middleware `role:...`; redirige a cada panel según el rol. |
 | `app/Services/HorarioGenerator.php` | Generador aleatorio que garantiza exactamente 150 h/mes. |
 | `app/Services/AgendaMedica.php` + `MedicoDelDia.php` | Une horarios generados y rol manual para la agenda de médicos del día. |
+| `app/Services/AgendaCitas.php` | Calcula bloques de 30 min dentro del turno y valida que una hora sea reservable. |
 | `app/Models/` | `Posta`, `Ciudadano`, `VacunaAviso`, `TurnoMedico`, `Cita`, `User`, `Horario`, `CampanaPreventiva`. |
 | `resources/views/hampi/layout.blade.php` | Header, menú móvil, footer y barra inferior. |
 | `resources/views/hampi/partials/` | `calendario.blade.php` y `admin-nav.blade.php`. |
-| `resources/views/empleado/` | Login y panel del trabajador. |
+| `resources/views/empleado/` | Login, panel del trabajador y vistas de `citas/` (listado, formulario y parcial de cita). |
 | `resources/views/hampi/admin/` | Vistas de equipo, horarios y campañas. |
 | `resources/views/components/` | `x-icon`, `x-badge`, `x-page-hero`, `x-empty-state`. |
 | `resources/css/app.css` | Tema Tailwind 4, componentes, fondo animado y animaciones. |
@@ -58,6 +60,7 @@ El guard `web` es el único guard. El rol se guarda en `users.role`:
 | --- | --- | --- |
 | `admin`, `admision` | `/admin/*` | `/personal/login` con correo |
 | `doctor`, `enfermero`, `enfermera` | `/empleado/*` | `/equipo/login` con DNI |
+| `doctor` (adicional) | `/empleado/citas/*` | Agenda de citas; enfermería no tiene acceso |
 | Ciudadanía (sin cuenta `User`) | Portal público y `/mi-panel` | Formulario de DNI en la portada |
 
 Rutas protegidas:
@@ -193,6 +196,8 @@ Todo el portal usa los tokens `brand-*`, `ink-*`, `mist-*` y `sand-*`, así que 
 | Login administrativo | `/personal/login` · `login` | `AuthController@showLoginForm` | `hampi/auth_login.blade.php` |
 | Login del personal | `/equipo/login` · `empleado.login` | `EmpleadoController@showLogin` | `empleado/login.blade.php` |
 | Panel del trabajador | `/empleado/panel` · `empleado.panel` | `EmpleadoController@panel` | `empleado/panel.blade.php` |
+| Mis citas (médico) | `/empleado/citas` · `empleado.citas.index` | `EmpleadoCitaController@index` | `empleado/citas/index.blade.php` |
+| Agendar cita | `/empleado/citas/crear` · `empleado.citas.create` | `EmpleadoCitaController@create` | `empleado/citas/create.blade.php` |
 | Panel admin | `/admin/dashboard` · `admin.dashboard` | `adminDashboard` | `hampi/admin_dashboard.blade.php` |
 | Equipo de salud | `/admin/equipo` · `admin.equipo.index` | `Admin\EquipoController@index` | `hampi/admin/equipo.blade.php` |
 | Horarios mensuales | `/admin/horarios` · `admin.horarios.index` | `Admin\HorarioController@index` | `hampi/admin/horarios.blade.php` |
@@ -325,6 +330,19 @@ No confundir con `VacunaAviso`, que alimenta el pizarrín de vacunación y se ad
 - Actualiza el middleware de la ruta y el login que redirige a cada panel.
 - No basta con ocultar un enlace en la vista: la ruta debe tener `role:...`.
 - El login del personal valida `activo`, rol y contraseña; las cuentas inactivas no pueden entrar.
+- La agenda de citas usa `role:doctor`; el enlace **Mis citas** solo aparece para médicos y cada médico solo puede consultar o cerrar sus propias citas.
+
+### 3.13 Agendar citas desde el panel médico
+
+- Controlador: `App\Http\Controllers\EmpleadoCitaController`.
+- Servicio: `App\Services\AgendaCitas` (`horarioDelDia`, `slots`, `slotValido`, `fechaHora`).
+- Rutas: `empleado.citas.index`, `create`, `store`, `disponibilidad` y `estado`.
+- Vistas: `resources/views/empleado/citas/index.blade.php`, `create.blade.php` y `partials/cita.blade.php`.
+- El formulario busca por DNI. Si el ciudadano no existe, el mismo `store` lo crea dentro de una transacción antes de guardar la cita.
+- La disponibilidad se genera en bloques de 30 minutos dentro del turno de `horarios`. El selector de hora se actualiza con `resources/js/app.js` (`data-citas-*`) y el endpoint JSON.
+- Los estados activos son `Confirmada` y `Pendiente`; `Atendida` y `Cancelada` liberan el bloque. Un médico no puede cerrar citas de otro (404).
+- Si cambias las reglas de bloques, edita `AgendaCitas` y agrega pruebas en `tests/Feature/CitaMedicaTest.php`. No dupliques la lógica en la vista.
+- Si administración regenera o elimina un mes, `Admin\HorarioController` bloquea la operación cuando hay citas futuras activas asignadas a ese médico y mes.
 
 ---
 
@@ -390,7 +408,7 @@ Estructura: primera línea corta (≤ 72 caracteres) y, si hace falta, un cuerpo
 
 ## 6. Checklist antes de cada commit
 
-- [ ] `php artisan test` termina en verde (suite completa, 20 pruebas).
+- [ ] `php artisan test` termina en verde (suite completa, 30 pruebas).
 - [ ] `npm run build` termina sin errores.
 - [ ] `php artisan view:clear` si cambiaste vistas (y `php artisan view:cache` si quieres verificar que compilan).
 - [ ] `php artisan route:list --except-vendor` no muestra rutas duplicadas ni errores.

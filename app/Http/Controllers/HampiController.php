@@ -42,20 +42,31 @@ class HampiController extends Controller
     public function accesoPorDni(Request $request)
     {
         $dni = $request->input('dni', '72345678');
-        $nombres = $request->input('nombres_reniec', 'Ciudadano(a)');
-        $apellidos = $request->input('apellidos_reniec', 'de Socabaya');
+        $nombres = trim(strip_tags((string) $request->input('nombres_reniec', '')));
+        $apellidos = trim(strip_tags((string) $request->input('apellidos_reniec', '')));
 
-        $ciudadano = Ciudadano::updateOrCreate(
-            ['dni' => $dni],
-            [
-                'nombres' => $nombres,
-                'apellidos' => $apellidos
-            ]
-        );
+        $ciudadano = Ciudadano::firstOrNew(['dni' => $dni]);
+
+        // Si la ficha ya existe (por ejemplo, creada por un médico), no la
+        // sobrescribimos con los valores de respaldo cuando RENIEC no responde.
+        if (! $ciudadano->exists) {
+            $ciudadano->nombres = $nombres !== '' ? $nombres : 'Ciudadano(a)';
+            $ciudadano->apellidos = $apellidos !== '' ? $apellidos : 'de Socabaya';
+        } else {
+            if ($nombres !== '') {
+                $ciudadano->nombres = $nombres;
+            }
+
+            if ($apellidos !== '') {
+                $ciudadano->apellidos = $apellidos;
+            }
+        }
+
+        $ciudadano->save();
 
         Session::put('ciudadano_dni', $ciudadano->dni);
 
-        $citas = Cita::with('posta')
+        $citas = Cita::with(['posta', 'medico'])
             ->where('ciudadano_id', $ciudadano->id)
             ->orderBy('fecha_hora')
             ->get();
@@ -71,7 +82,7 @@ class HampiController extends Controller
         $ciudadano = Ciudadano::where('dni', $dni)->first();
 
         if ($ciudadano) {
-            $citas = Cita::with('posta')
+            $citas = Cita::with(['posta', 'medico'])
                 ->where('ciudadano_id', $ciudadano->id)
                 ->orderBy('fecha_hora')
                 ->get();

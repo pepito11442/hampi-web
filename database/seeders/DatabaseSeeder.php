@@ -173,14 +173,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Cita::firstOrCreate(
+        $medicoDemo = collect($usuariosPersonal)->firstWhere('role', User::ROL_DOCTOR);
+
+        Cita::updateOrCreate(
             [
                 'ciudadano_id' => $ciudadano->id,
                 'posta_id' => $posta->id,
                 'especialidad' => 'Medicina General',
                 'fecha_hora' => now()->startOfMonth()->addDays(9)->setTime(9, 0),
             ],
-            ['estado' => 'Confirmada']
+            [
+                'user_id' => $medicoDemo?->id,
+                'estado' => 'Confirmada',
+            ]
         );
 
         // Campañas preventivas de ejemplo.

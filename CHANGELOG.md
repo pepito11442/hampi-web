@@ -8,11 +8,28 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Añadido
 
+- **Agenda de citas para médicos** (`/empleado/citas`):
+  - Acceso exclusivo para el rol `doctor`, con enlace **Mis citas** en el panel del personal.
+  - Búsqueda de pacientes por DNI; si no existe la ficha, el médico completa nombres, apellidos y teléfono y el ciudadano se crea al confirmar.
+  - Selección de establecimiento, fecha y bloques de **30 minutos** calculados dentro del turno mensual del médico.
+  - Validación de fechas pasadas, horas fuera de turno, bloques desalineados, conflictos del médico y del paciente.
+  - Cierre de citas como **Atendida** o **Cancelada**; al cancelar, el bloque vuelve a quedar disponible.
+  - Listado **Mis citas** con secciones de hoy, próximas e historial.
+  - Visualización del nombre del médico en `/mi-panel` y en el detalle de las citas del ciudadano.
+- **Migración `citas.user_id`** (nullable, FK a `users` con `nullOnDelete`) para relacionar cada cita con su médico. Las citas antiguas se conservan sin médico asignado.
+- **Servicio `AgendaCitas`** y endpoint JSON `/empleado/citas/disponibilidad` para actualizar los horarios disponibles sin recargar la página.
+- **Pruebas de citas médicas**: búsqueda por DNI, registro de paciente nuevo, disponibilidad, conflictos, permisos, cierre de citas y bloqueo de regeneración de horarios.
 - **Agenda diaria unificada** con `app/Services/AgendaMedica.php` y `MedicoDelDia.php`: los horarios mensuales generados alimentan `/medicos-hoy`, el indicador del inicio y la lista del panel administrativo. El rol manual (`turno_medicos`) se conserva para médicos visitantes o ajustes puntuales.
 - Pruebas de agenda del día: horarios visibles, exclusión de enfermeros e inactivos, turno completo en ambos bloques y deduplicación con el rol manual.
 
+### Cambiado
+
+- El panel ciudadano prioriza la próxima cita activa (`Confirmada` o `Pendiente`) y muestra el nombre del médico.
+- La regeneración o eliminación de un horario mensual se bloquea si existen citas futuras activas en ese mes, para evitar citas fuera de turno.
+
 ### Corregido
 
+- El acceso ciudadano conserva los nombres y apellidos de una ficha existente cuando RENIEC no responde, en lugar de reemplazarlos por “Ciudadano(a) de Socabaya”.
 - La vista pública y el panel administrativo ya no muestran únicamente el rol manual antiguo: ahora reflejan los médicos programados para la fecha actual.
 - Los médicos con horario y registro manual se muestran una sola vez; se usa el consultorio manual y el turno del horario mensual.
 - El estado de los médicos programados se calcula según la hora (`Programado`, `Atendiendo`, `Finalizado`) y se actualizaron las horas visibles a 07:00–13:00 y 13:00–19:30.

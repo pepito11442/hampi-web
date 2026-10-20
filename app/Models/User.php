@@ -59,6 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(Horario::class);
     }
 
+    public function citas()
+    {
+        return $this->hasMany(Cita::class);
+    }
+
     public function esAdmin(): bool
     {
         return in_array($this->role, self::ROLES_ADMIN, true);

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cita;
 use App\Models\Horario;
 use App\Models\User;
+use App\Services\AgendaCitas;
 use App\Services\HorarioGenerator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -86,6 +88,21 @@ class HorarioController extends Controller
 
         abort_unless($user->esPersonal(), 404);
 
+        $inicioMes = Carbon::create((int) $datos['anio'], (int) $datos['mes'], 1)->startOfDay();
+        $finMes = $inicioMes->copy()->endOfMonth();
+
+        $tieneCitasFuturas = Cita::where('user_id', $user->id)
+            ->whereBetween('fecha_hora', [$inicioMes, $finMes])
+            ->where('fecha_hora', '>=', now())
+            ->whereIn('estado', AgendaCitas::ESTADOS_ACTIVOS)
+            ->exists();
+
+        if ($tieneCitasFuturas) {
+            return back()->withErrors([
+                'horario' => 'No se puede regenerar el horario mientras existan citas futuras activas en ese mes. Cancela o reprograma esas citas primero.',
+            ]);
+        }
+
         try {
             $generador->generar($user, (int) $datos['anio'], (int) $datos['mes']);
         } catch (\Throwable $exception) {
@@ -110,6 +127,18 @@ class HorarioController extends Controller
         $anio = max(2020, min(2100, $anio));
         $mes = max(1, min(12, $mes));
         $inicio = Carbon::create($anio, $mes, 1);
+
+        $tieneCitasFuturas = Cita::where('user_id', $empleado->id)
+            ->whereBetween('fecha_hora', [$inicio->copy()->startOfDay(), $inicio->copy()->endOfMonth()])
+            ->where('fecha_hora', '>=', now())
+            ->whereIn('estado', AgendaCitas::ESTADOS_ACTIVOS)
+            ->exists();
+
+        if ($tieneCitasFuturas) {
+            return back()->withErrors([
+                'horario' => 'No se puede eliminar el horario mientras existan citas futuras activas en ese mes. Cancela o reprograma esas citas primero.',
+            ]);
+        }
 
         Horario::where('user_id', $empleado->id)
             ->whereBetween('fecha', [
