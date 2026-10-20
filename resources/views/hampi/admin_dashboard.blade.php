@@ -11,19 +11,23 @@
     @endphp
 
     <x-page-hero
-        eyebrow="Enfermería / Admisión"
+        eyebrow="Administración"
         title="Panel de gestión hospitalaria"
         :description="'Centro de Salud San Martín de Socabaya · Responsable: ' . (Auth::user()->name ?? 'Personal de salud')"
         icon="settings"
     >
         <x-slot:actions>
+            <a href="{{ route('admin.horarios.index') }}" class="btn btn-primary btn-sm">
+                <x-icon name="calendar" class="h-4 w-4" />
+                Horarios
+            </a>
+            <a href="{{ route('admin.equipo.index') }}" class="btn btn-secondary btn-sm">
+                <x-icon name="users" class="h-4 w-4 text-brand-600" />
+                Equipo de salud
+            </a>
             <a href="/medicos-hoy" class="btn btn-secondary btn-sm">
                 <x-icon name="stethoscope" class="h-4 w-4 text-brand-600" />
                 Ver rol público
-            </a>
-            <a href="/pizarrin-vacunas" class="btn btn-secondary btn-sm">
-                <x-icon name="syringe" class="h-4 w-4 text-brand-600" />
-                Ver pizarrín público
             </a>
             <form action="/personal/logout" method="POST">
                 @csrf
@@ -34,6 +38,8 @@
             </form>
         </x-slot:actions>
     </x-page-hero>
+
+    @include('hampi.partials.admin-nav')
 
     <div class="container-page py-8 md:py-12">
         @if ($errors->any())
@@ -51,14 +57,14 @@
         @endif
 
         {{-- Indicadores --}}
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <div class="card flex items-center gap-4 p-5" data-reveal>
                 <span class="grid h-11 w-11 place-items-center rounded-2xl bg-brand-50 text-brand-700">
                     <x-icon name="users" class="h-5 w-5" />
                 </span>
                 <div>
                     <p class="stat-number">{{ $turnos->count() }}</p>
-                    <p class="stat-label">Médicos en rol</p>
+                    <p class="stat-label">Médicos en rol de hoy</p>
                 </div>
             </div>
             <div class="card flex items-center gap-4 p-5" data-reveal style="--reveal-delay: 60ms">
@@ -88,6 +94,44 @@
                     <p class="stat-label">Campañas urgentes</p>
                 </div>
             </div>
+            <div class="card flex items-center gap-4 p-5" data-reveal style="--reveal-delay: 240ms">
+                <span class="grid h-11 w-11 place-items-center rounded-2xl bg-violet-50 text-violet-700">
+                    <x-icon name="user-check" class="h-5 w-5" />
+                </span>
+                <div>
+                    <p class="stat-number">{{ $personalCount }}</p>
+                    <p class="stat-label">Personal de salud</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Accesos rápidos a las nuevas secciones --}}
+        <div class="mt-6 grid gap-4 lg:grid-cols-2">
+            <a href="{{ route('admin.horarios.index') }}" class="card card-hover flex items-center gap-4 p-5" data-reveal>
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
+                    <x-icon name="calendar" class="h-6 w-6" />
+                </span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-sm font-bold text-ink-900">Horarios mensuales del equipo</h2>
+                    <p class="mt-0.5 text-xs leading-relaxed text-ink-500">
+                        {{ $horariosMes }} {{ $horariosMes === 1 ? 'turno programado' : 'turnos programados' }} este mes · meta de 150 h por trabajador.
+                    </p>
+                </div>
+                <x-icon name="chevron-right" class="h-5 w-5 shrink-0 text-ink-300" />
+            </a>
+
+            <a href="{{ route('admin.equipo.index') }}" class="card card-hover flex items-center gap-4 p-5" data-reveal style="--reveal-delay: 60ms">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-700">
+                    <x-icon name="users" class="h-6 w-6" />
+                </span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-sm font-bold text-ink-900">Cuentas de médicos y enfermeros</h2>
+                    <p class="mt-0.5 text-xs leading-relaxed text-ink-500">
+                        Crea accesos con DNI, asigna especialidad y administra el panel de enfermería.
+                    </p>
+                </div>
+                <x-icon name="chevron-right" class="h-5 w-5 shrink-0 text-ink-300" />
+            </a>
         </div>
 
         {{-- Gestión de médicos --}}

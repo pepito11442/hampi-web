@@ -6,6 +6,72 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ## [Sin publicar]
 
+## [2026-10-19] — Panel del personal, horarios mensuales y migración a MySQL
+
+### Añadido
+
+- **Panel independiente para médicos y enfermeros** (`/equipo/login` → `/empleado/panel`):
+  - Acceso con DNI y contraseña creados desde administración.
+  - Vista del horario mensual con calendario, navegación entre meses, total de horas y progreso hacia las 150 h.
+  - Edición de foto de perfil, biografía, títulos, experiencia, especialidad, teléfono y correo.
+  - Subida de fotos al disco `public` (`storage/app/public/perfiles`) con validación de tipo y tamaño.
+- **Panel administrativo de equipo** (`/admin/equipo`):
+  - Creación, edición, activación/desactivación y eliminación de cuentas de médicos y enfermeros.
+  - Filtros por todo el equipo, médicos y enfermería.
+  - Asignación de contraseña inicial y cambio de contraseña.
+- **Horarios mensuales** (`/admin/horarios`):
+  - Generación aleatoria por trabajador, mes y año con **exactamente 150 horas**.
+  - Turnos: mañana 07:00–13:00 (6 h), tarde 13:00–19:30 (6.5 h), todo el día 07:00–19:00 (12 h) y sábados 07:00–15:00 (8 h).
+  - Domingos sin atención; restricción única por trabajador y fecha.
+  - Regeneración y eliminación del horario del mes; calendario compartido entre administración y personal.
+- **Campañas preventivas**:
+  - Nueva tabla/modelo `CampanaPreventiva` y página pública `/campanas-preventivas`.
+  - Administración en `/admin/campanas`: crear, publicar/ocultar y eliminar campañas.
+  - Estados calculados (`En curso`, `Próxima`, `Finalizada`) y datos de demostración en el seeder.
+- **Nuevas migraciones** para campos de personal, `horarios` y `campanas_preventivas`.
+- **Middleware de roles** `role:...` para separar administración, personal de salud y ciudadanía.
+- **Servicio `HorarioGenerator`** con búsqueda de combinaciones válidas y transacción de reemplazo.
+- **Factory `UserFactory`** y pruebas de horarios, login por DNI, permisos, perfil con foto y campañas.
+- **Documentación actualizada**: README, CONTRIBUTING y este CHANGELOG.
+- **Docker Compose** opcional para levantar MySQL 8 en desarrollo.
+- **Laravel Boost** como dependencia de desarrollo, siguiendo las instrucciones de `AGENTS.md`.
+
+### Cambiado
+
+- **Migración de la base de datos de SQLite a MySQL/MariaDB**:
+  - `.env.example` ahora usa `DB_CONNECTION=mysql`, base `hampi` y configuración de XAMPP/Docker.
+  - `database/laravel` se retiró del control de versiones y se agregó a `database/.gitignore`.
+  - SQLite queda únicamente para la suite de pruebas (`phpunit.xml`, `:memory:`).
+- El campo `users.role` pasó de enum cerrado a string para admitir `admin`, `admision`, `doctor`, `enfermero` y `enfermera`.
+- El login administrativo redirige según el rol; el personal de salud tiene un login y un panel propios.
+- **Navegación móvil corregida**:
+  - La barra inferior de cinco accesos ahora se muestra también en el inicio (antes se perdía en móvil).
+  - Se mantiene el menú hamburguesa; la navbar de escritorio aparece desde `lg`.
+  - La barra inferior se oculta en `/admin/*`, `/personal/*` y `/empleado/*`.
+- Etiquetas de navegación: “Campañas” para el pizarrín de vacunación y “Preventivas” para las campañas preventivas; se agregó el acceso a “Campañas Preventivas”.
+- La tarjeta del inicio “Pizarrín de vacunas” ahora se llama “Campañas de vacunación” y se agregó una tarjeta de “Campañas preventivas”.
+- **Fondo y tema visual**:
+  - La paleta `mist` pasó a celeste claro (`#f0f9ff`, `#e0f2fe`, `#bae6fd`).
+  - Nuevo fondo decorativo `bg-aurora` con blobs y puntos animados; secciones principales con blanco translúcido.
+  - Se reforzó el contraste de tarjetas y formularios sobre el fondo celeste.
+- Se limpiaron rutas duplicadas del grupo administrativo y la ruta muerta `admin.vacuna.update`.
+- Se agregó Laravel Boost a las dependencias de desarrollo, se actualizó el lockfile de Composer y se recompilaron los assets con Vite.
+
+### Corregido
+
+- La barra de navegación móvil ya no desaparece en el inicio.
+- El acceso administrativo y el acceso del personal están separados y protegidos por rol.
+- Los horarios se generan con una restricción de unicidad y se eliminan al borrar la cuenta.
+- La página pública de campañas solo muestra campañas activas.
+
+### Notas
+
+- **Cambio incompatible:** la aplicación requiere MySQL/MariaDB; no arranca con SQLite como base principal. Ejecuta `php artisan migrate --seed` sobre una base nueva.
+- Ejecuta `php artisan storage:link` para que las fotos de perfil sean accesibles.
+- Credenciales demo: administración `enfermeria@hampi.pe` / `socabaya2024`; personal con DNI y contraseña `socabaya2024` (ver README).
+- `public/build` sigue ignorado: ejecuta `npm install && npm run build` después de clonar.
+- Los horarios no consideran feriados ni licencias; es una mejora futura documentada en CONTRIBUTING.
+
 ## [2026-10-19] — Rediseño visual del portal + datos reales
 
 ### Añadido

@@ -17,7 +17,9 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    // La aplicación usa MySQL/MariaDB. SQLite queda solo para la suite de tests
+    // (phpunit.xml define DB_CONNECTION=sqlite y DB_DATABASE=:memory:).
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------

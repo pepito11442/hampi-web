@@ -1,6 +1,6 @@
 # Guía de desarrollo y contribución — Hampi
 
-Todo lo necesario para modificar el portal sin romper lo existente.
+Todo lo necesario para modificar el portal sin romper lo existente. Para instalar y ejecutar el proyecto, empieza por el [`README.md`](README.md).
 
 ## Índice
 
@@ -23,21 +23,71 @@ Flujo de una petición:
 routes/web.php → Controlador → Modelo (Eloquent) → Vista Blade (layout + componentes) → Assets compilados con Vite
 ```
 
+### Carpetas y responsabilidades
+
 | Archivo / carpeta | Qué contiene |
 | --- | --- |
-| `routes/web.php` | Todas las rutas del portal y del panel. |
-| `app/Http/Controllers/HampiController.php` | Portada, acceso por DNI, panel ciudadano y panel admin. |
-| `app/Http/Controllers/AuthController.php` | Login/logout del personal + rate limiting (429). |
-| `app/Models/` | `Posta`, `Ciudadano`, `VacunaAviso`, `TurnoMedico`, `Cita`, `User`. |
-| `resources/views/hampi/layout.blade.php` | Estructura común: header, menú móvil, footer y navegación inferior. |
-| `resources/views/hampi/*.blade.php` | Una vista por página. |
-| `resources/views/components/` | Componentes reutilizables: `x-icon`, `x-badge`, `x-page-hero`, `x-empty-state`. |
-| `resources/css/app.css` | Tema de Tailwind CSS 4: tokens de color, componentes y animaciones. |
-| `resources/js/app.js` | Interacciones de interfaz (menú, reveal, filtros, contraseña). |
-| `database/migrations/` + `database/seeders/` | Esquema y datos de demostración. |
-| `database/laravel` | Base de datos SQLite (versionada). |
+| `routes/web.php` | Rutas públicas, del personal de salud y de administración. |
+| `app/Http/Controllers/HampiController.php` | Portada, acceso ciudadano, páginas públicas y panel administrativo general. |
+| `app/Http/Controllers/AuthController.php` | Login/logout administrativo por correo y rate limiting. |
+| `app/Http/Controllers/EmpleadoController.php` | Login por DNI, panel y perfil del personal de salud. |
+| `app/Http/Controllers/Admin/EquipoController.php` | CRUD de cuentas de médicos y enfermeros. |
+| `app/Http/Controllers/Admin/HorarioController.php` | Consulta, generación y eliminación de horarios mensuales. |
+| `app/Http/Controllers/Admin/CampanaController.php` | Crear, publicar/ocultar y eliminar campañas preventivas. |
+| `app/Http/Middleware/EnsureRole.php` | Middleware `role:...`; redirige a cada panel según el rol. |
+| `app/Services/HorarioGenerator.php` | Generador aleatorio que garantiza exactamente 150 h/mes. |
+| `app/Models/` | `Posta`, `Ciudadano`, `VacunaAviso`, `TurnoMedico`, `Cita`, `User`, `Horario`, `CampanaPreventiva`. |
+| `resources/views/hampi/layout.blade.php` | Header, menú móvil, footer y barra inferior. |
+| `resources/views/hampi/partials/` | `calendario.blade.php` y `admin-nav.blade.php`. |
+| `resources/views/empleado/` | Login y panel del trabajador. |
+| `resources/views/hampi/admin/` | Vistas de equipo, horarios y campañas. |
+| `resources/views/components/` | `x-icon`, `x-badge`, `x-page-hero`, `x-empty-state`. |
+| `resources/css/app.css` | Tema Tailwind 4, componentes, fondo animado y animaciones. |
+| `resources/js/app.js` | Interacciones progresivas (menú, reveal, filtros, contraseña). |
+| `database/migrations/` + `database/seeders/` | Esquema MySQL y datos de demostración. |
+| `database/factories/UserFactory.php` | Factory para pruebas y datos de ejemplo. |
+| `docker-compose.yml` | MySQL 8 de desarrollo opcional. |
 | `public/images/`, `public/favicon.svg` | Recursos estáticos. |
-| `vite.config.js` | Entradas de CSS/JS y carga de la tipografía. |
+
+### Roles y autenticación
+
+El guard `web` es el único guard. El rol se guarda en `users.role`:
+
+| Rol | Acceso | Login |
+| --- | --- | --- |
+| `admin`, `admision` | `/admin/*` | `/personal/login` con correo |
+| `doctor`, `enfermero`, `enfermera` | `/empleado/*` | `/equipo/login` con DNI |
+| Ciudadanía (sin cuenta `User`) | Portal público y `/mi-panel` | Formulario de DNI en la portada |
+
+Rutas protegidas:
+
+```php
+Route::middleware(['auth', 'role:doctor,enfermero,enfermera'])
+    ->prefix('empleado')
+    ->name('empleado.')
+    ->group(function () {
+        // ...
+    });
+
+Route::middleware(['auth', 'role:admin,admision'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        // ...
+    });
+```
+
+`EnsureRole` también redirige a los invitados al login correcto (`/equipo/login` o `/personal/login`) y evita que un rol entre al panel de otro. Si agregas un rol nuevo, actualiza los arrays `ROLES_ADMIN` / `ROLES_PERSONAL` del modelo `User` y las rutas correspondientes.
+
+### Base de datos
+
+- **Desarrollo/producción:** MySQL 8 o MariaDB 10.4+.
+- **Tests:** SQLite en memoria (`phpunit.xml`).
+- No hay archivo SQLite versionado. `database/laravel` se retiró del repositorio y está en `database/.gitignore`.
+- Las migraciones nuevas son:
+  - `2026_10_19_120000_add_staff_fields_to_users_table.php`
+  - `2026_10_19_120100_create_horarios_table.php`
+  - `2026_10_19_120200_create_campanas_preventivas_table.php`
 
 ---
 
@@ -49,11 +99,13 @@ routes/web.php → Controlador → Modelo (Eloquent) → Vista Blade (layout + c
 | --- | --- | --- |
 | `brand-*` | Turquesa sanitaria (acciones, acentos) | 500 `#14b8a6` · 600 `#0d9488` · 700 `#0f766e` |
 | `ink-*` | Azul profundo (texto y contraste) | 500 `#5c7489` · 800 `#24394a` · 900 `#0f2a3d` |
-| `mist-*` | Fondo general claro | 50 `#f7fbfa` |
+| `mist-*` | Fondo celeste claro | 50 `#f0f9ff` · 100 `#e0f2fe` · 200 `#bae6fd` |
 | `sand-*` | Acento cálido secundario | 100 `#f7f1e5` |
 
 Sombras: `shadow-card`, `shadow-lift`, `shadow-glow`. Radios amplios: `rounded-4xl`, `rounded-5xl`.
 Tipografía: **Instrument Sans** (400–700), cargada en `vite.config.js`.
+
+El fondo general combina `bg-mist-50` con la capa decorativa `.bg-aurora` (blobs y puntos animados) del layout. Las secciones principales usan blanco translúcido (`bg-white/65`, `backdrop-blur-sm`) para que el fondo se perciba sin sacrificar legibilidad. Respeta `prefers-reduced-motion`.
 
 ### Componentes Blade
 
@@ -92,7 +144,8 @@ Tipografía: **Instrument Sans** (400–700), cargada en `vite.config.js`.
 | Navegación | `.nav-link`, `.nav-link-active` |
 | Indicadores | `.stat-number`, `.stat-label` |
 | Filtros | `.filter-pill` (estado activo vía `aria-pressed="true"`) |
-| Utilidades | `.bg-hero-glow`, `.bg-dot-grid`, `.mask-fade-b`, `.text-balance`, `.animate-float-soft`, `.skip-link` |
+| Fondo | `.bg-aurora`, `.bg-hero-glow`, `.bg-dot-grid` |
+| Utilidades | `.mask-fade-b`, `.text-balance`, `.animate-float-soft`, `.skip-link` |
 
 ### JavaScript (atributos `data-` en `resources/js/app.js`)
 
@@ -105,6 +158,12 @@ Tipografía: **Instrument Sans** (400–700), cargada en `vite.config.js`.
 | `data-stock-filter` · `data-vaccine-card` (`data-stock`) · `data-vaccine-count` · `data-filter-empty` | Filtros del pizarrín de vacunas. |
 
 Todo el JS es **progresivo**: si no carga, la página sigue funcionando.
+
+### Navegación móvil
+
+- La navbar completa se muestra desde `lg`; por debajo se usa el botón hamburguesa.
+- La barra inferior de cinco accesos se muestra en todo el portal público, **incluido el inicio**, y se oculta en `/admin/*`, `/personal/*` y `/empleado/*`.
+- El estado activo usa `request()->routeIs(...)`. Si agregas una página pública importante, actualiza tanto el menú de escritorio como la barra inferior en `layout.blade.php`.
 
 ---
 
@@ -127,10 +186,16 @@ Todo el portal usa los tokens `brand-*`, `ink-*`, `mist-*` y `sand-*`, así que 
 | Portada + acceso DNI | `/` · `inicio` | `HampiController@index` | `hampi/login.blade.php` |
 | Panel ciudadano | `/mi-panel` · `ciudadano.panel` | `panelCiudadano` | `hampi/panel_paciente.blade.php` |
 | Médicos del día | `/medicos-hoy` · `medicos.index` | `verMedicos` | `hampi/medicos.blade.php` |
-| Pizarrín de vacunas | `/pizarrin-vacunas` · `pizarrin.index` | `verPizarrin` | `hampi/pizarrin.blade.php` |
+| Campañas de vacunación | `/pizarrin-vacunas` · `pizarrin.index` | `verPizarrin` | `hampi/pizarrin.blade.php` |
+| Campañas preventivas | `/campanas-preventivas` · `campanas.index` | `verCampanasPreventivas` | `hampi/campanas.blade.php` |
 | Directorio de postas | `/directorio-postas` · `postas.index` | `verPostas` | `hampi/postas.blade.php` |
-| Login del personal | `/personal/login` · `login` | `AuthController@showLoginForm` | `hampi/auth_login.blade.php` |
+| Login administrativo | `/personal/login` · `login` | `AuthController@showLoginForm` | `hampi/auth_login.blade.php` |
+| Login del personal | `/equipo/login` · `empleado.login` | `EmpleadoController@showLogin` | `empleado/login.blade.php` |
+| Panel del trabajador | `/empleado/panel` · `empleado.panel` | `EmpleadoController@panel` | `empleado/panel.blade.php` |
 | Panel admin | `/admin/dashboard` · `admin.dashboard` | `adminDashboard` | `hampi/admin_dashboard.blade.php` |
+| Equipo de salud | `/admin/equipo` · `admin.equipo.index` | `Admin\EquipoController@index` | `hampi/admin/equipo.blade.php` |
+| Horarios mensuales | `/admin/horarios` · `admin.horarios.index` | `Admin\HorarioController@index` | `hampi/admin/horarios.blade.php` |
+| Campañas preventivas (admin) | `/admin/campanas` · `admin.campanas.index` | `Admin\CampanaController@index` | `hampi/admin/campanas.blade.php` |
 | Error 429 | — | — | `errors/429.blade.php` |
 
 ### 3.3 Agregar una página nueva
@@ -169,7 +234,7 @@ Todo el portal usa los tokens `brand-*`, `ink-*`, `mist-*` y `sand-*`, así que 
    @endsection
    ```
 
-4. (Opcional) Enlázala desde el menú en `layout.blade.php`.
+4. (Opcional) Enlázala desde el menú y/o la barra inferior en `layout.blade.php`.
 
 ### 3.4 Agregar un icono
 
@@ -197,12 +262,16 @@ Todo el portal usa los tokens `brand-*`, `ink-*`, `mist-*` y `sand-*`, así que 
   ```
 
 - No cambies los nombres de ruta existentes; hay enlaces y redirecciones que dependen de ellos.
+- Para acciones destructivas usa `onsubmit="return confirm('...')"` y explica el alcance.
 
-### 3.6 Imágenes
+### 3.6 Imágenes y fotos de perfil
 
-- Guárdalas en `public/images/` (JPG + WebP cuando sea posible).
-- En las vistas usa rutas relativas (`/images/...`), con `width`, `height` y `alt` descriptivo.
-- El hero mantiene ~1600 px de ancho; no subas archivos de varios MB.
+- Imágenes estáticas del portal: `public/images/` (JPG + WebP cuando sea posible), con `width`, `height` y `alt` descriptivo.
+- Fotos del personal: se suben desde `/empleado/panel` y se guardan en `storage/app/public/perfiles` a través del disco `public`.
+- Requiere `php artisan storage:link`.
+- Validación actual: `image`, `mimes:jpg,jpeg,png,webp`, máximo 2 MB.
+- Para mostrar la foto usa el accesor `$user->foto_url`; no construyas rutas a mano.
+- Al reemplazar una foto, el controlador elimina la anterior.
 
 ### 3.7 Agregar un campo o tabla en la base de datos
 
@@ -211,9 +280,9 @@ php artisan make:migration agregar_campo_a_tabla
 php artisan migrate
 ```
 
-Luego actualiza: modelo (si requiere cast o relación), validación del controlador, formularios/vistas y, si aplica, `database/seeders/DatabaseSeeder.php` para que la demo también lo incluya.
+Luego actualiza: modelo (si requiere cast o relación), validación del controlador, formularios/vistas y, si aplica, `database/seeders/DatabaseSeeder.php` y `database/factories/UserFactory.php` para que la demo y las pruebas también lo incluyan.
 
-> Nunca edites migraciones ya ejecutadas: crea una nueva.
+> Nunca edites migraciones ya ejecutadas: crea una nueva. Para probar el esquema desde cero en local puedes usar `php artisan migrate:fresh --seed`, pero **nunca** en producción.
 
 ### 3.8 Menú, footer y navegación inferior
 
@@ -223,9 +292,38 @@ Todo vive en `resources/views/hampi/layout.blade.php`. Para marcar el enlace act
 <a href="/medicos-hoy" @class(['nav-link', 'nav-link-active' => request()->routeIs('medicos.index')])>Médicos</a>
 ```
 
+La barra inferior móvil tiene cinco accesos; si agregas una sección, revisa que no se desborde en 390 px. La barra se oculta en los paneles mediante la variable `$esPanel` del layout.
+
 ### 3.9 Indicadores de la portada
 
-Se calculan en `HampiController@index` (variable `$stats`) y se muestran en `hampi/login.blade.php`. Si agregas un indicador, edita ambos a la vez y usa datos reales de la base de datos.
+Se calculan en `HampiController@index` (variable `$stats`) y se muestran en `hampi/login.blade.php`. Si agregas un indicador, edita ambos a la vez y usa datos reales de la base de datos. Lo mismo aplica a las métricas del panel admin (`$personalCount`, `$horariosMes`).
+
+### 3.10 Crear una cuenta de personal y generar su horario
+
+1. Entra con una cuenta administrativa a `/admin/equipo`.
+2. Completa nombre, DNI, correo, rol (`doctor` o `enfermero`) y contraseña.
+3. El trabajador ya puede entrar en `/equipo/login` con su DNI.
+4. En `/admin/horarios`, selecciónalo, elige mes/año y pulsa **Generar horario**.
+5. El generador crea turnos hasta sumar exactamente 150 h; si vuelves a generar, reemplaza los turnos de ese mes.
+
+Si cambias las reglas de turnos, edita únicamente `Horario::TURNOS` y `HorarioGenerator`; las vistas leen las etiquetas y horas desde el modelo.
+
+### 3.11 Campañas preventivas
+
+- Modelo: `App\Models\CampanaPreventiva`.
+- Página pública: `HampiController@verCampanasPreventivas` → `hampi/campanas.blade.php`, solo campañas `activa = true`.
+- Administración: `Admin\CampanaController` + `hampi/admin/campanas.blade.php`.
+- Rutas: `admin.campanas.index`, `store`, `estado` (publicar/ocultar) y `destroy`.
+- Al crear una campaña, valida fechas (`fecha_fin >= fecha_inicio`) y usa `activa` para controlar la visibilidad.
+
+No confundir con `VacunaAviso`, que alimenta el pizarrín de vacunación y se administra desde el panel general.
+
+### 3.12 Roles y permisos
+
+- Para permitir un rol nuevo, agrégalo a `User::ROLES_ADMIN` o `User::ROLES_PERSONAL` según corresponda.
+- Actualiza el middleware de la ruta y el login que redirige a cada panel.
+- No basta con ocultar un enlace en la vista: la ruta debe tener `role:...`.
+- El login del personal valida `activo`, rol y contraseña; las cuentas inactivas no pueden entrar.
 
 ---
 
@@ -236,9 +334,11 @@ Se calculan en `HampiController@index` (variable `$stats`) y se muestran en `ham
 3. Todo formulario conserva `@csrf` (y `@method` cuando corresponde).
 4. **Sin CDNs nuevos**: los estilos y scripts van por Vite (`resources/...` + `npm run build`).
 5. Las migraciones ya ejecutadas **no se editan**; se crea una nueva.
-6. **No ejecutes `migrate:fresh`** sobre `database/laravel` versionada: borra los datos de demostración.
+6. **No uses `migrate:fresh` en producción** ni sobre datos que no puedas recuperar. En local/demo es aceptable con `--seed`.
 7. Mantén la accesibilidad: `alt`, `aria-*`, foco visible, contraste. Los componentes ya lo implementan; consérvalo.
 8. Prueba siempre en **móvil (~390 px)** y **escritorio (~1440 px)**.
+9. La app usa **MySQL/MariaDB**; no vuelvas a introducir SQLite para desarrollo o producción. SQLite queda reservado para `phpunit.xml`.
+10. Si cambias el esquema, actualiza migración, modelo, validaciones, vistas, seeder/factory y pruebas.
 
 ---
 
@@ -246,7 +346,7 @@ Se calculan en `HampiController@index` (variable `$stats`) y se muestran en `ham
 
 ```bash
 # 1. Crea una rama para tu cambio (recomendado)
-git checkout -b mejora-pizarrin
+git checkout -b mejora-horarios
 
 # 2. Haz tus cambios y revisa qué se subirá
 git status
@@ -257,8 +357,8 @@ npm run build
 
 # 4. Confirma y sube
 git add -A
-git commit -m "feat: filtra vacunas por stock"
-git push -u origin mejora-pizarrin
+git commit -m "feat: agrega horarios mensuales del personal"
+git push -u origin mejora-horarios
 
 # 5. Abre un Pull Request en GitHub
 ```
@@ -267,7 +367,7 @@ Si trabajas directo sobre `main` (proyecto pequeño):
 
 ```bash
 git add -A
-git commit -m "feat: filtra vacunas por stock"
+git commit -m "feat: agrega horarios mensuales del personal"
 git push origin main
 ```
 
@@ -289,12 +389,16 @@ Estructura: primera línea corta (≤ 72 caracteres) y, si hace falta, un cuerpo
 
 ## 6. Checklist antes de cada commit
 
+- [ ] `php artisan test` termina en verde (suite completa, 14 pruebas).
 - [ ] `npm run build` termina sin errores.
 - [ ] `php artisan view:clear` si cambiaste vistas (y `php artisan view:cache` si quieres verificar que compilan).
-- [ ] `php artisan test --testsuite=Feature` → 3/3 en verde.
+- [ ] `php artisan route:list --except-vendor` no muestra rutas duplicadas ni errores.
+- [ ] Si tocaste fotos o `storage`, verificaste `php artisan storage:link` y que la imagen cargue.
+- [ ] Probaste el flujo correspondiente en MySQL, no solo con tests SQLite.
 - [ ] Revisaste en el navegador las rutas que tocaste, en móvil y escritorio.
-- [ ] `git status` no incluye `.env`, `node_modules` ni `public/build`.
+- [ ] `git status` no incluye `.env`, `node_modules`, `public/build`, `database/laravel` ni fotos subidas.
 - [ ] Si agregaste datos demo, actualizaste `DatabaseSeeder`.
+- [ ] Si agregaste reglas de negocio, agregaste o actualizaste pruebas.
 
 ---
 
@@ -306,23 +410,30 @@ Estructura: primera línea corta (≤ 72 caracteres) y, si hace falta, un cuerpo
 | Los estilos no reflejan tus cambios | Build antiguo | `npm run build` (o `npm run dev`) |
 | Una clase de Tailwind no aplica | No existe literalmente en Blade/JS | Escribe la clase completa en el archivo; el build escanea `resources/views` |
 | `php` no se reconoce en Windows | PHP fuera del PATH | Usa `C:\xampp\php\php.exe` o agrégalo al PATH |
-| `419 Page Expired` | Falta `@csrf` | Añádelo al formulario |
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL detenido / host incorrecto | Inicia MySQL y revisa `DB_HOST`/`DB_PORT` |
+| `Unknown database 'hampi'` | Base no creada | Crea la base o ejecuta `docker compose up -d` |
+| `SQLSTATE[HY000] [1045] Access denied` | Credenciales incorrectas | Ajusta `DB_USERNAME`/`DB_PASSWORD`; en XAMPP root suele estar vacío |
+| `could not find driver` | Falta `pdo_mysql` | Habilítalo en `php.ini` y reinicia PHP |
+| `419 Page Expired` | Falta `@csrf` o sesión vencida | Añádelo al formulario; limpia config/caché si cambió el dominio |
 | `429 Too Many Requests` en el login | Rate limiter (5 intentos/min) | Espera un minuto o `php artisan cache:clear` |
-| “Sin conexión” al validar DNI | RENIEC no responde o falta token | Revisa `RENIEC_API_TOKEN` en `.env`; el formulario permite completar a mano |
-| Imagen 404 | Archivo fuera de `public/` o ruta absoluta | Guárdala en `public/images/` y referencia `/images/archivo.jpg` |
-| Cambios de vistas no se ven en producción | Vistas cacheadas | `php artisan view:clear && php artisan view:cache` |
-| Se pierde la sesión ciudadana | Driver de sesión | `SESSION_DRIVER=database` requiere la tabla `sessions` (ya incluida) |
+| El personal no puede entrar con correo | El acceso del personal es por DNI | Usa `/equipo/login`; el correo es solo para administración |
+| Un médico entra a `/admin` y vuelve a su panel | El middleware de roles lo redirige | Es el comportamiento esperado; usa una cuenta admin |
+| “Sin conexión” al validar DNI | RENIEC no responde o falta token | Revisa `RENIEC_API_TOKEN`; el formulario permite completar a mano |
+| Foto 404 | Falta el enlace de storage | `php artisan storage:link` |
+| No se genera el horario | Mes/año fuera de rango o error del generador | Usa 2020–2100 y meses 1–12; revisa `storage/logs/laravel.log` |
+| Cambios de vistas no se ven en producción | Vistas/optimización cacheadas | `php artisan view:clear && php artisan optimize` |
+| Se pierde la sesión | Driver de sesión | `SESSION_DRIVER=database` requiere la tabla `sessions` (ya incluida) |
 
 ---
 
 ## 8. Deuda técnica conocida
 
-Cosas pendientes o mejorables detectadas durante el rediseño. **Ninguna afecta al funcionamiento actual**, pero conviene resolverlas con calma:
-
-1. **Rutas duplicadas dentro de `/admin`** (`routes/web.php`, líneas 44–51): las copias de `/personal/login`, `/api/consultar-dni` e `/ingreso-dni` con `throttle` quedaron dentro del grupo con prefijo `admin`, por lo que no protegen las rutas públicas reales (las url finales son `/admin/...`). La protección real del login está en `AuthController` (RateLimiter → 429) y la de la API en la validación de 8 dígitos. Antes de limpiarlas, confirma que nadie las use.
-2. **`admin.vacuna.update` sin método**: la ruta (línea 33) apunta a `HampiController@updateVacunaEstado`, que no existe. Ninguna vista la usa; para aprovecharla, implementa el método (cambiar `stock_estado`) o elimina la ruta.
-3. **`phpunit.xml` referencia `tests/Unit`**, que no existe; por eso los tests se ejecutan con `--testsuite=Feature`. Opciones: crear `tests/Unit/.gitkeep` o quitar la suite del XML.
-4. **`storeVacuna` y `storeTurno` fijan `posta_id = 1`**: si se registran más postas, hay que permitir elegir la posta en el formulario.
-5. **Modelo `Posta` con relación autorreferente `posta()`**: código heredado; revísalo antes de usarlo.
-6. **`database/laravel` versionada** incluye sesiones y caché: cada uso local modifica el archivo. Si en el futuro molesta, considera `git rm --cached database/laravel`, añadirlo al `.gitignore` y documentar `php artisan migrate --seed` para nuevos clones (se pierde el “clonar y funciona”).
-7. **Ruta `/test`** devuelve un string de depuración; puedes eliminarla cuando ya no la necesites.
+1. **`storeVacuna` y `storeTurno` fijan `posta_id = 1`**: si se registran más postas, hay que permitir elegir la posta en el formulario y validarla.
+2. **Modelo `Posta` con relación autorreferente `posta()`**: código heredado; revísalo antes de usarlo.
+3. **Ruta `/test`** devuelve un string de depuración; puedes eliminarla cuando ya no la necesites.
+4. **Campañas preventivas sin edición completa**: actualmente se crean, publican/ocultan y eliminan. Si se necesita corregir textos o fechas, conviene agregar `update` y un formulario de edición.
+5. **Horarios aleatorios sin feriados/licencias**: el generador cumple 150 h y las reglas de turnos, pero no descuenta feriados ni ausencias. Una mejora futura es cargar un calendario laboral y bloqueos por trabajador.
+6. **Fotos en almacenamiento local**: para varios servidores o despliegues efímeros (Codespaces), usa S3 u otro disco compartido y ajusta `foto_url`/`store`.
+7. **Sin recuperación de contraseña por correo**: administración asigna una nueva contraseña desde `/admin/equipo`. Se puede añadir un flujo de restablecimiento si el proyecto lo requiere.
+8. **Acceso ciudadano por DNI sin validación fuerte en servidor**: el flujo existente prioriza la demo y la consulta RENIEC; endurecerlo requiere validar formato, verificar identidad y evitar crear ciudadanos con datos arbitrarios.
+9. **Sin auditoría de cambios**: no se registra quién generó/regeneró un horario o publicó una campaña. Si el sistema crece, añade una tabla de auditoría.

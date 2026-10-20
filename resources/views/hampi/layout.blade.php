@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0d9488">
+    <meta name="theme-color" content="#e0f2fe">
 
     <title>@yield('title', 'Hampi · Tu salud, más cerca | Socabaya, Arequipa')</title>
-    <meta name="description" content="@yield('meta_description', 'Hampi conecta a los vecinos de Socabaya con los servicios de su microred de salud: médicos de turno, pizarrín de vacunas y directorio de postas.')">
+    <meta name="description" content="@yield('meta_description', 'Hampi conecta a los vecinos de Socabaya con los servicios de su microred de salud: médicos de turno, campañas y directorio de postas.')">
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
@@ -19,7 +19,16 @@
 <body class="flex min-h-screen flex-col bg-mist-50 text-ink-800">
     <a href="#contenido" class="skip-link">Saltar al contenido principal</a>
 
-    <header data-site-header class="site-header sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur-md">
+    {{-- Fondo decorativo dinámico (celeste) --}}
+    <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-aurora"></div>
+        <div class="absolute inset-0 bg-dot-grid opacity-40 mask-fade-b"></div>
+        <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-brand-200/50 blur-3xl animate-float-soft"></div>
+        <div class="absolute -right-20 top-1/2 h-96 w-96 rounded-full bg-sky-200/60 blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-cyan-100/70 blur-3xl animate-float-soft" style="animation-delay: -3s"></div>
+    </div>
+
+    <header data-site-header class="site-header sticky top-0 z-40 border-b border-ink-100/80 bg-white/85 backdrop-blur-md">
         {{-- Franja institucional (escritorio) --}}
         <div class="hidden border-b border-ink-100 bg-ink-950 text-white lg:block">
             <div class="container-page flex h-9 items-center justify-between text-[11px] font-medium tracking-wide">
@@ -30,12 +39,26 @@
                 <div class="flex items-center gap-6">
                     <span class="flex items-center gap-1.5 text-white/75">
                         <x-icon name="clock" class="h-3.5 w-3.5 text-brand-300" />
-                        Atención de lunes a sábado · 07:30 a 19:30
+                        Lun a vie 07:00–19:30 · Sáb 07:00–15:00
                     </span>
-                    <a href="/personal/login" class="flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-200">
-                        <x-icon name="user-cog" class="h-3.5 w-3.5" />
-                        Personal de salud
-                    </a>
+                    @auth
+                        @if(auth()->user()->esAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-200">
+                                <x-icon name="settings" class="h-3.5 w-3.5" />
+                                Panel administrativo
+                            </a>
+                        @else
+                            <a href="{{ route('empleado.panel') }}" class="flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-200">
+                                <x-icon name="user-check" class="h-3.5 w-3.5" />
+                                Mi panel de trabajo
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('empleado.login') }}" class="flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-200">
+                            <x-icon name="user-cog" class="h-3.5 w-3.5" />
+                            Personal de salud
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -57,10 +80,11 @@
                 </span>
             </a>
 
-            <nav class="hidden items-center gap-1 md:flex" aria-label="Navegación principal">
+            <nav class="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
                 <a href="/" class="nav-link {{ request()->is('/') ? 'nav-link-active' : '' }}" @if(request()->is('/')) aria-current="page" @endif>Inicio</a>
-                <a href="/medicos-hoy" class="nav-link {{ request()->is('medicos-hoy') ? 'nav-link-active' : '' }}" @if(request()->is('medicos-hoy')) aria-current="page" @endif>Médicos del día</a>
-                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}" @if(request()->is('pizarrin-vacunas')) aria-current="page" @endif>Pizarrín de vacunas</a>
+                <a href="/medicos-hoy" class="nav-link {{ request()->is('medicos-hoy') ? 'nav-link-active' : '' }}" @if(request()->is('medicos-hoy')) aria-current="page" @endif>Médicos</a>
+                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}" @if(request()->is('pizarrin-vacunas')) aria-current="page" @endif aria-label="Campañas de vacunación">Campañas</a>
+                <a href="/campanas-preventivas" class="nav-link {{ request()->is('campanas-preventivas') ? 'nav-link-active' : '' }}" @if(request()->is('campanas-preventivas')) aria-current="page" @endif>Campañas preventivas</a>
                 <a href="/directorio-postas" class="nav-link {{ request()->is('directorio-postas') ? 'nav-link-active' : '' }}" @if(request()->is('directorio-postas')) aria-current="page" @endif>Postas</a>
                 @if(session('ciudadano_dni'))
                     <a href="/mi-panel" class="nav-link {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}" @if(request()->is('mi-panel')) aria-current="page" @endif>Mi panel</a>
@@ -91,7 +115,7 @@
                     data-menu-toggle
                     aria-controls="mobile-menu"
                     aria-expanded="false"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700 md:hidden"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700 lg:hidden"
                 >
                     <x-icon name="menu" class="h-5 w-5" data-menu-icon-open />
                     <x-icon name="x" class="hidden h-5 w-5" data-menu-icon-close />
@@ -101,23 +125,37 @@
         </div>
 
         {{-- Menú móvil --}}
-        <div id="mobile-menu" hidden class="border-t border-ink-100 bg-white md:hidden">
+        <div id="mobile-menu" hidden class="border-t border-ink-100 bg-white lg:hidden">
             <nav class="container-page flex flex-col gap-1 py-4" aria-label="Navegación móvil">
                 <a href="/" class="nav-link {{ request()->is('/') ? 'nav-link-active' : '' }}">Inicio</a>
                 <a href="/medicos-hoy" class="nav-link {{ request()->is('medicos-hoy') ? 'nav-link-active' : '' }}">Médicos del día</a>
-                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}">Pizarrín de vacunas</a>
+                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}" aria-label="Campañas de vacunación">Campañas</a>
+                <a href="/campanas-preventivas" class="nav-link {{ request()->is('campanas-preventivas') ? 'nav-link-active' : '' }}">Campañas preventivas</a>
                 <a href="/directorio-postas" class="nav-link {{ request()->is('directorio-postas') ? 'nav-link-active' : '' }}">Directorio de postas</a>
                 @if(session('ciudadano_dni'))
-                    <a href="/mi-panel" class="nav-link {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}">Mi panel</a>
+                    <a href="/mi-panel" class="nav-link {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}">Mi panel de citas</a>
                     <a href="/cerrar-sesion-ciudadano" class="nav-link text-rose-600 hover:bg-rose-50 hover:text-rose-700">Cerrar sesión ciudadana</a>
                 @endif
-                <a href="/personal/login" class="nav-link">Personal de salud</a>
+
+                @auth
+                    @if(auth()->user()->esAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link">Panel administrativo</a>
+                    @else
+                        <a href="{{ route('empleado.panel') }}" class="nav-link">Mi panel de trabajo</a>
+                    @endif
+                    <form action="{{ auth()->user()->esAdmin() ? route('logout') : route('empleado.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link w-full text-left text-rose-600 hover:bg-rose-50 hover:text-rose-700">Cerrar sesión del personal</button>
+                    </form>
+                @else
+                    <a href="{{ route('empleado.login') }}" class="nav-link">Acceso del personal (DNI)</a>
+                @endauth
             </nav>
         </div>
     </header>
 
     @if(session('mensaje'))
-        <div class="container-page pt-6">
+        <div class="relative z-10 container-page pt-6">
             <div role="status" class="flex items-start gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-900 shadow-sm">
                 <x-icon name="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
                 <p>{{ session('mensaje') }}</p>
@@ -125,11 +163,15 @@
         </div>
     @endif
 
-    <main id="contenido" class="flex-grow {{ request()->is('/') ? '' : 'pb-24 md:pb-0' }}">
+    @php
+        $esPanel = request()->is('admin/*') || request()->is('personal/*') || request()->is('empleado/*');
+    @endphp
+
+    <main id="contenido" class="relative z-10 flex-grow {{ $esPanel ? '' : 'pb-24 lg:pb-0' }}">
         @yield('content')
     </main>
 
-    <footer class="mt-auto border-t border-ink-100 bg-white">
+    <footer class="relative z-10 mt-auto border-t border-ink-100/80 bg-white/90 {{ $esPanel ? '' : 'pb-20 lg:pb-0' }}">
         <div class="container-page grid gap-10 py-14 md:grid-cols-12">
             <div class="md:col-span-4">
                 <div class="flex items-center gap-3">
@@ -142,7 +184,7 @@
                     </span>
                 </div>
                 <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-500">
-                    Portal ciudadano de la Microred Socabaya. Consulta médicos de turno, disponibilidad de vacunas y el directorio de establecimientos de tu comunidad.
+                    Portal ciudadano de la Microred Socabaya. Consulta médicos de turno, disponibilidad de vacunas y campañas preventivas de tu comunidad.
                 </p>
                 <p class="mt-4 inline-flex items-center gap-2 rounded-full border border-ink-100 bg-ink-50 px-3 py-1.5 text-[11px] font-semibold text-ink-500">
                     <x-icon name="lock" class="h-3.5 w-3.5 text-brand-600" />
@@ -155,8 +197,8 @@
                 <ul class="mt-4 space-y-2.5 text-sm">
                     <li><a href="/" class="text-ink-600 transition-colors hover:text-brand-700">Inicio</a></li>
                     <li><a href="/medicos-hoy" class="text-ink-600 transition-colors hover:text-brand-700">Médicos del día</a></li>
-                    <li><a href="/pizarrin-vacunas" class="text-ink-600 transition-colors hover:text-brand-700">Pizarrín de vacunas</a></li>
-                    <li><a href="/directorio-postas" class="text-ink-600 transition-colors hover:text-brand-700">Directorio de postas</a></li>
+                    <li><a href="/pizarrin-vacunas" class="text-ink-600 transition-colors hover:text-brand-700">Campañas</a></li>
+                    <li><a href="/campanas-preventivas" class="text-ink-600 transition-colors hover:text-brand-700">Campañas preventivas</a></li>
                 </ul>
             </div>
 
@@ -165,7 +207,8 @@
                 <ul class="mt-4 space-y-2.5 text-sm">
                     <li><a href="/#acceso" class="text-ink-600 transition-colors hover:text-brand-700">Acceso ciudadano con DNI</a></li>
                     <li><a href="/mi-panel" class="text-ink-600 transition-colors hover:text-brand-700">Mi panel de citas</a></li>
-                    <li><a href="/personal/login" class="text-ink-600 transition-colors hover:text-brand-700">Personal de salud</a></li>
+                    <li><a href="{{ route('empleado.login') }}" class="text-ink-600 transition-colors hover:text-brand-700">Personal de salud (DNI)</a></li>
+                    <li><a href="{{ route('login') }}" class="text-ink-600 transition-colors hover:text-brand-700">Administración</a></li>
                 </ul>
             </div>
 
@@ -178,7 +221,7 @@
                     </li>
                     <li class="flex items-start gap-2">
                         <x-icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                        Lunes a sábado · 07:30 a 19:30
+                        Lun a vie 07:00–19:30 · Sáb 07:00–15:00
                     </li>
                     <li class="flex items-start gap-2">
                         <x-icon name="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
@@ -188,7 +231,7 @@
             </div>
         </div>
 
-        <div class="border-t border-ink-100">
+        <div class="border-t border-ink-100/80">
             <div class="container-page flex flex-col gap-3 py-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
                 <p>© {{ date('Y') }} Hampi · Microred Socabaya (Arequipa). Proyecto académico Universidad Continental.</p>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -200,30 +243,34 @@
         </div>
     </footer>
 
-    {{-- Navegación inferior para móviles (páginas internas) --}}
-    @unless(request()->is('/'))
-        <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden" aria-label="Accesos rápidos">
-            <div class="grid grid-cols-4 py-1.5">
+    {{-- Navegación inferior para móviles y tablets (solo portal público) --}}
+    @unless($esPanel)
+        <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden" aria-label="Accesos rápidos">
+            <div class="grid grid-cols-5 py-1.5">
                 @if(session('ciudadano_dni'))
-                    <a href="/mi-panel" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold transition-colors {{ request()->is('mi-panel') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                    <a href="/mi-panel" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('mi-panel') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
                         <x-icon name="calendar-check" class="h-5 w-5" />
                         Mis citas
                     </a>
                 @else
-                    <a href="/" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold transition-colors {{ request()->is('/') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                    <a href="/" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('/') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
                         <x-icon name="home" class="h-5 w-5" />
                         Inicio
                     </a>
                 @endif
-                <a href="/medicos-hoy" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold transition-colors {{ request()->is('medicos-hoy') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                <a href="/medicos-hoy" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('medicos-hoy') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
                     <x-icon name="stethoscope" class="h-5 w-5" />
                     Médicos
                 </a>
-                <a href="/pizarrin-vacunas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold transition-colors {{ request()->is('pizarrin-vacunas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                <a href="/pizarrin-vacunas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('pizarrin-vacunas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}" aria-label="Campañas de vacunación">
                     <x-icon name="clipboard-list" class="h-5 w-5" />
-                    Pizarrín
+                    Campañas
                 </a>
-                <a href="/directorio-postas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold transition-colors {{ request()->is('directorio-postas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                <a href="/campanas-preventivas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('campanas-preventivas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}" aria-label="Campañas preventivas">
+                    <x-icon name="shield-check" class="h-5 w-5" />
+                    Preventivas
+                </a>
+                <a href="/directorio-postas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('directorio-postas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
                     <x-icon name="map-pin" class="h-5 w-5" />
                     Postas
                 </a>

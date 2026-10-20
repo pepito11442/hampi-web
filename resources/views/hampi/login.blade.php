@@ -248,7 +248,7 @@
                 <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-5 text-xs text-ink-500">
                     <span>¿Solo deseas consultar?</span>
                     <a href="/pizarrin-vacunas" class="inline-flex items-center gap-1 font-semibold text-brand-700 transition-colors hover:text-brand-800">
-                        Ver el pizarrín de vacunas
+                        Ver campañas de vacunación
                         <x-icon name="chevron-right" class="h-3.5 w-3.5" />
                     </a>
                 </div>
@@ -257,7 +257,7 @@
     </section>
 
     {{-- ============================= SERVICIOS ============================= --}}
-    <section class="border-y border-ink-100 bg-white py-16 sm:py-24">
+    <section class="border-y border-ink-100 bg-white/65 py-16 backdrop-blur-sm sm:py-24">
         <div class="container-page">
             <div class="mx-auto max-w-2xl text-center" data-reveal>
                 <span class="eyebrow">Servicios del portal</span>
@@ -267,7 +267,7 @@
                 </p>
             </div>
 
-            <div class="mt-12 grid gap-6 md:grid-cols-3">
+            <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <a href="/medicos-hoy" class="card card-hover group flex flex-col p-6" data-reveal>
                     <span class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-700 transition-colors group-hover:bg-brand-600 group-hover:text-white">
                         <x-icon name="stethoscope" class="h-6 w-6" />
@@ -286,7 +286,7 @@
                     <span class="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-700 transition-colors group-hover:bg-sky-600 group-hover:text-white">
                         <x-icon name="syringe" class="h-6 w-6" />
                     </span>
-                    <h3 class="mt-5 text-lg font-bold tracking-tight text-ink-900">Pizarrín de vacunas</h3>
+                    <h3 class="mt-5 text-lg font-bold tracking-tight text-ink-900">Campañas de vacunación</h3>
                     <p class="mt-2 flex-1 text-sm leading-relaxed text-ink-500">
                         Revisa qué vacunas están disponibles, para qué grupo están dirigidas y qué documentos debes llevar.
                     </p>
@@ -296,7 +296,21 @@
                     </span>
                 </a>
 
-                <a href="/directorio-postas" class="card card-hover group flex flex-col p-6" data-reveal style="--reveal-delay: 180ms">
+                <a href="/campanas-preventivas" class="card card-hover group flex flex-col p-6" data-reveal style="--reveal-delay: 180ms">
+                    <span class="grid h-12 w-12 place-items-center rounded-2xl bg-violet-50 text-violet-700 transition-colors group-hover:bg-violet-600 group-hover:text-white">
+                        <x-icon name="shield-check" class="h-6 w-6" />
+                    </span>
+                    <h3 class="mt-5 text-lg font-bold tracking-tight text-ink-900">Campañas preventivas</h3>
+                    <p class="mt-2 flex-1 text-sm leading-relaxed text-ink-500">
+                        Control de presión, diabetes, anemia y otras actividades gratuitas de prevención en tu comunidad.
+                    </p>
+                    <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700">
+                        Ver campañas
+                        <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                </a>
+
+                <a href="/directorio-postas" class="card card-hover group flex flex-col p-6" data-reveal style="--reveal-delay: 270ms">
                     <span class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-amber-700 transition-colors group-hover:bg-amber-500 group-hover:text-white">
                         <x-icon name="map-pin" class="h-6 w-6" />
                     </span>

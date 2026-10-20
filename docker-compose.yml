@@ -1,0 +1,29 @@
+# MySQL de desarrollo para Hampi.
+#
+# Uso:
+#   docker compose up -d
+#   php artisan migrate --seed
+#
+# Nota: el puerto 3306 choca si XAMPP/MySQL ya está corriendo en el equipo.
+# En ese caso, detén uno de los dos o cambia el mapeo a "3307:3306" y ajusta
+# DB_PORT en el .env. La contraseña vacía de root es solo para desarrollo local.
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: hampi-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: hampi
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - hampi_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  hampi_mysql:

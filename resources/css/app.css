@@ -3,6 +3,7 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
+@source '../../app/**/*.php';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -33,9 +34,9 @@
     --color-ink-900: #0f2a3d;
     --color-ink-950: #071b2a;
 
-    --color-mist-50: #f7fbfa;
-    --color-mist-100: #eef7f5;
-    --color-mist-200: #e0f0ed;
+    --color-mist-50: #f0f9ff;
+    --color-mist-100: #e0f2fe;
+    --color-mist-200: #bae6fd;
 
     --color-sand-50: #fdfbf7;
     --color-sand-100: #f7f1e5;
@@ -174,7 +175,7 @@
     }
 
     .nav-link {
-        @apply rounded-full px-3.5 py-2 text-sm font-semibold text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-800;
+        @apply whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-800;
     }
 
     .nav-link-active {
@@ -213,6 +214,14 @@
 @layer utilities {
     .text-balance {
         text-wrap: balance;
+    }
+
+    .bg-aurora {
+        background-image:
+            radial-gradient(60rem 42rem at 8% -12%, rgba(186, 230, 253, 0.55), transparent 62%),
+            radial-gradient(52rem 38rem at 102% 8%, rgba(165, 243, 252, 0.42), transparent 58%),
+            radial-gradient(46rem 36rem at 50% 110%, rgba(209, 250, 229, 0.35), transparent 60%),
+            linear-gradient(180deg, #f0f9ff 0%, #e8f6ff 48%, #f7fbfa 100%);
     }
 
     .bg-hero-glow {

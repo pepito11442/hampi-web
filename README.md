@@ -1,11 +1,12 @@
 # Hampi · Portal de Salud Comunitaria (Microred Socabaya)
 
-Aplicación web desarrollada con **Laravel** que centraliza la información de la Microred Socabaya (Arequipa, Perú) para dos públicos:
+Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa, Perú). Centraliza la información de la comunidad y el trabajo del personal de salud en tres accesos:
 
-- **Ciudadanía:** acceso con DNI, panel de citas, médicos de turno del día, pizarrín digital de vacunas y directorio de postas.
-- **Personal de salud:** acceso protegido y panel de gestión para publicar turnos médicos y avisos de vacunas.
+- **Ciudadanía:** ingreso con DNI, panel de citas, médicos de turno, campañas de vacunación, campañas preventivas y directorio de postas.
+- **Personal de salud (médicos y enfermeros):** ingreso con **DNI + contraseña**, horario mensual, calendario de turnos y edición de su perfil profesional (foto, biografía, títulos, experiencia y especialidad).
+- **Administración (enfermería / admisión):** panel para gestionar el rol de médicos, el pizarrín de vacunas, las cuentas del equipo, los horarios mensuales y las campañas preventivas.
 
-> Proyecto académico. Los datos y credenciales incluidos son **de demostración**.
+> Proyecto académico. Los datos y credenciales incluidos son **de demostración**. No uses las contraseñas demo en producción.
 
 ---
 
@@ -13,14 +14,18 @@ Aplicación web desarrollada con **Laravel** que centraliza la información de l
 
 1. [Stack tecnológico](#stack-tecnológico)
 2. [Requisitos](#requisitos)
-3. [Instalación](#instalación)
-4. [Uso](#uso)
-5. [Compilar assets](#compilar-assets)
-6. [Tests](#tests)
-7. [Base de datos](#base-de-datos)
-8. [Despliegue en producción](#despliegue-en-producción)
-9. [Solución rápida de problemas](#solución-rápida-de-problemas)
-10. [Documentación adicional](#documentación-adicional)
+3. [Instalación local](#instalación-local)
+4. [Codespaces](#codespaces)
+5. [Uso y rutas](#uso-y-rutas)
+6. [Credenciales demo](#credenciales-demo)
+7. [Horarios mensuales](#horarios-mensuales)
+8. [Campañas preventivas](#campañas-preventivas)
+9. [Compilar assets](#compilar-assets)
+10. [Tests](#tests)
+11. [Base de datos](#base-de-datos)
+12. [Despliegue en producción](#despliegue-en-producción)
+13. [Solución rápida de problemas](#solución-rápida-de-problemas)
+14. [Documentación adicional](#documentación-adicional)
 
 ---
 
@@ -29,212 +34,430 @@ Aplicación web desarrollada con **Laravel** que centraliza la información de l
 | Componente | Tecnología |
 | --- | --- |
 | Backend | Laravel 11.57 · PHP 8.2+ |
-| Base de datos | SQLite (archivo `database/laravel`) |
-| Vistas | Blade + componentes propios |
-| Estilos | Tailwind CSS 4 (compilado con Vite) |
-| Bundler | Vite 8 + `laravel-vite-plugin` |
-| Tipografía | Instrument Sans (autoalojada en el build) |
-| Iconos | Componente Blade `<x-icon>` con SVG locales (sin CDN) |
-| JS | JavaScript progresivo en `resources/js/app.js` (sin frameworks) |
+| Base de datos | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción |
+| Tests | PHPUnit con SQLite `:memory:` (solo pruebas automáticas) |
+| Frontend | Blade + Tailwind CSS 4 + Vite 8 |
+| Autenticación | Guard `web`, sesiones de Laravel y middleware de roles |
+| Archivos | Disco `public` de Laravel para fotos de perfil |
+| Herramientas de desarrollo | Laravel Boost (dev), Composer, npm |
 
-No requiere MySQL ni Livewire/Alpine/Bootstrap.
+SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó de versionarse y la app espera una conexión MySQL/MariaDB. Los tests conservan SQLite en memoria porque es rápido y no requiere un servidor; esa configuración vive en `phpunit.xml`.
 
 ---
 
 ## Requisitos
 
-- **PHP ≥ 8.2** con extensiones: `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl`, `curl`, `fileinfo`, `tokenizer`, `xml`.
-- **Composer 2**.
-- **Node.js 20.19+ o 22.12+** y npm (solo para compilar CSS/JS).
-- Opcional: XAMPP, Laragon u otro servidor local con PHP.
+- PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`) y **`pdo_mysql`**.
+- Composer 2.
+- Node.js **22.12+** (Vite 8) y npm.
+- MySQL 8 o MariaDB 10.4+.
+  - En Windows puedes usar XAMPP.
+  - En Linux/macOS puedes instalar MySQL/MariaDB o usar Docker.
+- Opcional: Docker + Docker Compose para levantar MySQL con `docker compose up -d`.
 
-En Windows con XAMPP, PHP suele estar en `C:\xampp\php\php.exe`.
+Verifica las versiones:
+
+```bash
+php -v
+composer -V
+node -v
+npm -v
+mysql --version
+```
+
+En XAMPP, si `php`, `composer` o `mysql` no están en el `PATH`, usa las rutas completas. Por ejemplo, en Windows:
+
+```powershell
+C:\xampp\php\php.exe -v
+C:\xampp\mysql\bin\mysql.exe --version
+```
 
 ---
 
-## Instalación
+## Instalación local
+
+### 1. Clonar e instalar dependencias PHP
 
 ```bash
-# 1. Clonar el repositorio
 git clone https://github.com/pepito11442/hampi-web.git
 cd hampi-web
-
-# 2. Dependencias PHP
 composer install
+```
 
-# 3. Configuración del entorno
-cp .env.example .env        # Windows: copy .env.example .env
+### 2. Crear la base de datos MySQL
+
+Con XAMPP o un MySQL local (root sin contraseña, configuración habitual de desarrollo):
+
+```bash
+mysql -u root -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Si tu root tiene contraseña:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+O con Docker:
+
+```bash
+docker compose up -d
+```
+
+El `docker-compose.yml` crea la base `hampi` y publica MySQL en el puerto `3306`. Si ya tienes XAMPP/MySQL ocupando ese puerto, detén uno de los dos o cambia el mapeo a `3307:3306` y ajusta `DB_PORT` en el `.env`.
+
+### 3. Configurar el entorno
+
+```bash
+cp .env.example .env
 php artisan key:generate
+```
 
-# 4. Dependencias frontend y compilación de assets
+Edita `.env` con tus datos de conexión. Para XAMPP/Docker con root sin contraseña:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hampi
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Si usas un usuario distinto, cambia `DB_USERNAME` y `DB_PASSWORD`. Nunca subas `.env` al repositorio.
+
+### 4. Migrar y cargar datos de demostración
+
+```bash
+php artisan migrate --seed
+```
+
+Esto crea el esquema, el administrador, cuatro cuentas de personal, un ciudadano de prueba, las campañas preventivas y los horarios del mes actual.
+
+> En una base ya existente no uses `migrate:fresh` sin respaldo. Para un entorno local de demostración sí puedes hacer `php artisan migrate:fresh --seed`.
+
+### 5. Enlazar el almacenamiento público
+
+Necesario para las fotos de perfil:
+
+```bash
+php artisan storage:link
+```
+
+### 6. Compilar assets
+
+```bash
 npm install
 npm run build
+```
 
-# 5. Levantar el servidor
+### 7. Levantar el servidor
+
+```bash
 php artisan serve
 ```
 
-Abre `http://localhost:8000`.
+Abre `http://127.0.0.1:8000`.
 
-### Variable `RENIEC_API_TOKEN`
+Si el puerto está ocupado:
 
-La consulta automática de DNI usa el servicio de [apis.net.pe](https://apis.net.pe/). El token se configura en `.env` y **nunca se sube al repositorio**:
-
-```env
-RENIEC_API_TOKEN=tu_token_aqui
+```bash
+php artisan serve --port=8001
 ```
-
-Si no hay token o el servicio no responde, el formulario muestra los campos de nombres y apellidos para completarlos manualmente (no se rompe el flujo).
 
 ---
 
-## Uso
+## Codespaces
 
-### Rutas públicas
+Dentro del Codespace, instala dependencias y prepara la base de datos.
 
-| Ruta | Nombre | Descripción |
+### Opción A: Docker Compose (si Docker está disponible)
+
+```bash
+composer install
+docker compose up -d
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm ci
+npm run build
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+### Opción B: MariaDB/MySQL instalado en el Codespace
+
+```bash
+sudo apt-get update
+sudo apt-get install -y mariadb-server
+sudo service mariadb start
+
+sudo mariadb -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mariadb -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVILEGES ON hampi.* TO 'hampi'@'%'; FLUSH PRIVILEGES;"
+```
+
+Luego configura `.env`:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hampi
+DB_USERNAME=hampi
+DB_PASSWORD=hampi
+```
+
+Y ejecuta:
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm ci
+npm run build
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+En la pestaña **Ports** del Codespace, haz público el puerto `8000` y abre la URL reenviada.
+
+Si necesitas el token de RENIEC, agrégalo como secreto del Codespace o directamente en el `.env` local del Codespace; el archivo `.env` está ignorado por Git.
+
+---
+
+## Uso y rutas
+
+### Portal público
+
+| Página | Ruta | Controlador / vista |
 | --- | --- | --- |
-| `/` | `inicio` | Portada informativa + acceso ciudadano con DNI. |
-| `POST /ingreso-dni` | `ciudadano.login` | Valida el DNI y abre el panel del ciudadano. |
-| `/mi-panel` | `ciudadano.panel` | Citas del ciudadano (requiere sesión ciudadana). |
-| `/cerrar-sesion-ciudadano` | `ciudadano.logout` | Cierra la sesión ciudadana. |
-| `/medicos-hoy` | `medicos.index` | Rol de médicos del día (mañana y tarde). |
-| `/pizarrin-vacunas` | `pizarrin.index` | Pizarrín digital de vacunas con filtros por stock. |
-| `/directorio-postas` | `postas.index` | Directorio de establecimientos con enlace a mapas. |
-| `GET /api/consultar-dni/{dni}` | — | Consulta RENIEC (JSON). Valida 8 dígitos; responde 400/404. |
+| Inicio y acceso con DNI | `/` · `inicio` | `HampiController@index` · `hampi/login.blade.php` |
+| Panel ciudadano | `/mi-panel` · `ciudadano.panel` | `HampiController@panelCiudadano` |
+| Médicos del día | `/medicos-hoy` · `medicos.index` | `HampiController@verMedicos` |
+| Campañas de vacunación | `/pizarrin-vacunas` · `pizarrin.index` | `HampiController@verPizarrin` |
+| Campañas preventivas | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas` |
+| Directorio de postas | `/directorio-postas` · `postas.index` | `HampiController@verPostas` |
 
-### Rutas del personal de salud
+En el menú de escritorio, **“Campañas”** lleva al pizarrín de vacunación y **“Campañas preventivas”** a la nueva página. En la barra inferior móvil se abrevian como **“Campañas”** y **“Preventivas”**. En móvil también está disponible el menú hamburguesa del encabezado.
 
-| Ruta | Nombre | Descripción |
+### Personal de salud
+
+| Acción | Ruta | Protección |
 | --- | --- | --- |
-| `GET /personal/login` | `login` | Formulario de acceso del personal. |
-| `POST /personal/login` | `login.post` | Autenticación (RateLimiter: 5 intentos → HTTP 429). |
-| `POST /personal/logout` | `logout` | Cierre de sesión. |
-| `GET /admin/dashboard` | `admin.dashboard` | Panel de gestión (protegido por `auth`). |
-| `POST /admin/turnos/guardar` | `admin.turno.store` | Registrar médico en el rol de hoy. |
-| `POST /admin/turnos/{id}/estado` | `admin.turno.update` | Cambiar estado del médico. |
-| `DELETE /admin/turnos/{id}` | `admin.turno.destroy` | Retirar médico del rol. |
-| `POST /admin/pizarrin/guardar` | `admin.vacuna.store` | Publicar aviso de vacuna. |
-| `DELETE /admin/pizarrin/{id}` | `admin.vacuna.destroy` | Retirar aviso de vacuna. |
+| Formulario de acceso | `/equipo/login` | Público |
+| Iniciar sesión con DNI | `POST /equipo/login` | Rate limit de 5 intentos/min |
+| Panel y calendario | `/empleado/panel` | `auth` + `role:doctor,enfermero,enfermera` |
+| Actualizar perfil | `POST /empleado/perfil` | `auth` + rol de personal |
+| Cerrar sesión | `POST /equipo/logout` | `auth` |
 
-### Credenciales y datos de prueba
+El trabajador solo ve **su propio** horario y su perfil. Un médico o enfermero que intente entrar a `/admin/*` es redirigido a su panel.
 
-Definidos en `database/seeders/DatabaseSeeder.php`:
+### Administración
 
-| Acceso | Usuario | Clave |
+| Acción | Ruta | Protección |
 | --- | --- | --- |
-| Ciudadano | DNI `72345678` | — |
-| Personal de salud | `enfermeria@hampi.pe` | `socabaya2024` |
+| Login administrativo por correo | `/personal/login` | Público |
+| Panel general | `/admin/dashboard` | `auth` + `role:admin,admision` |
+| Equipo de salud | `/admin/equipo` | Administración |
+| Horarios mensuales | `/admin/horarios` | Administración |
+| Campañas preventivas | `/admin/campanas` | Administración |
 
+Las rutas del panel administrativo conservan los flujos existentes de rol de médicos y pizarrín de vacunas. La subnavegación `Panel · Equipo de salud · Horarios · Campañas preventivas` se comparte mediante `hampi/partials/admin-nav.blade.php`.
 
-### Flujo ciudadano
+---
 
-1. En la portada, escribe un DNI de 8 dígitos. Se consulta RENIEC automáticamente.
-2. Si RENIEC responde, los nombres se completan solos; si no, se habilitan los campos manuales.
-3. Al enviar, se crea/actualiza el ciudadano y se abre `/mi-panel` con sus citas reales.
-4. El botón “Cerrar sesión” elimina la sesión ciudadana.
+## Credenciales demo
 
-### Flujo del personal
+### Administración
 
-1. Entrar a `/personal/login` y autenticarse.
-2. En `/admin/dashboard` se pueden registrar médicos, cambiar su estado u retirarlos, y publicar/eliminar avisos de vacunas.
-3. Los cambios se reflejan de inmediato en las páginas públicas.
+| Nombre | Correo | Contraseña | Dónde ingresar |
+| --- | --- | --- | --- |
+| Lic. Carmen Alfaro | `enfermeria@hampi.pe` | `socabaya2024` | `/personal/login` |
+
+### Personal de salud (ingreso por DNI)
+
+| Nombre | DNI | Contraseña | Rol |
+| --- | --- | --- | --- |
+| Dr. Eduardo Flores Quispe | `45678912` | `socabaya2024` | Médico |
+| Dra. María Paredes Salas | `41234567` | `socabaya2024` | Médico |
+| Lic. Rosa Mendoza Vargas | `47891234` | `socabaya2024` | Enfermero/a |
+| Téc. Luis Huamán Ríos | `46789123` | `socabaya2024` | Enfermero/a |
+
+Ingresan en `/equipo/login` con su **DNI** y la contraseña. La administración puede crear nuevas cuentas y cambiar contraseñas desde `/admin/equipo`.
+
+### Ciudadanía
+
+- DNI de demostración: **`72345678`** (Rosa Elena Quispe Mamani).
+- Se ingresa desde el formulario de la portada; no requiere contraseña.
+- El seeder incluye una cita de demostración para este DNI.
+
+> Cambia todas las contraseñas demo antes de publicar el sistema. El registro de personal es cerrado: solo administración crea cuentas.
+
+---
+
+## Horarios mensuales
+
+### Reglas de negocio
+
+- **Lunes a viernes:**
+  - Mañana: `07:00–13:00` → 6 h.
+  - Tarde: `13:00–19:30` → 6.5 h.
+  - Todo el día: `07:00–19:00` → 12 h.
+- **Sábados:** solo turno completo `07:00–15:00` → 8 h.
+- **Domingos:** sin atención. No se generan turnos.
+- **Meta mensual:** exactamente **150 horas** por médico/enfermero.
+
+El servicio `app/Services/HorarioGenerator.php` reparte aleatoriamente días completos, sábados, mañanas y tardes hasta sumar 150 h. Al regenerar un mes, primero elimina los turnos existentes de ese trabajador y mes, y luego inserta la nueva combinación. La tabla `horarios` tiene una restricción única por `user_id + fecha`.
+
+### Cómo se usa
+
+1. Administración entra a `/admin/horarios`.
+2. Filtra por **Todo el equipo**, **Médicos** o **Enfermería**.
+3. Elige trabajador, mes y año.
+4. Pulsa **Generar horario** o **Regenerar horario**.
+5. El calendario muestra los turnos del mes y el avance hacia las 150 h.
+6. Puede eliminar el horario completo del mes con **Eliminar**.
+
+El trabajador ve el mismo calendario desde `/empleado/panel`, puede navegar al mes anterior/siguiente y consultar sus horas y turnos. Si se elimina la cuenta, sus horarios se eliminan en cascada.
+
+Los horarios son de demostración y no contemplan feriados, licencias ni cambios de último minuto; esas reglas se pueden agregar más adelante.
+
+---
+
+## Campañas preventivas
+
+- Página pública: `/campanas-preventivas`.
+- Administración: `/admin/campanas`.
+- Se puede crear una campaña con título, grupo objetivo, descripción, lugar, fechas y estado de publicación.
+- Las campañas **activas** aparecen en el portal público; las inactivas quedan ocultas.
+- Desde el listado se puede **publicar/ocultar** o **eliminar** una campaña.
+- Los estados (`En curso`, `Próxima`, `Finalizada`) se calculan a partir de las fechas.
+
+No confundir con el **pizarrín de vacunas** (`/pizarrin-vacunas`), que sigue administrándose desde el panel general y muestra disponibilidad de vacunas.
 
 ---
 
 ## Compilar assets
 
-`public/build` está **ignorado por git**: después de clonar o de cambiar CSS/JS hay que compilar.
-
 ```bash
-# Desarrollo (recarga automática / HMR)
+# Desarrollo con recarga automática
 npm run dev
 
 # Producción (genera public/build con hash de caché)
 npm run build
 ```
 
-Si al abrir el sitio aparece `Vite manifest not found at ...`, significa que faltó ejecutar `npm run build`.
+`public/build` está ignorado por Git. Después de clonar, o cada vez que cambies clases de Tailwind en Blade, vuelve a compilar. Tailwind 4 escanea `resources/views/**/*.php` y `resources/js/**/*.js`; una clase usada solo en una vista nueva necesita un nuevo build.
 
 ---
 
 ## Tests
 
-El proyecto incluye pruebas de seguridad en `tests/Feature/SecurityTest.php`:
+La suite usa SQLite en memoria (`phpunit.xml`) para no depender de MySQL durante las pruebas. La aplicación real sigue usando MySQL.
 
 ```bash
+php artisan test
+# o solo las pruebas de funcionalidad:
 php artisan test --testsuite=Feature
 ```
 
-Pruebas actuales: rechazo de inyección en el DNI, bloqueo de fuerza bruta en el login y hash bcrypt de la contraseña.
+La suite actual cubre:
 
-> Nota: `phpunit.xml` referencia `tests/Unit`, que aún no existe; por eso se ejecuta por suite. Ver “Deuda técnica” en `CONTRIBUTING.md`.
+- Seguridad: inyección SQL en la consulta de DNI, rate limiting del login y hash Bcrypt.
+- Generación de horarios: 150 h exactas, reglas de domingo/sábado y todos los meses de varios años.
+- Login de personal por DNI y acceso a su panel.
+- Bloqueo del panel administrativo para cuentas de personal.
+- Creación de cuentas de trabajadores desde administración.
+- Actualización de perfil y subida de foto.
+- Publicación/ocultado de campañas y visibilidad en el portal público.
+
+Antes de un commit:
+
+```bash
+php artisan test
+npm run build
+```
 
 ---
 
 ## Base de datos
 
-- Es **SQLite versionado**: el archivo `database/laravel` está en el repositorio con datos de demostración (posta, vacunas, turnos, ciudadano y una cita).
-- Por eso, tras clonar **no necesitas migrar ni sembrar**: el sitio funciona al instante.
-- El archivo también guarda **sesiones** y **caché** (drivers `database`), así que cada uso normal lo modifica. Evita ejecutar:
+### Motor y configuración
 
-  ```bash
-  php artisan migrate:fresh   # ⚠️ borra los datos versionados
-  ```
+- Motor principal: **MySQL/MariaDB**.
+- Configuración en `.env` (`DB_CONNECTION=mysql`, host, puerto, base, usuario y contraseña).
+- SQLite solo se usa en tests (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:` en `phpunit.xml`).
 
-- Para añadir o modificar tablas, crea **nuevas migraciones**:
+### Tablas nuevas
 
-  ```bash
-  php artisan make:migration agregar_campo_x_a_tabla_y
-  php artisan migrate
-  ```
+| Tabla | Propósito |
+| --- | --- |
+| `horarios` | Turnos mensuales por trabajador y fecha (con horas, inicio y fin). |
+| `campanas_preventivas` | Campañas preventivas publicadas por administración. |
 
-- Si necesitas regenerar la base demo desde cero (solo en tu entorno local):
+La tabla `users` se amplió con `dni`, `telefono`, `especialidad`, `biografia`, `titulos`, `experiencia`, `foto_perfil` y `activo`. El campo `role` pasó de un enum cerrado a un string que admite `admin`, `admision`, `doctor`, `enfermero` y `enfermera`.
 
-  ```bash
-  php artisan migrate:fresh --seed
-  ```
+### Flujo para una base nueva
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+```
+
+### Si vienes de la versión SQLite
+
+El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos reales, expórtalos antes de cambiar de motor y migra la información con un proceso de conversión; el seeder solo crea datos de demostración. Para un entorno académico/demo, lo más simple es crear la base MySQL y ejecutar `migrate --seed`.
+
+### Buenas prácticas
+
+- Haz respaldo antes de `migrate:fresh`.
+- No edites migraciones ya ejecutadas: crea una nueva.
+- En producción usa `php artisan migrate --force` (sin `fresh`).
+- Configura un usuario MySQL con permisos solo sobre la base `hampi`, no root.
 
 ---
 
 ## Despliegue en producción
 
-1. **Configura el entorno** (`.env` de producción):
+1. Configura `.env` de producción:
 
-   ```env
-   APP_NAME=Hampi
+   ```dotenv
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://tu-dominio.pe
-   APP_KEY=...              # php artisan key:generate
-   RENIEC_API_TOKEN=...
+   APP_URL=https://tu-dominio.example
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=hampi
+   DB_USERNAME=hampi
+   DB_PASSWORD=una-contraseña-segura
    ```
 
-2. **Instala y compila**:
+2. Instala dependencias y compila:
 
    ```bash
    composer install --no-dev --optimize-autoloader
    npm ci
    npm run build
-   php artisan migrate --force   # solo si usas migraciones nuevas
+   php artisan migrate --force
+   php artisan storage:link
    php artisan optimize
    ```
 
-3. **DocumentRoot**: apunta el servidor web a la carpeta `public/` (nunca a la raíz del proyecto). Ejemplo para XAMPP/Apache:
+3. Asegura permisos de escritura en `storage/` y `bootstrap/cache/`.
 
-   ```apache
-   <VirtualHost *:80>
-       ServerName hampi.local
-       DocumentRoot "C:/xampp/htdocs/hampi-web/public"
-       <Directory "C:/xampp/htdocs/hampi-web/public">
-           AllowOverride All
-           Require all granted
-       </Directory>
-   </VirtualHost>
-   ```
+4. Configura HTTPS y un servidor web (Nginx/Apache) apuntando a `public/`.
 
-4. **Permisos de escritura** para `storage/` y `bootstrap/cache/`.
-5. Usa **HTTPS** y cambia las credenciales de demostración.
+5. Mantén respaldos de la base y del directorio `storage/app/public/perfiles`.
+
+### Notas de seguridad
+
+- No ejecutes `db:seed` en producción salvo que quieras datos demo.
+- Cambia las contraseñas demo y el usuario root de MySQL.
+- Las fotos se guardan en `storage/app/public/perfiles`; en varios servidores conviene moverlas a S3 u otro almacenamiento compartido.
+- El sistema no incluye recuperación de contraseña por correo para el personal; administración puede asignar una nueva desde `/admin/equipo`.
+- El rate limiting del login es de 5 intentos por minuto y se registra en el log.
 
 ---
 
@@ -242,27 +465,31 @@ Pruebas actuales: rechazo de inyección en el DNI, bloqueo de fuerza bruta en el
 
 | Síntoma | Causa probable | Solución |
 | --- | --- | --- |
-| `Vite manifest not found` | Assets sin compilar | `npm install && npm run build` |
-| Los estilos no cambian | Build desactualizado | `npm run build` (o `npm run dev`) |
-| `php` no se reconoce | PHP fuera del PATH | Usa la ruta completa (ej. `C:\xampp\php\php.exe`) o agrégalo al PATH |
-| Error `419 Page Expired` | Falta `@csrf` en un formulario | Añadir `@csrf` |
-| Error `429` en el login | Rate limiter activo | Esperar 1 minuto o `php artisan cache:clear` |
-| “Sin conexión” al validar DNI | Token/Fuente RENIEC | Revisar `RENIEC_API_TOKEN`; el formulario permite completar manualmente |
-| Imagen o asset 404 | Archivo no versionado (build) | `npm run build`; las imágenes deben estar en `public/images/` |
-
-Más detalles en [`CONTRIBUTING.md`](CONTRIBUTING.md).
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | Inicia MySQL (XAMPP/Docker/servicio) y revisa `DB_HOST`/`DB_PORT`. |
+| `Unknown database 'hampi'` | La base no existe | `CREATE DATABASE hampi ...` o `docker compose up -d`. |
+| `SQLSTATE[HY000] [1045] Access denied` | Usuario/contraseña incorrectos | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña. |
+| `could not find driver` | Falta `pdo_mysql` | Habilítalo en `php.ini` y reinicia PHP/Apache. |
+| `Vite manifest not found` | Assets sin compilar | `npm install && npm run build`. |
+| Los estilos nuevos no aparecen | Build antiguo o clase no escaneada | Vuelve a ejecutar `npm run build`. |
+| `419 Page Expired` | Falta `@csrf` o sesión vencida | Añade `@csrf`; limpia configuración/caché si cambiaste el dominio. |
+| `403` o redirección al entrar a `/admin` | La cuenta no tiene rol administrativo | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel. |
+| No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI | Entra en `/equipo/login` con DNI y contraseña. |
+| `429 Too Many Requests` | Rate limit del login | Espera un minuto o limpia la caché del rate limiter. |
+| Foto de perfil 404 | Falta el enlace de storage | `php artisan storage:link`. |
+| Error al generar 150 h | Combinación inválida o mes sin días hábiles | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12. |
+| El puerto 8000 no abre en Codespaces | Visibilidad del puerto | Abre la pestaña **Ports** y pon el puerto en público. |
+| `npm run build` falla por versión de Node | Node antiguo | Usa Node 22.12+ (Vite 8). |
 
 ---
 
 ## Documentación adicional
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — arquitectura, sistema de diseño y guía para hacer cambios.
-- [`CHANGELOG.md`](CHANGELOG.md) — historial de cambios del proyecto.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): arquitectura, sistema de diseño, recetas y checklist de cambios.
+- [`CHANGELOG.md`](CHANGELOG.md): historial de versiones y cambios relevantes.
+- [`AGENTS.md`](AGENTS.md) / [`CLAUDE.md`](CLAUDE.md): instrucciones para asistentes de desarrollo (Laravel Boost).
 
 ---
 
 ## Créditos y licencias
 
-- Fotografías: [Unsplash](https://unsplash.com) (licencia Unsplash, uso libre). Reemplazables desde `public/images/`.
-- Laravel, Tailwind CSS y Vite: licencias MIT.
-- Tipografía Instrument Sans vía Bunny Fonts, autoalojada durante el build.
+Proyecto académico de la Microred Socabaya. Construido con [Laravel](https://laravel.com), [Tailwind CSS](https://tailwindcss.com) y [Vite](https://vite.dev). Tipografía **Instrument Sans**. Las imágenes locales son de uso demostrativo.

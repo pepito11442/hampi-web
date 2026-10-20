@@ -9,6 +9,9 @@ use App\Models\Ciudadano;
 use App\Models\VacunaAviso;
 use App\Models\TurnoMedico;
 use App\Models\Cita;
+use App\Models\CampanaPreventiva;
+use App\Models\Horario;
+use App\Models\User;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
 
@@ -104,6 +107,16 @@ class HampiController extends Controller
         return view('hampi.postas', compact('postas'));
     }
 
+    // Pantalla 6: Campañas preventivas de la Microred
+    public function verCampanasPreventivas()
+    {
+        $campanas = CampanaPreventiva::activas()
+            ->orderBy('fecha_inicio')
+            ->get();
+
+        return view('hampi.campanas', compact('campanas'));
+    }
+
     public function logoutCiudadano()
     {
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
@@ -115,7 +128,13 @@ class HampiController extends Controller
     {
         $vacunas = VacunaAviso::all();
         $turnos = TurnoMedico::all();
-        return view('hampi.admin_dashboard', compact('vacunas', 'turnos'));
+        $personalCount = User::whereIn('role', User::ROLES_PERSONAL)->count();
+        $horariosMes = Horario::whereBetween('fecha', [
+            now()->startOfMonth()->toDateString(),
+            now()->endOfMonth()->toDateString(),
+        ])->count();
+
+        return view('hampi.admin_dashboard', compact('vacunas', 'turnos', 'personalCount', 'horariosMes'));
     }
 
         // Guardar aviso en el Pizarrín

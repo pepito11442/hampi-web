@@ -38,7 +38,23 @@ class AuthController extends Controller
         if (Auth::attempt($credenciales)) {
             // Si acertó, limpiamos el contador de intentos
             RateLimiter::clear($throttleKey);
+
+            $user = Auth::user();
+
+            // Este formulario es exclusivo de administración. El personal de
+            // salud debe usar su DNI en /equipo/login.
+            if (! $user->esAdmin() || ! $user->activo) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Esta cuenta no tiene acceso administrativo. El personal de salud ingresa con su DNI en /equipo/login.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
+
             return redirect('/admin/dashboard');
         }
 

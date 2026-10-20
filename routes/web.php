@@ -1,52 +1,96 @@
 <?php
-// routes/web.php
-Route::get('/test', function () {
-    return '¡Laravel está vivo!';
-});
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HampiController;
-use App\Http\Controllers\AuthController;
 
-// --- Rutas Públicas y Acceso Ciudadano por DNI ---
+use App\Http\Controllers\Admin\CampanaController as AdminCampanaController;
+use App\Http\Controllers\Admin\EquipoController as AdminEquipoController;
+use App\Http\Controllers\Admin\HorarioController as AdminHorarioController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmpleadoController;
+use App\Http\Controllers\HampiController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Portal público
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', [HampiController::class, 'index'])->name('inicio');
 Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec']);
 Route::post('/ingreso-dni', [HampiController::class, 'accesoPorDni'])->name('ciudadano.login');
 Route::get('/mi-panel', [HampiController::class, 'panelCiudadano'])->name('ciudadano.panel');
 Route::get('/cerrar-sesion-ciudadano', [HampiController::class, 'logoutCiudadano'])->name('ciudadano.logout');
 
-// --- Pistas y Módulos Informativos Ciudadanos ---
 Route::get('/medicos-hoy', [HampiController::class, 'verMedicos'])->name('medicos.index');
 Route::get('/pizarrin-vacunas', [HampiController::class, 'verPizarrin'])->name('pizarrin.index');
+Route::get('/campanas-preventivas', [HampiController::class, 'verCampanasPreventivas'])->name('campanas.index');
 Route::get('/directorio-postas', [HampiController::class, 'verPostas'])->name('postas.index');
 
-// --- Autenticación Administrativa (Personal de Salud) ---
+// Ruta de diagnóstico heredada.
+Route::get('/test', fn () => '¡Laravel está vivo!');
+
+/*
+|--------------------------------------------------------------------------
+| Acceso administrativo (correo institucional)
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/personal/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/personal/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/personal/logout', [AuthController::class, 'logout'])->name('logout');
 
-// --- Panel Administrativo Protegido (CRUD 50%) ---
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [HampiController::class, 'adminDashboard'])->name('admin.dashboard');
-    
-    // CRUD Pizarrín de Vacunas
-    Route::post('/pizarrin/guardar', [HampiController::class, 'storeVacuna'])->name('admin.vacuna.store');
-    Route::post('/pizarrin/{id}/estado', [HampiController::class, 'updateVacunaEstado'])->name('admin.vacuna.update');
-    Route::delete('/pizarrin/{id}', [HampiController::class, 'destroyVacuna'])->name('admin.vacuna.destroy');
+/*
+|--------------------------------------------------------------------------
+| Acceso del personal de salud (DNI + contraseña)
+|--------------------------------------------------------------------------
+*/
 
-    // Gestión de Turnos de Médicos
-    Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('admin.turno.update');
-        // Gestión completa de Médicos y Especialidades (CRUD)
-    Route::post('/turnos/guardar', [HampiController::class, 'storeTurno'])->name('admin.turno.store');
-    Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('admin.turno.update');
-    Route::delete('/turnos/{id}', [HampiController::class, 'destroyTurno'])->name('admin.turno.destroy');
-        // Eliminar aviso de vacuna
-    Route::delete('/pizarrin/{id}', [HampiController::class, 'destroyVacuna'])->name('admin.vacuna.destroy');
-    // Protección contra HYDRA: Máximo 5 intentos por minuto por IP. Al 6to intento, bloquea con HTTP 429
-Route::post('/personal/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::get('/equipo/login', [EmpleadoController::class, 'showLogin'])->name('empleado.login');
+Route::post('/equipo/login', [EmpleadoController::class, 'login'])->name('empleado.login.post');
+Route::post('/equipo/logout', [EmpleadoController::class, 'logout'])->name('empleado.logout');
 
-// Protección contra DDoS en la API de RENIEC:
-Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec'])->middleware('throttle:15,1');
+Route::middleware(['auth', 'role:doctor,enfermero,enfermera'])
+    ->prefix('empleado')
+    ->name('empleado.')
+    ->group(function () {
+        Route::get('/panel', [EmpleadoController::class, 'panel'])->name('panel');
+        Route::post('/perfil', [EmpleadoController::class, 'updatePerfil'])->name('perfil.update');
+    });
 
-// Protección contra DDoS en el ingreso de DNI:
-Route::post('/ingreso-dni', [HampiController::class, 'accesoPorDni'])->middleware('throttle:20,1');
+/*
+|--------------------------------------------------------------------------
+| Panel administrativo
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin,admision'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [HampiController::class, 'adminDashboard'])->name('dashboard');
+
+        // Rol de médicos del día.
+        Route::post('/turnos/guardar', [HampiController::class, 'storeTurno'])->name('turno.store');
+        Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('turno.update');
+        Route::delete('/turnos/{id}', [HampiController::class, 'destroyTurno'])->name('turno.destroy');
+
+        // Pizarrín de vacunas.
+        Route::post('/pizarrin/guardar', [HampiController::class, 'storeVacuna'])->name('vacuna.store');
+        Route::delete('/pizarrin/{id}', [HampiController::class, 'destroyVacuna'])->name('vacuna.destroy');
+
+        // Equipo de salud (médicos y enfermeros).
+        Route::get('/equipo', [AdminEquipoController::class, 'index'])->name('equipo.index');
+        Route::post('/equipo', [AdminEquipoController::class, 'store'])->name('equipo.store');
+        Route::post('/equipo/{empleado}', [AdminEquipoController::class, 'update'])->name('equipo.update');
+        Route::delete('/equipo/{empleado}', [AdminEquipoController::class, 'destroy'])->name('equipo.destroy');
+
+        // Horarios mensuales.
+        Route::get('/horarios', [AdminHorarioController::class, 'index'])->name('horarios.index');
+        Route::post('/horarios/generar', [AdminHorarioController::class, 'generar'])->name('horarios.generar');
+        Route::delete('/horarios/{empleado}/{anio}/{mes}', [AdminHorarioController::class, 'destroy'])->name('horarios.destroy');
+
+        // Campañas preventivas.
+        Route::get('/campanas', [AdminCampanaController::class, 'index'])->name('campanas.index');
+        Route::post('/campanas', [AdminCampanaController::class, 'store'])->name('campanas.store');
+        Route::post('/campanas/{campana}/estado', [AdminCampanaController::class, 'toggleEstado'])->name('campanas.estado');
+        Route::delete('/campanas/{campana}', [AdminCampanaController::class, 'destroy'])->name('campanas.destroy');
     });
