@@ -8,6 +8,8 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 
 > Proyecto académico. Los datos y credenciales incluidos son **de demostración**. No uses las contraseñas demo en producción.
 
+> **Demo rápida para revisión:** abre el proyecto en [Codespaces](#codespaces). La API de RENIEC es opcional: sin token, el formulario permite escribir los nombres manualmente. El token no se incluye en el repositorio por seguridad.
+
 ---
 
 ## Tabla de contenidos
@@ -34,12 +36,14 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 
 | Componente | Tecnología |
 | --- | --- |
-| Backend | Laravel 11.57 · PHP 8.2+ |
+| Backend | Laravel 11.57 · PHP 8.2+ con `pdo_mysql` |
 | Base de datos | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción |
 | Tests | PHPUnit con SQLite `:memory:` (solo pruebas automáticas) |
-| Frontend | Blade + Tailwind CSS 4 + Vite 8 |
+| Frontend | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+ |
 | Autenticación | Guard `web`, sesiones de Laravel y middleware de roles |
 | Archivos | Disco `public` de Laravel para fotos de perfil |
+| Entorno de desarrollo | GitHub Codespaces, XAMPP o Docker Compose |
+| API externa | RENIEC vía `apis.net.pe` (opcional; sin token se ingresan los nombres manualmente) |
 | Herramientas de desarrollo | Laravel Boost (dev), Composer, npm |
 
 SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó de versionarse y la app espera una conexión MySQL/MariaDB. Los tests conservan SQLite en memoria porque es rápido y no requiere un servidor; esa configuración vive en `phpunit.xml`.
@@ -49,6 +53,7 @@ SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó
 ## Requisitos
 
 - PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`) y **`pdo_mysql`**.
+  - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql`; la sección [Codespaces](#codespaces) explica cómo compilarlo o usar PHP 8.3.
 - Composer 2.
 - Node.js **22.12+** (Vite 8) y npm.
 - MySQL 8 o MariaDB 10.4+.
@@ -174,23 +179,145 @@ php artisan serve --port=8001
 
 ## Codespaces
 
-Dentro del Codespace, instala dependencias y prepara la base de datos.
+Esta guía deja el proyecto funcionando en **GitHub Codespaces**: PHP, la extensión `pdo_mysql`, MySQL, dependencias de Composer, assets de Vite y el servidor de Laravel.
 
-### Opción A: Docker Compose (si Docker está disponible)
+> **Codespaces es para desarrollo y demos.** No es un hosting permanente: se suspende por inactividad, consume horas de la cuota y su URL pública es temporal. Para un enlace estable, revisa [Despliegue en producción](#despliegue-en-producción).
+
+### 1. Crear el Codespace
+
+1. Sube los cambios a GitHub con `git push`.
+2. Abre el repositorio en GitHub.
+3. Pulsa **Code** → **Codespaces** → **Create codespace on main**.
+4. Espera a que termine de preparar el contenedor.
+
+> El archivo `.env` no se versiona. La base de datos y las fotos de perfil viven dentro del Codespace; si lo eliminas, se pierden.
+
+### 2. Verificar el entorno
+
+En la terminal del Codespace:
 
 ```bash
-composer install
-docker compose up -d
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan storage:link
-npm ci
-npm run build
-php artisan serve --host=0.0.0.0 --port=8000
+php -v
+composer -V
+node -v
+npm -v
+docker --version
+php -m | grep -i -E 'pdo|mysql'
 ```
 
-### Opción B: MariaDB/MySQL instalado en el Codespace
+Debes ver al menos:
+
+```text
+PDO
+pdo_mysql
+mysqlnd
+```
+
+Si **no aparece `pdo_mysql`**, sigue el paso 3. Si ya aparece, salta al paso 4.
+
+Si no aparece `docker`, usa la opción con MariaDB del paso 4.
+
+### 3. Instalar `pdo_mysql` si falta
+
+En algunos Codespaces, PHP viene compilado en `/opt/php/<versión>` y **no es el PHP de Ubuntu**. En ese caso:
+
+- `sudo apt-get install php<versión>-mysql` no funciona si Ubuntu no tiene paquetes para esa versión exacta.
+- `docker-php-ext-install` no existe porque no es la imagen oficial de PHP.
+- Hay que compilar la extensión con `phpize`.
+
+Primero comprueba que estén los headers de PHP y de `mysqlnd`:
+
+```bash
+PHP_CONFIG=$(which php-config)
+INCLUDE_DIR=$($PHP_CONFIG --include-dir)
+
+echo "$INCLUDE_DIR"
+ls "$INCLUDE_DIR/ext/pdo/php_pdo_driver.h"
+ls "$INCLUDE_DIR/ext/mysqlnd/mysqlnd.h"
+```
+
+Si `php-config` no existe, salta a la alternativa con PHP 8.3 al final de esta sección.
+
+Instala las herramientas de compilación y compila la extensión:
+
+```bash
+PHP_VERSION=$(php -r 'echo PHP_VERSION;')
+PHP_CONFIG=$(which php-config)
+EXT_DIR=$($PHP_CONFIG --extension-dir)
+INI_DIR=$(php --ini | sed -n 's/^Scan for additional .ini files in: //p' | tr -d '"')
+
+sudo apt-get update
+sudo apt-get install -y autoconf gcc g++ make pkg-config libtool
+
+cd /tmp
+curl -fsSL "https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz" -o "php-${PHP_VERSION}.tar.gz"
+tar -xzf "php-${PHP_VERSION}.tar.gz"
+cd "php-${PHP_VERSION}/ext/pdo_mysql"
+
+phpize
+./configure --with-php-config="$PHP_CONFIG" --with-pdo-mysql=mysqlnd
+make -j"$(nproc)"
+sudo make install
+
+echo "extension=$EXT_DIR/pdo_mysql.so" | sudo tee "$INI_DIR/pdo_mysql.ini"
+
+php -m | grep -i pdo_mysql
+php --ri pdo_mysql
+```
+
+La última comprobación debe mostrar `pdo_mysql` y `PDO Driver for MySQL => enabled`.
+
+Si `configure` indica que falta `mysqlnd.h`, instala la librería cliente de MySQL y vuelve a configurar:
+
+```bash
+sudo apt-get install -y libmysqlclient-dev
+
+./configure --with-php-config="$PHP_CONFIG" --with-pdo-mysql=/usr/bin/mysql_config
+make -j"$(nproc)"
+sudo make install
+```
+
+> La extensión se pierde si reconstruyes el Codespace desde cero. Para que quede permanente, se puede agregar un `.devcontainer` con PHP y `pdo_mysql`, o repetir este paso.
+
+#### Alternativa: usar PHP 8.3 de Ubuntu
+
+Si no quieres compilar, puedes usar el PHP 8.3 que sí está empaquetado en Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y php8.3-cli php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-mysql
+```
+
+A partir de ahí, ejecuta Artisan con la ruta explícita:
+
+```bash
+/usr/bin/php8.3 artisan config:clear
+/usr/bin/php8.3 artisan migrate --seed
+/usr/bin/php8.3 artisan serve --host=0.0.0.0 --port=8000
+```
+
+No uses `php artisan` en este caso, porque `php` seguiría apuntando a la versión del Codespace sin `pdo_mysql`.
+
+### 4. Levantar MySQL
+
+#### Opción A: Docker Compose (recomendada)
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+El `docker-compose.yml` crea la base `hampi`, publica MySQL en el puerto `3306` y usa `root` sin contraseña. Espera a que `hampi-mysql` aparezca como `healthy`.
+
+Si no arranca o se reinicia:
+
+```bash
+docker compose logs mysql
+```
+
+#### Opción B: MariaDB instalado en el Codespace
+
+Si Docker no está disponible:
 
 ```bash
 sudo apt-get update
@@ -214,22 +341,169 @@ DB_USERNAME=hampi
 DB_PASSWORD=hampi
 ```
 
-Y ejecuta:
+### 5. Configurar Laravel y dependencias
 
 ```bash
-composer install
+cd /workspaces/hampi-web
+
 cp .env.example .env
+composer install
 php artisan key:generate
+```
+
+Si `.env` ya existe, no lo sobrescribas: solo ejecuta `composer install` y `php artisan key:generate` si aún no tienes `APP_KEY`.
+
+No uses `sudo composer install`: puede dejar `vendor/` con permisos de root.
+
+Revisa en `.env`:
+
+```dotenv
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+APP_TIMEZONE=America/Lima
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hampi
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Si usas MariaDB, cambia `DB_USERNAME` y `DB_PASSWORD` por `hampi` / `hampi`.
+
+Para aplicar cambios de configuración:
+
+```bash
+php artisan config:clear
+```
+
+### 6. Migrar y cargar los datos demo
+
+```bash
 php artisan migrate --seed
 php artisan storage:link
+```
+
+Esto crea las tablas, el administrador, el personal de salud, el ciudadano de prueba, las campañas y los horarios del mes actual. Las credenciales demo están en [Credenciales demo](#credenciales-demo).
+
+Si aparece `Connection refused`, MySQL todavía no está listo. Espera unos segundos y reintenta:
+
+```bash
+php artisan migrate --seed
+```
+
+No uses `migrate:fresh` sobre una base con datos que quieras conservar.
+
+### 7. Compilar los assets
+
+```bash
+node -v
+```
+
+Vite 8 necesita **Node.js 22.12 o superior**. Si tienes una versión menor:
+
+```bash
+nvm install 22
+nvm use 22
+```
+
+Luego:
+
+```bash
+npm ci
+npm run build
+```
+
+`public/build` está ignorado por Git. Si no ejecutas `npm run build`, Laravel mostrará `Vite manifest not found`.
+
+### 8. Levantar la aplicación y abrir el puerto
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+1. Abre la pestaña **Ports** del Codespace.
+2. Busca el puerto **8000**.
+3. Pulsa **Open in Browser**.
+4. Para compartir el enlace, cambia la visibilidad del puerto a **Public**.
+
+La URL tendrá una forma parecida a:
+
+```text
+https://TU-CODESPACE-8000.app.github.dev
+```
+
+Si hay problemas de sesión o `419 Page Expired`, actualiza `APP_URL` con esa URL y ejecuta:
+
+```bash
+php artisan config:clear
+```
+
+### 9. Token de RENIEC (opcional)
+
+Sin token, el formulario de acceso ciudadano sigue funcionando: permite escribir nombres y apellidos manualmente. Para la revisión académica no se necesita el token; si se quiere probar el autocompletado RENIEC, el docente puede solicitar el token al autor o configurarlo como secreto. Si quieres autocompletar los datos desde RENIEC, configura:
+
+```dotenv
+RENIEC_API_TOKEN=tu_token
+RENIEC_API_URL=https://api.apis.net.pe/v2/reniec/dni
+```
+
+Puedes agregarlo de dos formas:
+
+- Directamente en el `.env` del Codespace.
+- Como **Codespaces secret** en GitHub: **Settings** → **Codespaces** → **Secrets** → **New secret**, con el nombre `RENIEC_API_TOKEN`. Luego reinicia el Codespace.
+
+> **No escribas el token real en este README ni en `.env.example`.** El repositorio es público y el token quedaría en el historial de Git; cualquiera podría usarlo y consumir tu cuota. Si el token ya se expuso, regenéralo en `apis.net.pe`.
+
+### 10. Problemas comunes en Codespaces
+
+| Síntoma | Causa probable | Solución |
+| --- | --- | --- |
+| `could not find driver` | Falta `pdo_mysql` | Compila la extensión o usa `php8.3-mysql` (paso 3). |
+| `php8.5-mysql` no existe en apt | El PHP del Codespace no es el de Ubuntu | Sigue el bloque de compilación del paso 3. |
+| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto | `cd /workspaces/hampi-web`. |
+| `Connection refused` | MySQL no está corriendo o no está listo | `docker compose ps`, espera y reintenta. |
+| `Vite manifest not found` | Assets sin compilar | `npm ci && npm run build`. |
+| `npm run build` falla por Node | Versión antigua de Node | `nvm install 22 && nvm use 22`. |
+| `419 Page Expired` | `APP_URL` o sesión desincronizada | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
+| El puerto 8000 no abre | Visibilidad del puerto | Ponlo en **Public** en la pestaña **Ports**. |
+| `Permission denied` en storage | Permisos de escritura | `chmod -R ug+rwx storage bootstrap/cache`. |
+| `docker: command not found` | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4. |
+
+### 11. Resumen rápido
+
+Primera vez, después de resolver `pdo_mysql`:
+
+```bash
+cd /workspaces/hampi-web
+cp .env.example .env
+composer install
+php artisan key:generate
+
+docker compose up -d
+php artisan migrate --seed
+php artisan storage:link
+
 npm ci
 npm run build
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-En la pestaña **Ports** del Codespace, haz público el puerto `8000` y abre la URL reenviada.
+Para volver a levantar el proyecto en una sesión posterior:
 
-Si necesitas el token de RENIEC, agrégalo como secreto del Codespace o directamente en el `.env` local del Codespace; el archivo `.env` está ignorado por Git.
+```bash
+cd /workspaces/hampi-web
+docker compose up -d
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+Si cambiaste estilos, vistas o archivos de `resources/`, vuelve a compilar antes de recargar:
+
+```bash
+npm run build
+```
 
 ---
 
@@ -520,8 +794,10 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 | `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | Inicia MySQL (XAMPP/Docker/servicio) y revisa `DB_HOST`/`DB_PORT`. |
 | `Unknown database 'hampi'` | La base no existe | `CREATE DATABASE hampi ...` o `docker compose up -d`. |
 | `SQLSTATE[HY000] [1045] Access denied` | Usuario/contraseña incorrectos | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña. |
-| `could not find driver` | Falta `pdo_mysql` | Habilítalo en `php.ini` y reinicia PHP/Apache. |
-| `Vite manifest not found` | Assets sin compilar | `npm install && npm run build`. |
+| `could not find driver` | Falta `pdo_mysql` | En local habilítalo en `php.ini` y reinicia PHP/Apache; en Codespaces sigue [Codespaces](#codespaces). |
+| `php8.5-mysql` no existe en apt | El PHP del Codespace no es el de Ubuntu | Compila `pdo_mysql` como se explica en [Codespaces](#codespaces) o usa PHP 8.3. |
+| `Could not open input file: artisan` | Estás fuera de la carpeta del proyecto | `cd /workspaces/hampi-web`. |
+| `Vite manifest not found` | Assets sin compilar | `npm ci && npm run build`. |
 | Los estilos nuevos no aparecen | Build antiguo o clase no escaneada | Vuelve a ejecutar `npm run build`. |
 | `419 Page Expired` | Falta `@csrf` o sesión vencida | Añade `@csrf`; limpia configuración/caché si cambiaste el dominio. |
 | `403` o redirección al entrar a `/admin` | La cuenta no tiene rol administrativo | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel. |

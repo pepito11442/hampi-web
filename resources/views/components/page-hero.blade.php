@@ -5,10 +5,7 @@
     'icon' => 'shield-plus',
 ])
 
-<section class="relative overflow-hidden border-b border-ink-100 bg-white">
-    <div class="pointer-events-none absolute inset-0 bg-hero-glow" aria-hidden="true"></div>
-    <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-brand-100/60 blur-3xl" aria-hidden="true"></div>
-
+<section class="relative overflow-hidden">
     <div class="container-page relative py-10 sm:py-14">
         <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="max-w-2xl">

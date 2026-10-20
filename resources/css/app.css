@@ -222,42 +222,13 @@
     }
 
     .bg-aurora {
-        background-image:
-            radial-gradient(
-                60rem 42rem at 8% -12%,
-                rgba(186, 230, 253, 0.55),
-                transparent 62%
-            ),
-            radial-gradient(
-                52rem 38rem at 102% 8%,
-                rgba(165, 243, 252, 0.42),
-                transparent 58%
-            ),
-            radial-gradient(
-                46rem 36rem at 50% 110%,
-                rgba(209, 250, 229, 0.35),
-                transparent 60%
-            ),
-            linear-gradient(180deg, #f0f9ff 0%, #e8f6ff 48%, #f7fbfa 100%);
-    }
-
-    .bg-hero-glow {
-        background-image:
-            radial-gradient(
-                circle at 12% 18%,
-                rgba(20, 184, 166, 0.16),
-                transparent 34%
-            ),
-            radial-gradient(
-                circle at 88% 8%,
-                rgba(56, 189, 248, 0.14),
-                transparent 30%
-            ),
-            radial-gradient(
-                circle at 70% 90%,
-                rgba(168, 240, 227, 0.28),
-                transparent 38%
-            );
+        background-image: linear-gradient(
+            180deg,
+            #f0f9ff 0%,
+            #eaf7ff 35%,
+            #eefaf8 70%,
+            #f7fbfa 100%
+        );
     }
 
     .bg-dot-grid {

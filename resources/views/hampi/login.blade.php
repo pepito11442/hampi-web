@@ -10,9 +10,7 @@
     @endphp
 
     {{-- ============================== PORTADA ============================== --}}
-    <section class="relative overflow-hidden bg-white">
-        <div class="pointer-events-none absolute inset-0 bg-hero-glow" aria-hidden="true"></div>
-
+    <section class="relative overflow-hidden">
         <div class="container-page relative grid items-center gap-12 py-14 lg:grid-cols-12 lg:py-24">
             <div class="lg:col-span-6" data-reveal>
                 <span class="inline-flex items-center gap-2 rounded-full border border-brand-200/70 bg-white/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-800 shadow-sm">
@@ -223,7 +221,7 @@
     </section>
 
     {{-- ============================= SERVICIOS ============================= --}}
-    <section class="border-y border-ink-100 bg-white/65 py-16 backdrop-blur-sm sm:py-24">
+    <section class="py-16 sm:py-24">
         <div class="container-page">
             <div class="mx-auto max-w-2xl text-center" data-reveal>
                 <span class="eyebrow">Servicios del portal</span>

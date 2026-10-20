@@ -19,11 +19,10 @@
 <body class="flex min-h-screen flex-col bg-mist-50 text-ink-800">
     <a href="#contenido" class="skip-link">Saltar al contenido principal</a>
 
-    {{-- Fondo decorativo dinámico (celeste) --}}
+    {{-- Fondo único de la aplicación --}}
     <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div class="absolute inset-0 bg-aurora"></div>
-        <div class="absolute inset-0 bg-dot-grid opacity-30 mask-fade-b"></div>
-        <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-brand-200/40 blur-3xl animate-float-soft"></div>
+        <div class="absolute inset-0 bg-dot-grid opacity-20 mask-fade-b"></div>
     </div>
 
     <header data-site-header class="site-header sticky top-0 z-40 border-b border-ink-100/80 bg-white/85 backdrop-blur-md">
