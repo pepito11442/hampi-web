@@ -185,7 +185,7 @@
                     </a>
                 </section>
 
-                <section class="rounded-3xl border border-amber-200 bg-amber-50/80 p-5" data-reveal style="--reveal-delay: 80ms">
+                <section class="  bg-amber-50/80 p-5" data-reveal style="--reveal-delay: 80ms">
                     <p class="flex items-center gap-2 text-xs font-bold text-amber-900">
                         <x-icon name="info" class="h-4 w-4" />
                         Atención de urgencias

@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class TurnoMedico extends Model
 {
-     protected $guarded = [];
+    protected $fillable = [
+        'posta_id',
+        'medico_nombre',
+        'especialidad',
+        'turno',
+        'consultorio',
+        'estado',
+    ];
+
     // Relación con la Posta
     public function posta()
     {

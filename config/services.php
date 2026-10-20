@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+#reniec token papa
+    'reniec' => [
+        'token' => env('RENIEC_API_TOKEN'),
+        'url' => env('RENIEC_API_URL', 'https://api.apis.net.pe/v2/reniec/dni'),
+    ],
 
 ];

@@ -168,6 +168,27 @@ class AgendaMedicaTest extends TestCase
         $this->assertDatabaseMissing('turno_medicos', ['id' => $turno->id]);
     }
 
+    public function test_un_turno_invalido_es_rechazado_por_el_form_request(): void
+    {
+        Posta::create([
+            'nombre' => 'C.S. de Prueba',
+            'direccion' => 'Av. Prueba 123',
+        ]);
+
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post('/admin/turnos/guardar', [
+                'medico_nombre' => 'Dr. Turno Inválido',
+                'especialidad' => 'Medicina General',
+                'turno' => 'Noche',
+                'consultorio' => 'Consultorio 1',
+            ])
+            ->assertSessionHasErrors('turno');
+
+        $this->assertDatabaseCount('turno_medicos', 0);
+    }
+
     private function crearHorario(User $user, string $turno): Horario
     {
         $esTarde = $turno === 'tarde';

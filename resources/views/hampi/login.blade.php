@@ -7,19 +7,17 @@
     @php
         $turnosHoy = $stats['turnos'] ?? 0;
         $vacunasDisponibles = $stats['vacunas'] ?? 0;
-        $postasActivas = $stats['postas'] ?? 0;
     @endphp
 
     {{-- ============================== PORTADA ============================== --}}
     <section class="relative overflow-hidden bg-white">
         <div class="pointer-events-none absolute inset-0 bg-hero-glow" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute -left-32 top-24 h-72 w-72 rounded-full bg-brand-100/50 blur-3xl" aria-hidden="true"></div>
 
         <div class="container-page relative grid items-center gap-12 py-14 lg:grid-cols-12 lg:py-24">
             <div class="lg:col-span-6" data-reveal>
                 <span class="inline-flex items-center gap-2 rounded-full border border-brand-200/70 bg-white/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-800 shadow-sm">
                     <span class="h-1.5 w-1.5 rounded-full bg-brand-500" aria-hidden="true"></span>
-                    Microred Socabaya · Arequipa
+                    Socabaya · Arequipa
                 </span>
 
                 <h1 class="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
@@ -93,38 +91,6 @@
             </div>
         </div>
 
-        {{-- Indicadores reales del sistema --}}
-        <div class="relative border-t border-ink-100 bg-white/80">
-            <div class="container-page grid grid-cols-1 divide-y divide-ink-100 py-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                <div class="flex items-center gap-3 px-2 py-3 sm:px-6" data-reveal>
-                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                        <x-icon name="stethoscope" class="h-5 w-5" />
-                    </span>
-                    <span>
-                        <span class="stat-number">{{ $turnosHoy }}</span>
-                        <span class="stat-label block">Médicos en el rol de hoy</span>
-                    </span>
-                </div>
-                <div class="flex items-center gap-3 px-2 py-3 sm:px-6" data-reveal style="--reveal-delay: 80ms">
-                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700">
-                        <x-icon name="syringe" class="h-5 w-5" />
-                    </span>
-                    <span>
-                        <span class="stat-number">{{ $vacunasDisponibles }}</span>
-                        <span class="stat-label block">Vacunas con stock disponible</span>
-                    </span>
-                </div>
-                <div class="flex items-center gap-3 px-2 py-3 sm:px-6" data-reveal style="--reveal-delay: 160ms">
-                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700">
-                        <x-icon name="building-2" class="h-5 w-5" />
-                    </span>
-                    <span>
-                        <span class="stat-number">{{ $postasActivas }}</span>
-                        <span class="stat-label block">{{ $postasActivas === 1 ? 'Establecimiento activo' : 'Establecimientos activos' }}</span>
-                    </span>
-                </div>
-            </div>
-        </div>
     </section>
 
     {{-- ========================== ACCESO CIUDADANO ========================== --}}
@@ -327,106 +293,6 @@
         </div>
     </section>
 
-    {{-- ========================= ATENCIÓN COMUNITARIA ========================= --}}
-    <section class="py-16 sm:py-24">
-        <div class="container-page grid items-center gap-12 lg:grid-cols-2">
-            <div class="relative order-2 lg:order-1" data-reveal>
-                <picture>
-                    <source srcset="/images/comunidad-cuidado.webp" type="image/webp">
-                    <img
-                        src="/images/comunidad-cuidado.jpg"
-                        alt="Manos de una persona mayor sostenidas con cuidado por un familiar"
-                        width="1200"
-                        height="800"
-                        loading="lazy"
-                        decoding="async"
-                        class="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-lift"
-                    >
-                </picture>
-
-                @if($postaPrincipal)
-                    <div class="absolute -bottom-6 left-4 right-4 rounded-2xl border border-ink-100 bg-white/95 p-4 shadow-lift backdrop-blur sm:left-8 sm:right-auto sm:max-w-sm">
-                        <p class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-brand-700">
-                            <x-icon name="building-2" class="h-4 w-4" />
-                            Establecimiento principal
-                        </p>
-                        <p class="mt-2 text-sm font-bold text-ink-900">{{ $postaPrincipal->nombre }}</p>
-                        <p class="mt-1 text-xs text-ink-500">{{ $postaPrincipal->direccion }}</p>
-                        <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-ink-600">
-                            <x-icon name="clock" class="h-3.5 w-3.5 text-brand-600" />
-                            {{ $postaPrincipal->horario_atencion }}
-                        </p>
-                    </div>
-                @endif
-            </div>
-
-            <div class="order-1 lg:order-2 lg:pl-6" data-reveal style="--reveal-delay: 120ms">
-                <span class="eyebrow">Atención cercana</span>
-                <h2 class="section-title mt-3">Una red de salud que te acompaña</h2>
-                <p class="section-lead mt-4">
-                    La Microred Socabaya articula postas y centros de salud para acercar la atención primaria a tu barrio, con derivación oportuna cuando se necesita un nivel de mayor complejidad.
-                </p>
-
-                <ul class="mt-8 grid gap-4 sm:grid-cols-2">
-                    <li class="rounded-2xl border border-ink-100 bg-white p-4">
-                        <x-icon name="syringe" class="h-5 w-5 text-brand-600" />
-                        <p class="mt-3 text-sm font-bold text-ink-900">Inmunizaciones</p>
-                        <p class="mt-1 text-xs leading-relaxed text-ink-500">Vacunación regular y campañas para toda la familia.</p>
-                    </li>
-                    <li class="rounded-2xl border border-ink-100 bg-white p-4">
-                        <x-icon name="heart" class="h-5 w-5 text-brand-600" />
-                        <p class="mt-3 text-sm font-bold text-ink-900">Control CRED</p>
-                        <p class="mt-1 text-xs leading-relaxed text-ink-500">Crecimiento y desarrollo de niñas y niños.</p>
-                    </li>
-                    <li class="rounded-2xl border border-ink-100 bg-white p-4">
-                        <x-icon name="stethoscope" class="h-5 w-5 text-brand-600" />
-                        <p class="mt-3 text-sm font-bold text-ink-900">Consulta médica</p>
-                        <p class="mt-1 text-xs leading-relaxed text-ink-500">Medicina general y especialidades programadas.</p>
-                    </li>
-                    <li class="rounded-2xl border border-ink-100 bg-white p-4">
-                        <x-icon name="navigation" class="h-5 w-5 text-brand-600" />
-                        <p class="mt-3 text-sm font-bold text-ink-900">Derivaciones</p>
-                        <p class="mt-1 text-xs leading-relaxed text-ink-500">Referencia a hospitales cuando el caso lo requiere.</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    {{-- ================================ PASOS ================================ --}}
-    <section class="relative overflow-hidden bg-ink-950 py-16 text-white sm:py-24">
-        <div class="pointer-events-none absolute inset-0 bg-dot-grid opacity-30" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl" aria-hidden="true"></div>
-
-        <div class="container-page relative">
-            <div class="mx-auto max-w-2xl text-center" data-reveal>
-                <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-300">Así de simple</span>
-                <h2 class="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Organiza tu visita en tres pasos</h2>
-                <p class="mt-4 text-base leading-relaxed text-white/70">
-                    Consulta la información en línea y acércate a tu establecimiento con todo lo necesario.
-                </p>
-            </div>
-
-            <ol class="mt-12 grid gap-6 md:grid-cols-3">
-                <li class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur" data-reveal>
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 text-sm font-bold text-ink-950">1</span>
-                    <h3 class="mt-4 text-lg font-bold">Ingresa tu DNI</h3>
-                    <p class="mt-2 text-sm leading-relaxed text-white/70">El sistema valida tus datos con RENIEC y prepara tu panel de servicios.</p>
-                </li>
-                <li class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur" data-reveal style="--reveal-delay: 90ms">
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 text-sm font-bold text-ink-950">2</span>
-                    <h3 class="mt-4 text-lg font-bold">Revisa la información</h3>
-                    <p class="mt-2 text-sm leading-relaxed text-white/70">Consulta tus citas, los turnos médicos del día y las vacunas con stock.</p>
-                </li>
-                <li class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur" data-reveal style="--reveal-delay: 180ms">
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 text-sm font-bold text-ink-950">3</span>
-                    <h3 class="mt-4 text-lg font-bold">Acércate a tu posta</h3>
-                    <p class="mt-2 text-sm leading-relaxed text-white/70">Lleva tu DNI y los documentos indicados para agilizar tu atención.</p>
-                </li>
-            </ol>
-        </div>
-    </section>
-
     {{-- ================================= FAQ ================================= --}}
     <section class="py-16 sm:py-24">
         <div class="container-page grid gap-12 lg:grid-cols-12">
@@ -473,25 +339,6 @@
                     </p>
                 </details>
 
-                <details class="faq-item card group overflow-hidden">
-                    <summary class="flex cursor-pointer items-center justify-between gap-4 p-5 text-sm font-bold text-ink-900 transition-colors hover:text-brand-700">
-                        ¿La disponibilidad de vacunas está actualizada?
-                        <x-icon name="chevron-down" class="h-5 w-5 shrink-0 text-ink-400 transition-transform duration-300 group-open:rotate-180" />
-                    </summary>
-                    <p class="border-t border-ink-100 px-5 py-4 text-sm leading-relaxed text-ink-500">
-                        El pizarrín digital es publicado y mantenido por el personal de salud de la microred. Si un aviso indica stock disponible, acércate con los requisitos señalados para confirmar la atención.
-                    </p>
-                </details>
-
-                <details class="faq-item card group overflow-hidden">
-                    <summary class="flex cursor-pointer items-center justify-between gap-4 p-5 text-sm font-bold text-ink-900 transition-colors hover:text-brand-700">
-                        ¿Qué hago si la validación del DNI falla?
-                        <x-icon name="chevron-down" class="h-5 w-5 shrink-0 text-ink-400 transition-transform duration-300 group-open:rotate-180" />
-                    </summary>
-                    <p class="border-t border-ink-100 px-5 py-4 text-sm leading-relaxed text-ink-500">
-                        El portal te mostrará los campos de nombres y apellidos para que los completes manualmente y puedas continuar con tu consulta sin inconvenientes.
-                    </p>
-                </details>
             </div>
         </div>
     </section>

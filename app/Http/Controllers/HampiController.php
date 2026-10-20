@@ -7,11 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Posta;
 use App\Models\Ciudadano;
 use App\Models\VacunaAviso;
-use App\Models\TurnoMedico;
 use App\Models\Cita;
 use App\Models\CampanaPreventiva;
-use App\Models\Horario;
-use App\Models\User;
 use App\Services\AgendaMedica;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
@@ -30,12 +27,9 @@ class HampiController extends Controller
         $stats = [
             'turnos' => $agenda->total($medicosHoy),
             'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
-            'postas' => Posta::where('estado_activo', true)->count(),
         ];
 
-        $postaPrincipal = Posta::where('estado_activo', true)->first();
-
-        return view('hampi.login', compact('stats', 'postaPrincipal'));
+        return view('hampi.login', compact('stats'));
     }
 
     // Validación e ingreso con DNI (Sin redirección)
@@ -138,99 +132,6 @@ class HampiController extends Controller
         return redirect('/');
     }
 
-    // --- Panel de Administración (Enfermería / Admisión) ---
-    public function adminDashboard(AgendaMedica $agenda)
-    {
-        $vacunas = VacunaAviso::all();
-        $medicosHoy = $agenda->delDia();
-        $turnosAtendiendo = $agenda->atendiendo($medicosHoy);
-        $personalCount = User::whereIn('role', User::ROLES_PERSONAL)->count();
-        $horariosMes = Horario::whereBetween('fecha', [
-            now()->startOfMonth()->toDateString(),
-            now()->endOfMonth()->toDateString(),
-        ])->count();
-
-        return view('hampi.admin_dashboard', compact(
-            'vacunas',
-            'medicosHoy',
-            'turnosAtendiendo',
-            'personalCount',
-            'horariosMes'
-        ));
-    }
-
-        // Guardar aviso en el Pizarrín
-    public function storeVacuna(Request $request)
-    {
-        $request->validate([
-            'titulo' => 'required|string|max:100',
-            'grupo_objetivo' => 'required|string|max:150',
-            'stock_estado' => 'required|in:Disponible,Por agotarse,Agotado',
-            'requisitos' => 'required|string'
-        ]);
-
-        VacunaAviso::create([
-            'posta_id' => 1,
-            'titulo' => strip_tags($request->titulo), // Elimina cualquier etiqueta <script> o <iframe>
-            'grupo_objetivo' => strip_tags($request->grupo_objetivo),
-            'stock_estado' => $request->stock_estado,
-            'requisitos' => strip_tags($request->requisitos),
-            'es_urgente' => $request->has('es_urgente')
-        ]);
-
-        return redirect('/admin/dashboard')->with('mensaje', 'Aviso publicado en el Pizarrín exitosamente.');
-    }
-
-    // Eliminar vacuna del Pizarrín
-    public function destroyVacuna($id)
-    {
-        $vacuna = VacunaAviso::findOrFail($id);
-        $vacuna->delete();
-
-        return redirect('/admin/dashboard')->with('mensaje', 'Aviso de vacuna retirado del Pizarrín exitosamente.');
-    }
-
-    // Guardar nuevo médico
-    public function storeTurno(Request $request)
-    {
-        $request->validate([
-            'medico_nombre' => 'required|string|max:100',
-            'especialidad' => 'required|string|max:100',
-            'turno' => 'required|in:Mañana,Tarde',
-            'consultorio' => 'required|string|max:50',
-        ]);
-
-        TurnoMedico::create([
-            'posta_id' => 1,
-            'medico_nombre' => $request->medico_nombre,
-            'especialidad' => $request->especialidad,
-            'turno' => $request->turno,
-            'consultorio' => $request->consultorio,
-            'estado' => 'Atendiendo'
-        ]);
-
-        return redirect('/admin/dashboard')->with('mensaje', 'Médico registrado exitosamente en el rol de hoy.');
-    }
-
-    // Cambiar estado del médico
-    public function updateTurnoEstado(Request $request, $id)
-    {
-        $turno = TurnoMedico::findOrFail($id);
-        $turno->estado = $request->estado;
-        $turno->save();
-
-        return redirect('/admin/dashboard')->with('mensaje', 'Estado del médico actualizado.');
-    }
-
-    // Eliminar médico del rol
-    public function destroyTurno($id)
-    {
-        $turno = TurnoMedico::findOrFail($id);
-        $turno->delete();
-
-        return redirect('/admin/dashboard')->with('mensaje', 'Médico retirado del rol de hoy.');
-    }
-
     // Consulta en vivo a RENIEC
     public function consultarDniReniec($dni)
     {
@@ -238,14 +139,14 @@ class HampiController extends Controller
             return response()->json(['success' => false, 'mensaje' => 'El DNI debe tener 8 dígitos'], 400);
         }
 
-        $token = env('RENIEC_API_TOKEN', '');
+        $token = config('services.reniec.token');
 
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
                 'Referer' => 'https://apis.net.pe/consulta-dni-api',
                 'User-Agent' => 'laravel/framework',
-            ])->timeout(5)->get("https://api.apis.net.pe/v2/reniec/dni?numero={$dni}");
+            ])->timeout(5)->get(config('services.reniec.url'), ['numero' => $dni]);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -266,6 +167,4 @@ class HampiController extends Controller
             'mensaje' => 'No se pudo conectar con el servicio de RENIEC. Puedes escribir tus nombres manualmente.'
         ], 404);
     }
-        // Eliminar vacuna o aviso del Pizarrín
-
 }

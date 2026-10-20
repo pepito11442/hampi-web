@@ -22,10 +22,8 @@
     {{-- Fondo decorativo dinámico (celeste) --}}
     <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div class="absolute inset-0 bg-aurora"></div>
-        <div class="absolute inset-0 bg-dot-grid opacity-40 mask-fade-b"></div>
-        <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-brand-200/50 blur-3xl animate-float-soft"></div>
-        <div class="absolute -right-20 top-1/2 h-96 w-96 rounded-full bg-sky-200/60 blur-3xl"></div>
-        <div class="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-cyan-100/70 blur-3xl animate-float-soft" style="animation-delay: -3s"></div>
+        <div class="absolute inset-0 bg-dot-grid opacity-30 mask-fade-b"></div>
+        <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-brand-200/40 blur-3xl animate-float-soft"></div>
     </div>
 
     <header data-site-header class="site-header sticky top-0 z-40 border-b border-ink-100/80 bg-white/85 backdrop-blur-md">
@@ -34,7 +32,7 @@
             <div class="container-page flex h-9 items-center justify-between text-[11px] font-medium tracking-wide">
                 <p class="flex items-center gap-2 text-white/85">
                     <x-icon name="map-pin" class="h-3.5 w-3.5 text-brand-300" />
-                    Microred Socabaya · Arequipa, Perú
+                    Posta Socabaya · Arequipa, Perú
                 </p>
                 <div class="flex items-center gap-6">
                     <span class="flex items-center gap-1.5 text-white/75">
@@ -65,27 +63,16 @@
 
         {{-- Barra principal --}}
         <div class="container-page flex h-16 items-center justify-between gap-3">
-            <a href="/" class="group flex items-center gap-3" aria-label="Hampi, volver al inicio">
-                <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow transition-transform duration-300 group-hover:scale-105">
-                    <x-icon name="heart-pulse" class="h-6 w-6" stroke-width="2" />
-                </span>
-                <span class="leading-tight">
-                    <span class="flex items-center gap-2">
-                        <span class="text-lg font-bold tracking-tight text-ink-900">Hampi</span>
-                        <span class="hidden rounded-full border border-brand-200/70 bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700 sm:inline-block">
-                            Socabaya
-                        </span>
-                    </span>
-                    <span class="block text-[11px] font-medium text-ink-400">Salud comunitaria · Arequipa</span>
-                </span>
-            </a>
+            <x-site-logo :badge="true" />
 
             <nav class="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
-                <a href="/" class="nav-link {{ request()->is('/') ? 'nav-link-active' : '' }}" @if(request()->is('/')) aria-current="page" @endif>Inicio</a>
-                <a href="/medicos-hoy" class="nav-link {{ request()->is('medicos-hoy') ? 'nav-link-active' : '' }}" @if(request()->is('medicos-hoy')) aria-current="page" @endif>Médicos</a>
-                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}" @if(request()->is('pizarrin-vacunas')) aria-current="page" @endif aria-label="Campañas de vacunación">Campañas</a>
-                <a href="/campanas-preventivas" class="nav-link {{ request()->is('campanas-preventivas') ? 'nav-link-active' : '' }}" @if(request()->is('campanas-preventivas')) aria-current="page" @endif>Campañas preventivas</a>
-                <a href="/directorio-postas" class="nav-link {{ request()->is('directorio-postas') ? 'nav-link-active' : '' }}" @if(request()->is('directorio-postas')) aria-current="page" @endif>Postas</a>
+                @foreach (config('navegacion') as $enlace)
+                    <a href="{{ $enlace['href'] }}"
+                       class="nav-link {{ request()->is($enlace['patron']) ? 'nav-link-active' : '' }}"
+                       @if (request()->is($enlace['patron'])) aria-current="page" @endif>
+                        {{ $enlace['etiqueta'] }}
+                    </a>
+                @endforeach
                 @if(session('ciudadano_dni'))
                     <a href="/mi-panel" class="nav-link {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}" @if(request()->is('mi-panel')) aria-current="page" @endif>Mi panel</a>
                 @endif
@@ -127,11 +114,11 @@
         {{-- Menú móvil --}}
         <div id="mobile-menu" hidden class="border-t border-ink-100 bg-white lg:hidden">
             <nav class="container-page flex flex-col gap-1 py-4" aria-label="Navegación móvil">
-                <a href="/" class="nav-link {{ request()->is('/') ? 'nav-link-active' : '' }}">Inicio</a>
-                <a href="/medicos-hoy" class="nav-link {{ request()->is('medicos-hoy') ? 'nav-link-active' : '' }}">Médicos del día</a>
-                <a href="/pizarrin-vacunas" class="nav-link {{ request()->is('pizarrin-vacunas') ? 'nav-link-active' : '' }}" aria-label="Campañas de vacunación">Campañas</a>
-                <a href="/campanas-preventivas" class="nav-link {{ request()->is('campanas-preventivas') ? 'nav-link-active' : '' }}">Campañas preventivas</a>
-                <a href="/directorio-postas" class="nav-link {{ request()->is('directorio-postas') ? 'nav-link-active' : '' }}">Directorio de postas</a>
+                @foreach (config('navegacion') as $enlace)
+                    <a href="{{ $enlace['href'] }}" class="nav-link {{ request()->is($enlace['patron']) ? 'nav-link-active' : '' }}">
+                        {{ $enlace['etiqueta'] }}
+                    </a>
+                @endforeach
                 @if(session('ciudadano_dni'))
                     <a href="/mi-panel" class="nav-link {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}">Mi panel de citas</a>
                     <a href="/cerrar-sesion-ciudadano" class="nav-link text-rose-600 hover:bg-rose-50 hover:text-rose-700">Cerrar sesión ciudadana</a>
@@ -174,31 +161,18 @@
     <footer class="relative z-10 mt-auto border-t border-ink-100/80 bg-white/90 {{ $esPanel ? '' : 'pb-20 lg:pb-0' }}">
         <div class="container-page grid gap-10 py-14 md:grid-cols-12">
             <div class="md:col-span-4">
-                <div class="flex items-center gap-3">
-                    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow">
-                        <x-icon name="heart-pulse" class="h-6 w-6" stroke-width="2" />
-                    </span>
-                    <span class="leading-tight">
-                        <span class="block text-lg font-bold tracking-tight text-ink-900">Hampi</span>
-                        <span class="block text-[11px] font-medium text-ink-400">Salud comunitaria · Socabaya</span>
-                    </span>
-                </div>
+                <x-site-logo subtitulo="Salud comunitaria · Socabaya" />
                 <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-500">
-                    Portal ciudadano de la Microred Socabaya. Consulta médicos de turno, disponibilidad de vacunas y campañas preventivas de tu comunidad.
-                </p>
-                <p class="mt-4 inline-flex items-center gap-2 rounded-full border border-ink-100 bg-ink-50 px-3 py-1.5 text-[11px] font-semibold text-ink-500">
-                    <x-icon name="lock" class="h-3.5 w-3.5 text-brand-600" />
-                    Datos protegidos por la Ley N.° 29733
+                    Portal ciudadano de la Posta Socabaya. Consulta médicos de turno, disponibilidad de vacunas y campañas preventivas de tu comunidad.
                 </p>
             </div>
 
             <div class="md:col-span-2">
                 <h2 class="text-xs font-bold uppercase tracking-[0.16em] text-ink-400">Portal</h2>
                 <ul class="mt-4 space-y-2.5 text-sm">
-                    <li><a href="/" class="text-ink-600 transition-colors hover:text-brand-700">Inicio</a></li>
-                    <li><a href="/medicos-hoy" class="text-ink-600 transition-colors hover:text-brand-700">Médicos del día</a></li>
-                    <li><a href="/pizarrin-vacunas" class="text-ink-600 transition-colors hover:text-brand-700">Campañas</a></li>
-                    <li><a href="/campanas-preventivas" class="text-ink-600 transition-colors hover:text-brand-700">Campañas preventivas</a></li>
+                    @foreach (config('navegacion') as $enlace)
+                        <li><a href="{{ $enlace['href'] }}" class="text-ink-600 transition-colors hover:text-brand-700">{{ $enlace['etiqueta'] }}</a></li>
+                    @endforeach
                 </ul>
             </div>
 
@@ -217,7 +191,7 @@
                 <ul class="mt-4 space-y-2.5 text-sm text-ink-600">
                     <li class="flex items-start gap-2">
                         <x-icon name="building-2" class="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                        Microred Socabaya, Arequipa
+                        Posta Socabaya, Arequipa
                     </li>
                     <li class="flex items-start gap-2">
                         <x-icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
@@ -233,10 +207,8 @@
 
         <div class="border-t border-ink-100/80">
             <div class="container-page flex flex-col gap-3 py-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
-                <p>© {{ date('Y') }} Hampi · Microred Socabaya (Arequipa). Proyecto académico Universidad Continental.</p>
+                <p>© {{ date('Y') }} Hampi · Socabaya Arequipa. Proyecto académico Universidad Continental.</p>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span>Ley N.° 29733 (Protección de Datos)</span>
-                    <span aria-hidden="true">•</span>
                     <span>GERESA Arequipa</span>
                 </div>
             </div>
@@ -252,28 +224,20 @@
                         <x-icon name="calendar-check" class="h-5 w-5" />
                         Mis citas
                     </a>
+                    @foreach (array_slice(config('navegacion'), 1) as $enlace)
+                        <a href="{{ $enlace['href'] }}" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is($enlace['patron']) ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                            <x-icon :name="$enlace['icono']" class="h-5 w-5" />
+                            {{ $enlace['etiqueta_corta'] }}
+                        </a>
+                    @endforeach
                 @else
-                    <a href="/" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('/') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
-                        <x-icon name="home" class="h-5 w-5" />
-                        Inicio
-                    </a>
+                    @foreach (config('navegacion') as $enlace)
+                        <a href="{{ $enlace['href'] }}" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is($enlace['patron']) ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
+                            <x-icon :name="$enlace['icono']" class="h-5 w-5" />
+                            {{ $enlace['etiqueta_corta'] }}
+                        </a>
+                    @endforeach
                 @endif
-                <a href="/medicos-hoy" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('medicos-hoy') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
-                    <x-icon name="stethoscope" class="h-5 w-5" />
-                    Médicos
-                </a>
-                <a href="/pizarrin-vacunas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('pizarrin-vacunas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}" aria-label="Campañas de vacunación">
-                    <x-icon name="clipboard-list" class="h-5 w-5" />
-                    Campañas
-                </a>
-                <a href="/campanas-preventivas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('campanas-preventivas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}" aria-label="Campañas preventivas">
-                    <x-icon name="shield-check" class="h-5 w-5" />
-                    Preventivas
-                </a>
-                <a href="/directorio-postas" class="flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors {{ request()->is('directorio-postas') ? 'text-brand-700' : 'text-ink-500 hover:text-brand-700' }}">
-                    <x-icon name="map-pin" class="h-5 w-5" />
-                    Postas
-                </a>
             </div>
         </nav>
     @endunless

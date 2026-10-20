@@ -321,7 +321,7 @@
                         </div>
 
                         <div class="flex items-center gap-2.5 rounded-xl border border-ink-100 bg-white p-3">
-                            <input type="checkbox" name="es_urgente" id="es_urgente" class="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
+                            <input type="checkbox" name="es_urgente" id="es_urgente" value="1" class="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
                             <label for="es_urgente" class="text-xs font-medium text-ink-600">Marcar como urgente / campaña</label>
                         </div>
 

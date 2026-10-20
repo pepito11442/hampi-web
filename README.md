@@ -246,7 +246,7 @@ Si necesitas el token de RENIEC, agrégalo como secreto del Codespace o directam
 | Campañas preventivas | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas` |
 | Directorio de postas | `/directorio-postas` · `postas.index` | `HampiController@verPostas` |
 
-En el menú de escritorio, **“Campañas”** lleva al pizarrín de vacunación y **“Campañas preventivas”** a la nueva página. En la barra inferior móvil se abrevian como **“Campañas”** y **“Preventivas”**. En móvil también está disponible el menú hamburguesa del encabezado.
+En el menú, **“Vacunas”** lleva al pizarrín de vacunación y **“Campañas preventivas”** a la página de campañas. En la barra inferior móvil se abrevia como **“Preventivas”**. En móvil también está disponible el menú hamburguesa del encabezado. Los enlaces del portal se definen una sola vez en `config/navegacion.php`.
 
 ### Personal de salud
 

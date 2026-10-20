@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\CampanaController as AdminCampanaController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\EquipoController as AdminEquipoController;
 use App\Http\Controllers\Admin\HorarioController as AdminHorarioController;
+use App\Http\Controllers\Admin\TurnoController as AdminTurnoController;
+use App\Http\Controllers\Admin\VacunaController as AdminVacunaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmpleadoCitaController;
 use App\Http\Controllers\EmpleadoController;
@@ -16,7 +19,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HampiController::class, 'index'])->name('inicio');
-Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec']);
+Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec'])
+    ->middleware('throttle:10,1');
 Route::post('/ingreso-dni', [HampiController::class, 'accesoPorDni'])->name('ciudadano.login');
 Route::get('/mi-panel', [HampiController::class, 'panelCiudadano'])->name('ciudadano.panel');
 Route::get('/cerrar-sesion-ciudadano', [HampiController::class, 'logoutCiudadano'])->name('ciudadano.logout');
@@ -25,9 +29,6 @@ Route::get('/medicos-hoy', [HampiController::class, 'verMedicos'])->name('medico
 Route::get('/pizarrin-vacunas', [HampiController::class, 'verPizarrin'])->name('pizarrin.index');
 Route::get('/campanas-preventivas', [HampiController::class, 'verCampanasPreventivas'])->name('campanas.index');
 Route::get('/directorio-postas', [HampiController::class, 'verPostas'])->name('postas.index');
-
-// Ruta de diagnóstico heredada.
-Route::get('/test', fn () => '¡Laravel está vivo!');
 
 /*
 |--------------------------------------------------------------------------
@@ -84,16 +85,16 @@ Route::middleware(['auth', 'role:admin,admision'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', [HampiController::class, 'adminDashboard'])->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Rol de médicos del día.
-        Route::post('/turnos/guardar', [HampiController::class, 'storeTurno'])->name('turno.store');
-        Route::post('/turnos/{id}/estado', [HampiController::class, 'updateTurnoEstado'])->name('turno.update');
-        Route::delete('/turnos/{id}', [HampiController::class, 'destroyTurno'])->name('turno.destroy');
+        Route::post('/turnos/guardar', [AdminTurnoController::class, 'store'])->name('turno.store');
+        Route::post('/turnos/{id}/estado', [AdminTurnoController::class, 'updateEstado'])->name('turno.update');
+        Route::delete('/turnos/{id}', [AdminTurnoController::class, 'destroy'])->name('turno.destroy');
 
         // Pizarrín de vacunas.
-        Route::post('/pizarrin/guardar', [HampiController::class, 'storeVacuna'])->name('vacuna.store');
-        Route::delete('/pizarrin/{id}', [HampiController::class, 'destroyVacuna'])->name('vacuna.destroy');
+        Route::post('/pizarrin/guardar', [AdminVacunaController::class, 'store'])->name('vacuna.store');
+        Route::delete('/pizarrin/{id}', [AdminVacunaController::class, 'destroy'])->name('vacuna.destroy');
 
         // Equipo de salud (médicos y enfermeros).
         Route::get('/equipo', [AdminEquipoController::class, 'index'])->name('equipo.index');

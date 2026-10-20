@@ -21,14 +21,25 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 - **Pruebas de citas médicas**: búsqueda por DNI, registro de paciente nuevo, disponibilidad, conflictos, permisos, cierre de citas y bloqueo de regeneración de horarios.
 - **Agenda diaria unificada** con `app/Services/AgendaMedica.php` y `MedicoDelDia.php`: los horarios mensuales generados alimentan `/medicos-hoy`, el indicador del inicio y la lista del panel administrativo. El rol manual (`turno_medicos`) se conserva para médicos visitantes o ajustes puntuales.
 - Pruebas de agenda del día: horarios visibles, exclusión de enfermeros e inactivos, turno completo en ambos bloques y deduplicación con el rol manual.
+- Pruebas de los accesos compartidos y del pizarrín de vacunas: render de ambos logins, publicación y retiro de avisos, y rechazo de stock o turnos inválidos.
 
 ### Cambiado
 
+- La navegación del portal se define una sola vez en `config/navegacion.php` y el logo se reutiliza con el componente `x-site-logo`. El enlace antes llamado "Campañas" ahora se llama **Vacunas** para distinguirlo de las campañas preventivas.
+- El inicio pasó de 7 a 5 secciones: se eliminaron la fila de estadísticas duplicada, la sección "Una red de salud que te acompaña" y "Organiza tu visita en tres pasos"; el FAQ bajó de 5 a 3 preguntas.
+- Se simplificó el fondo decorativo global (un solo halo en lugar de tres) y se redujeron los íconos sin uso.
+- El panel administrativo se dividió en `Admin\DashboardController`, `Admin\TurnoController` y `Admin\VacunaController`; las validaciones del rol de médicos y del pizarrín viven en `FormRequest`.
+- Los accesos del personal (`/equipo/login`) y de administración (`/personal/login`) comparten el componente `x-auth-shell` y ya no duplican el panel institucional.
 - El panel ciudadano prioriza la próxima cita activa (`Confirmada` o `Pendiente`) y muestra el nombre del médico.
 - La regeneración o eliminación de un horario mensual se bloquea si existen citas futuras activas en ese mes, para evitar citas fuera de turno.
 
 ### Corregido
 
+- El enlace **Mis citas** de la barra inferior móvil tenía el atributo `class` partido (`c` + `lass`) y perdía todos sus estilos.
+- Se eliminó la ruta de diagnóstico heredada `/test`.
+- El token de RENIEC se lee con `config('services.reniec.*')`, por lo que sigue funcionando con `php artisan config:cache`.
+- La API `/api/consultar-dni/{dni}` ahora tiene un límite de 10 solicitudes por minuto por IP.
+- `TurnoMedico` usa `$fillable` en lugar de `$guarded = []`, y el cambio de estado del rol valida los valores permitidos.
 - El acceso ciudadano conserva los nombres y apellidos de una ficha existente cuando RENIEC no responde, en lugar de reemplazarlos por “Ciudadano(a) de Socabaya”.
 - La vista pública y el panel administrativo ya no muestran únicamente el rol manual antiguo: ahora reflejan los médicos programados para la fecha actual.
 - Los médicos con horario y registro manual se muestran una sola vez; se usa el consultorio manual y el turno del horario mensual.
