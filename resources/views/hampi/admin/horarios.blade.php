@@ -18,26 +18,22 @@
     <x-page-hero
         eyebrow="Administración"
         title="Horarios mensuales"
-        description="Cada médico y enfermero cumple 150 horas al mes. El generador reparte los turnos de forma aleatoria respetando los domingos sin atención."
+        description="Cada médico y enfermero cumple 150 horas al mes. El generador reparte los turnos respetando los domingos sin atención."
         icon="calendar"
     >
         <x-slot:actions>
-            <a href="{{ route('admin.equipo.index') }}" class="btn btn-secondary btn-sm">
-                <x-icon name="users" class="h-4 w-4 text-brand-600" />
+            <a href="{{ route('admin.equipo.index') }}" class="btn btn-primary btn-sm">
+                <x-icon name="users" class="h-4 w-4" />
                 Gestionar equipo
-            </a>
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary btn-sm">
-                <x-icon name="arrow-left" class="h-4 w-4 text-brand-600" />
-                Volver al panel
             </a>
         </x-slot:actions>
     </x-page-hero>
 
     @include('hampi.partials.admin-nav')
 
-    <div class="container-page py-8 md:py-12">
+    <div class="container-page py-6 md:py-9">
         @if ($errors->any())
-            <div role="alert" class="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+            <div role="alert" class="mb-6 flex items-start gap-3 border border-stamp-300 bg-stamp-50 p-4 text-sm text-stamp-800">
                 <x-icon name="alert-circle" class="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
                     <p class="font-bold">No se pudo completar la operación</p>
@@ -50,27 +46,31 @@
             </div>
         @endif
 
-        {{-- Filtros por rol --}}
-        <div class="mb-6 flex flex-wrap items-center gap-2">
-            @foreach ([
-                ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
-                ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
-                ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
-            ] as $tab)
-                <a
-                    href="{{ route('admin.horarios.index', array_filter(['rol' => $tab['key'], 'anio' => $anio, 'mes' => $mes])) }}"
-                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-colors {{ $rol === $tab['key'] ? 'border-ink-950 bg-ink-950 text-white' : 'border-ink-200 bg-white text-ink-600 hover:border-brand-300 hover:text-brand-800' }}"
-                    @if ($rol === $tab['key']) aria-current="page" @endif
-                >
-                    <x-icon :name="$tab['icon']" class="h-4 w-4" />
-                    {{ $tab['label'] }}
-                    <span class="rounded-full px-1.5 py-0.5 text-[10px] {{ $rol === $tab['key'] ? 'bg-white/15 text-white' : 'bg-ink-100 text-ink-500' }}">{{ $tab['count'] }}</span>
-                </a>
-            @endforeach
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-ink-300">
+            <div class="flex gap-1 overflow-x-auto" role="group" aria-label="Filtrar horarios por rol">
+                @foreach ([
+                    ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
+                    ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
+                    ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
+                ] as $tab)
+                    <a
+                        href="{{ route('admin.horarios.index', array_filter(['rol' => $tab['key'], 'anio' => $anio, 'mes' => $mes])) }}"
+                        class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $tab['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
+                        @if ($rol === $tab['key']) aria-current="page" @endif
+                    >
+                        <x-icon :name="$tab['icon']" class="h-4 w-4" />
+                        {{ $tab['label'] }}
+                        <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $tab['count'] }}</span>
+                    </a>
+                @endforeach
+            </div>
+
+            <p class="hidden font-mono text-[10px] uppercase tracking-[0.05em] text-ink-500 sm:block">Meta mensual: 150 h</p>
         </div>
 
         @if ($personal->isEmpty())
             <x-empty-state
+                class="mt-5"
                 icon="calendar"
                 title="No hay personal para programar"
                 description="Primero crea las cuentas de médicos o enfermeros. Después podrás generar su horario mensual de 150 horas."
@@ -81,24 +81,24 @@
             </x-empty-state>
         @else
             {{-- Selector de trabajador y periodo --}}
-            <section class="card p-5" data-reveal>
+            <section class="mt-5 border border-ink-300 bg-paper-50 p-4" data-reveal>
                 <form action="{{ route('admin.horarios.index') }}" method="GET" class="grid gap-4 md:grid-cols-12 md:items-end">
                     @if ($rol !== 'todos')
                         <input type="hidden" name="rol" value="{{ $rol }}">
                     @endif
 
-                    <div class="md:col-span-6">
+                    <div class="md:col-span-12 lg:col-span-6">
                         <label for="user_id" class="label">Trabajador</label>
                         <select name="user_id" id="user_id" class="input">
                             @foreach ($personal as $persona)
                                 <option value="{{ $persona->id }}" @selected($user && $user->id === $persona->id)>
-                                    {{ $persona->name }} · {{ $persona->rol_label }}@if ($persona->especialidad) · {{ $persona->especialidad }}@endif
+                                    {{ $persona->name }} · {{ $persona->rol_label }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="md:col-span-3">
+                    <div class="md:col-span-5 lg:col-span-3">
                         <label for="mes" class="label">Mes</label>
                         <select name="mes" id="mes" class="input">
                             @foreach ($meses as $numero => $nombre)
@@ -107,15 +107,15 @@
                         </select>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-4 lg:col-span-2">
                         <label for="anio" class="label">Año</label>
                         <input type="number" name="anio" id="anio" min="2020" max="2100" value="{{ $anio }}" class="input">
                     </div>
 
-                    <div class="md:col-span-1">
+                    <div class="md:col-span-3 lg:col-span-1">
                         <button type="submit" class="btn btn-primary w-full">
                             <x-icon name="search" class="h-4 w-4" />
-                            <span class="md:hidden xl:inline">Ver</span>
+                            <span class="sr-only">Consultar horario</span>
                         </button>
                     </div>
                 </form>
@@ -123,48 +123,51 @@
 
             @if ($user)
                 {{-- Resumen del trabajador --}}
-                <section class="card mt-6 overflow-hidden" data-reveal>
-                    <div class="grid gap-6 p-6 lg:grid-cols-12 lg:items-center">
+                <section class="mt-5 border border-ink-300 bg-paper-50" data-reveal>
+                    <div class="grid gap-5 p-4 sm:p-5 lg:grid-cols-12 lg:items-center">
                         <div class="flex items-start gap-4 lg:col-span-5">
                             @if ($user->foto_url)
-                                <img src="{{ $user->foto_url }}" alt="Foto de {{ $user->name }}" class="h-16 w-16 shrink-0 rounded-3xl object-cover ring-4 ring-brand-50">
+                                <img src="{{ $user->foto_url }}" alt="Foto de {{ $user->name }}" class="h-16 w-16 shrink-0 border border-ink-300 object-cover">
                             @else
-                                <span class="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-bold text-white shadow-glow">
+                                <span class="grid h-16 w-16 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-display text-lg font-bold text-brand-800">
                                     {{ $user->iniciales() }}
                                 </span>
                             @endif
 
                             <div class="min-w-0">
-                                <h2 class="text-lg font-bold leading-tight text-ink-900">{{ $user->name }}</h2>
+                                <h2 class="font-display text-lg font-bold leading-tight text-ink-950">{{ $user->name }}</h2>
                                 <div class="mt-1.5 flex flex-wrap gap-1.5">
                                     <x-badge color="teal">{{ $user->rol_label }}</x-badge>
                                     <x-badge color="sky">{{ $meses[$mes] }} {{ $anio }}</x-badge>
                                 </div>
-                                <p class="mt-2 text-xs text-ink-500">
+                                <p class="mt-2 text-xs text-ink-600">
                                     DNI {{ $user->dni }} · {{ $user->especialidad ?: 'Especialidad por completar' }}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-4">
+                        <div class="border-t border-ink-200 pt-4 lg:col-span-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
                             <div class="flex items-end justify-between gap-3">
                                 <div>
-                                    <p class="stat-label">Horas asignadas</p>
-                                    <p class="stat-number">{{ $horasTexto }} <span class="text-lg font-semibold text-ink-400">/ 150 h</span></p>
+                                    <p class="mono-label">Horas asignadas</p>
+                                    <div class="mt-1 flex items-baseline gap-1.5">
+                                        <span class="stat-number">{{ $horasTexto }}</span>
+                                        <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-500">de 150 h</span>
+                                    </div>
                                 </div>
-                                <span class="text-xs font-bold {{ $totalHoras >= 150 ? 'text-brand-700' : 'text-amber-700' }}">
+                                <span class="badge {{ $totalHoras >= 150 ? 'badge-teal' : 'badge-amber' }}">
                                     {{ $turnosAsignados }} {{ $turnosAsignados === 1 ? 'turno' : 'turnos' }}
                                 </span>
                             </div>
-                            <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $totalHoras }}" aria-label="Avance de horas del trabajador">
-                                <div class="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all duration-500" style="width: {{ $progreso }}%"></div>
+                            <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $totalHoras }}" aria-label="Avance de horas del trabajador">
+                                <div class="h-full bg-brand-700 transition-[width] duration-500" style="width: {{ $progreso }}%"></div>
                             </div>
-                            <p class="mt-2 text-[11px] text-ink-400">
-                                {{ $totalHoras >= 150 ? 'Cumple la meta mensual de 150 horas.' : 'Aún no se alcanzan las 150 horas.' }}
+                            <p class="mt-1.5 font-mono text-[9px] uppercase tracking-[0.05em] text-ink-500">
+                                {{ $totalHoras >= 150 ? 'Cumple la meta mensual de 150 horas' : 'Aún no se alcanzan las 150 horas' }}
                             </p>
                         </div>
 
-                        <div class="flex flex-wrap gap-2 lg:col-span-3 lg:justify-end">
+                        <div class="flex flex-wrap gap-2 border-t border-ink-200 pt-4 lg:col-span-3 lg:justify-end lg:border-t-0 lg:pt-0">
                             <form
                                 action="{{ route('admin.horarios.generar') }}"
                                 method="POST"
@@ -194,12 +197,12 @@
                     </div>
 
                     {{-- Meses del año --}}
-                    <div class="border-t border-ink-100 bg-ink-50/40 px-3 py-3">
-                        <div class="flex gap-1.5 overflow-x-auto">
+                    <div class="border-t border-ink-300 bg-paper-100 px-3 py-2">
+                        <div class="flex gap-1 overflow-x-auto">
                             @foreach ($meses as $numero => $nombre)
                                 <a
                                     href="{{ route('admin.horarios.index', array_filter(['user_id' => $user->id, 'anio' => $anio, 'mes' => $numero, 'rol' => $rol !== 'todos' ? $rol : null])) }}"
-                                    class="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition-colors {{ $mes === $numero ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-ink-500 ring-1 ring-ink-100 hover:text-brand-700' }}"
+                                    class="inline-flex min-h-9 shrink-0 items-center border px-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.04em] transition-colors {{ $mes === $numero ? 'border-ink-950 bg-ink-950 text-paper-50' : 'border-ink-300 bg-paper-50 text-ink-600 hover:border-ink-500 hover:text-ink-950' }}"
                                     @if ($mes === $numero) aria-current="page" @endif
                                 >
                                     {{ $nombre }}
@@ -210,12 +213,12 @@
                 </section>
 
                 {{-- Calendario --}}
-                <section class="card mt-6 p-6" data-reveal>
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <section class="mt-5 border border-ink-300 bg-paper-50" data-reveal>
+                    <div class="flex flex-col gap-2 border-b-2 border-ink-950 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
                         <div>
-                            <span class="eyebrow">Calendario del mes</span>
-                            <h2 class="mt-1 text-xl font-bold tracking-tight text-ink-900">{{ $meses[$mes] }} {{ $anio }}</h2>
-                            <p class="mt-1 text-xs leading-relaxed text-ink-500">
+                            <p class="mono-label">Calendario del mes</p>
+                            <h2 class="mt-1 font-display text-xl font-bold text-ink-950">{{ $meses[$mes] }} {{ $anio }}</h2>
+                            <p class="mt-1 text-xs leading-relaxed text-ink-600">
                                 Turnos asignados a {{ $user->name }}. Los domingos no se atiende y los sábados solo se trabaja de 07:00 a 15:00.
                             </p>
                         </div>
@@ -224,12 +227,13 @@
                         </x-badge>
                     </div>
 
-                    <div class="mt-6">
+                    <div class="p-3 sm:p-5">
                         @if ($turnosAsignados === 0)
                             <x-empty-state
+                                class="border-0 px-0 py-6"
                                 icon="calendar"
                                 title="Sin horario generado"
-                                description="Genera el horario de este mes. El sistema distribuirá turnos aleatorios y garantizará exactamente 150 horas."
+                                description="Genera el horario de este mes. El sistema distribuirá turnos y garantizará exactamente 150 horas."
                             >
                                 <x-slot:action>
                                     <form action="{{ route('admin.horarios.generar') }}" method="POST">
@@ -251,13 +255,13 @@
                 </section>
 
                 {{-- Reglas del generador --}}
-                <section class="card mt-6 border-brand-100 bg-brand-50/50 p-5" data-reveal>
+                <section class="mt-5 border border-maize-300 bg-maize-50 p-5" data-reveal>
                     <div class="flex items-start gap-3">
-                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-brand-700 shadow-sm">
+                        <span class="icon-seal border-maize-400 bg-maize-100 text-maize-800">
                             <x-icon name="info" class="h-5 w-5" />
                         </span>
-                        <div class="text-xs leading-relaxed text-ink-600">
-                            <p class="font-bold text-ink-900">Reglas del horario mensual</p>
+                        <div class="text-xs leading-relaxed text-maize-900/90">
+                            <p class="font-display text-base font-bold text-ink-950">Reglas del horario mensual</p>
                             <ul class="mt-1.5 list-inside list-disc space-y-0.5">
                                 <li>Lunes a viernes: mañana 07:00–13:00 (6 h), tarde 13:00–19:30 (6.5 h) o todo el día 07:00–19:00 (12 h).</li>
                                 <li>Sábados: solo turno completo de 07:00 a 15:00 (8 h).</li>

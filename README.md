@@ -10,6 +10,8 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 
 > **Demo rápida para revisión:** abre el proyecto en [Codespaces](#codespaces). La API de RENIEC es opcional: sin token, el formulario permite escribir los nombres manualmente. El token no se incluye en el repositorio por seguridad.
 
+> **Rediseño visual:** la demo usa la dirección **“El parte de la posta”** (papel hueso, verde posta, sellos y filas de registro). El sistema completo está documentado en [`DESIGN.md`](DESIGN.md).
+
 ---
 
 ## Tabla de contenidos
@@ -20,15 +22,18 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 4. [Codespaces](#codespaces)
 5. [Uso y rutas](#uso-y-rutas)
 6. [Credenciales demo](#credenciales-demo)
-7. [Horarios mensuales](#horarios-mensuales)
-8. [Citas médicas](#citas-médicas)
-9. [Campañas preventivas](#campañas-preventivas)
-10. [Compilar assets](#compilar-assets)
-11. [Tests](#tests)
-12. [Base de datos](#base-de-datos)
-13. [Despliegue en producción](#despliegue-en-producción)
-14. [Solución rápida de problemas](#solución-rápida-de-problemas)
-15. [Documentación adicional](#documentación-adicional)
+7. [Sistema visual y UI](#sistema-visual-y-ui)
+8. [Accesibilidad y verificación](#accesibilidad-y-verificación)
+9. [Horarios mensuales](#horarios-mensuales)
+10. [Citas médicas](#citas-médicas)
+11. [Campañas preventivas](#campañas-preventivas)
+12. [Compilar assets](#compilar-assets)
+13. [Tests](#tests)
+14. [Base de datos](#base-de-datos)
+15. [Despliegue en producción](#despliegue-en-producción)
+16. [Solución rápida de problemas](#solución-rápida-de-problemas)
+17. [Documentación adicional](#documentación-adicional)
+18. [Créditos y licencias](#créditos-y-licencias)
 
 ---
 
@@ -39,12 +44,13 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 | Backend                    | Laravel 11.57 · PHP 8.2+ con `pdo_mysql` e `intl`                                  |
 | Base de datos              | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción                             |
 | Tests                      | PHPUnit con SQLite `:memory:` (solo pruebas automáticas)                           |
-| Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+                                   |
+| Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+ · fuentes autoalojadas              |
 | Autenticación              | Guard `web`, sesiones de Laravel y middleware de roles                             |
 | Archivos                   | Disco `public` de Laravel para fotos de perfil                                     |
 | Entorno de desarrollo      | GitHub Codespaces, XAMPP o Docker Compose                                          |
 | API externa                | RENIEC vía `apis.net.pe` (opcional; sin token se ingresan los nombres manualmente) |
 | Herramientas de desarrollo | Laravel Boost (dev), Composer, npm                                                 |
+| Sistema visual             | “El parte de la posta” · documentado en `DESIGN.md`                                |
 
 SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó de versionarse y la app espera una conexión MySQL/MariaDB. Los tests conservan SQLite en memoria porque es rápido y no requiere un servidor; esa configuración vive en `phpunit.xml`.
 
@@ -153,6 +159,12 @@ Necesario para las fotos de perfil:
 
 ```bash
 php artisan storage:link
+```
+
+Si Laravel corre dentro de Docker con el proyecto montado desde Windows/WSL, el enlace absoluto puede apuntar a una ruta que no existe dentro del contenedor. En ese caso, crea un enlace **relativo**:
+
+```bash
+ln -sfn ../storage/app/public public/storage
 ```
 
 ### 6. Compilar assets
@@ -635,6 +647,152 @@ Ingresan en `/equipo/login` con su **DNI** y la contraseña. La administración 
 
 ---
 
+## Sistema visual y UI
+
+La demo se rediseñó con la dirección **“El parte de la posta”**: el portal se comporta como la hoja diaria de una posta de salud, con folio, fecha, filas de registro, sellos y una fotografía prendida con cinta. No es una landing genérica de clínica ni un dashboard SaaS. El documento completo —tokens, componentes, superficies, decisiones y créditos— vive en [`DESIGN.md`](DESIGN.md).
+
+### Identidad y tono
+
+- **Producto:** Hampi, presentado junto a **Microred Socabaya** (Arequipa, Perú).
+- **Tono:** claro, humano y directo; sin paternalismo, jerga innecesaria ni hype comercial.
+- **Honestidad:** el portal se presenta siempre como **demo académica funcional** con datos simulados. No se inventan testimonios, convenios, métricas oficiales, leyes, certificaciones ni claims de producción.
+- **Especificidad local:** *posta*, *microred*, *pizarrín*, *rol de atención* y *campaña preventiva* se usan como parte del dominio, no como decoración.
+
+### Tipografía
+
+| Rol | Fuente | Uso |
+| --- | --- | --- |
+| Display | **Archivo** | Titulares, nombres, números grandes y títulos de sección. |
+| Texto / UI | **Instrument Sans** | Párrafos, botones, formularios y navegación. |
+| Dato | **Martian Mono** | Fechas, folios, horas, DNI, códigos y estados. |
+
+Las tres fuentes están **autoalojadas** en `public/fonts/hampi/` como WOFF2, con licencia SIL Open Font License 1.1. No se hacen peticiones a Google Fonts ni a Bunny Fonts en tiempo de ejecución. La configuración de Vite ya no contiene integración remota de fuentes.
+
+### Paleta
+
+| Token | Hex | Uso |
+| --- | --- | --- |
+| `paper-50` | `#fbfaf6` | Hojas, tarjetas y campos. |
+| `paper-100` | `#f4f2ea` | Fondo único del portal. |
+| `paper-200` | `#e8e5d9` | Hover y zonas secundarias. |
+| `ink-950` | `#0b0f0c` | Tinta principal, cabeceras y texto de máximo contraste. |
+| `ink-600` | `#37423a` | Texto secundario. |
+| `ink-300` | `#aab1a6` | Reglas y bordes. |
+| `brand-700` | `#17522f` | Verde posta: acción principal y enlaces. |
+| `brand-900` | `#0d2f1d` | Panel editorial oscuro. |
+| `signal-600` | `#c9471b` | Naranja de señal y subrayado activo. |
+| `stamp-600` | `#b3261e` | Rojo sello, demo, errores y acciones destructivas. |
+| `cobalt-700` | `#234a87` | Información administrativa. |
+| `maize-400` | `#e7b32a` | Atención, campañas y cinta de la foto. |
+
+El fondo se define una sola vez con `.bg-ledger` (papel hueso + retícula tenue). No hay secciones full-width opacas que rompan esa hoja. El color nunca es el único portador de un estado: los badges siempre incluyen texto y, cuando aporta, un icono.
+
+### Composición de la portada
+
+El primer viewport contiene, en este orden:
+
+1. Hoja asimétrica con folio, fecha, sección y sello **DEMO ACADÉMICA**.
+2. Titular “La salud de tu barrio, hoy.”.
+3. Formulario de DNI integrado en la hoja (no en un hero separado).
+4. Tres filas de estado: médicos en rol, vacunas disponibles y próxima campaña.
+5. Foto comunitaria pequeña con cinta y crédito.
+6. Acceso al directorio de postas.
+
+Debajo aparecen los servicios en formato ledger, las preguntas frecuentes y un cierre tipo ventanilla. En 390×844 el formulario de DNI ya es visible sin desplazamiento horizontal.
+
+### Superficies
+
+| Superficie | Tratamiento |
+| --- | --- |
+| Portada y páginas públicas | Hoja publicada: más aire, foto, ledger y cierre editorial. |
+| Accesos | `auth-shell` de dos columnas en escritorio; una columna en móvil. |
+| Administración | “Copia de escritorio”: `page-hero`, tabs, tablas, formularios y confirmaciones. |
+| Personal de salud | Hoja de turno: resumen de horas, calendario, perfil y agenda. |
+| Panel ciudadano | Ficha personal: saludo, próxima cita, historial y accesos rápidos. |
+
+Los paneles internos comparten el header y el fondo, pero no muestran la barra inferior ciudadana. En escritorio, el header incluye una barra superior de utilidades con sede, horario y acceso al panel correspondiente. En móvil, la navegación principal se resuelve con el menú hamburguesa y la barra inferior de cinco accesos.
+
+### Componentes reutilizables
+
+| Componente / clase | Función |
+| --- | --- |
+| `x-site-logo` | Logo H, wordmark, bajada de Microred y badge de Socabaya. |
+| `x-page-hero` | Cabecera editorial con eyebrow, `h1`, descripción, acciones y sello. |
+| `x-auth-shell` | Marco compartido de los dos accesos internos. |
+| `x-empty-state` | Estado vacío con icono, explicación y acción. |
+| `.sheet` / `.sheet-head` | Hoja y banda de folio con datos monoespaciados. |
+| `.ledger-row` | Fila de libro para servicios y datos. |
+| `.stamp` | Sello demo/estado con rotación leve. |
+| `.taped-photo` | Foto con marco de papel y cinta. |
+| `.data-table` | Tabla de lectura densa para administración. |
+| `.input`, `.label`, `.btn`, `.badge` | Controles base con foco, estados y tamaños táctiles. |
+| `.icon-seal` | Icono dentro de un sello cuadrado. |
+| `hampi.partials.calendario` | Calendario mensual de escritorio y agenda vertical móvil. |
+
+### Responsive y movimiento
+
+- Mobile-first con revisión en **320, 390, 768, 1024 y 1440 px**.
+- Controles con altura mínima de **44px** y campos con `font-size: 16px` para evitar zoom no deseado en iOS.
+- En `< 1024px` se usa el menú hamburguesa; en móvil se añade la barra inferior con cinco destinos.
+- Las tablas y tabs administrativos permiten desplazamiento horizontal cuando no caben, sin romper el ancho de la página.
+- `data-reveal` solo oculta los bloques que están fuera del primer viewport; si JS falla, el contenido sigue visible. La animación es de 500ms y se ejecuta una sola vez.
+- `prefers-reduced-motion: reduce` desactiva reveal, sello, contadores y transiciones; el contenido queda visible.
+- Las animaciones decorativas no son infinitas y no bloquean la lectura ni la interacción.
+
+### Archivos de diseño
+
+- `resources/css/app.css`: tokens, fuentes, base, componentes, foco, fondo y motion.
+- `resources/js/app.js`: menú móvil, reveal, password toggle, filtros y disponibilidad de citas.
+- `resources/views/hampi/layout.blade.php`: header, navegación, fondo único, footer y barra móvil.
+- `resources/views/hampi/partials/calendario.blade.php`: calendario y agenda móvil.
+- `resources/views/components/`: logo, page hero, auth shell, empty state e iconos.
+- `public/fonts/hampi/`: fuentes autoalojadas.
+- `DESIGN.md`: documento maestro del sistema visual.
+
+### Cómo extender la UI
+
+1. Define si la pantalla **persuade** (público) u **opera** (panel).
+2. Reutiliza `x-page-hero`, `.sheet`, `.mono-label`, `.badge`, `.btn` y `.input` antes de crear estilos nuevos.
+3. Mantén un solo `h1` y una jerarquía clara de `h2`/`h3`.
+4. Incluye estado vacío, error y carga; no rellenes con datos inventados.
+5. Verifica teclado, foco, 320px, zoom 200%, contraste y reduced motion.
+6. Si aparece un patrón nuevo, actualízalo en `DESIGN.md` y compila con `npm run build`.
+
+---
+
+## Accesibilidad y verificación
+
+Objetivo declarado: **WCAG 2.2 AA** para la demo académica. La accesibilidad se trató como parte del diseño, no como un parche posterior.
+
+### Implementado
+
+- **Estructura:** un `h1` por pantalla, secciones con `h2`/`h3`, landmarks (`header`, `nav`, `main`, `footer`) y skip link “Saltar al contenido principal”.
+- **Teclado:** todos los controles son alcanzables; foco visible con outline de 2px signal-600; los campos añaden un halo brand-100; el skip link mueve el foco a `main#contenido`.
+- **Menú móvil:** `aria-expanded`, `aria-controls`, foco al primer enlace al abrir, cierre con `Escape` y retorno de foco al botón.
+- **Formularios:** labels asociados, ayudas con `aria-describedby`, errores con `role="alert"` y estado de consulta RENIEC con `aria-live="polite"`.
+- **Estados:** badges con texto; no se depende solo del color. Los turnos del calendario tienen etiqueta y leyenda.
+- **Targets:** mínimo 44px en botones, enlaces de navegación, barra inferior, tabs y controles.
+- **Contraste:** texto y estados revisados sobre papel, verde y fondos oscuros; los tamaños pequeños usan tonos ink de alto contraste.
+- **Movimiento:** `prefers-reduced-motion` desactiva transiciones y animaciones; `initReveal` muestra todo de inmediato cuando corresponde.
+- **Sin JS:** el portal público, los textos, el formulario de acceso y la navegación siguen siendo legibles y utilizables. El JS solo mejora la consulta RENIEC, el menú, el reveal y la carga dinámica de horarios.
+- **Imágenes:** `alt` descriptivo; la foto de referencia se acredita y no se presenta como oficial.
+
+### Evidencia de la revisión
+
+| Verificación | Resultado |
+| --- | --- |
+| axe-core 4.10.2 sobre 15 pantallas | **0 violaciones** de WCAG 2.2 A/AA configuradas. |
+| Foco con teclado | Skip link, foco visible, menú móvil y retorno con Escape verificados. |
+| Reduced motion | Sin bloques ocultos; transiciones reducidas a ~0.01ms. |
+| Responsive | Sin scroll horizontal en 320, 390, 768, 1024 y 1440 px. |
+| Navegador real | Rutas públicas, logins, admin, panel del trabajador, panel ciudadano y citas renderizadas con PHP 8.3 + MySQL 8.4. |
+| Consola JS | Sin errores de la aplicación en las rutas capturadas. |
+| Formularios | Errores, estados vacíos, login de personal, login admin y acceso ciudadano probados. |
+
+La auditoría automatizada no sustituye una revisión con personas usuarias ni una certificación formal. Para publicar un servicio real habría que revisar privacidad, tratamiento de datos personales, contenido institucional y flujos asistidos.
+
+---
+
 ## Horarios mensuales
 
 ### Reglas de negocio
@@ -857,7 +1015,7 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 | `403` o redirección al entrar a `/admin`    | La cuenta no tiene rol administrativo                | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel.                         |
 | No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI                    | Entra en `/equipo/login` con DNI y contraseña.                                                         |
 | `429 Too Many Requests`                     | Rate limit del login                                 | Espera un minuto o limpia la caché del rate limiter.                                                   |
-| Foto de perfil 404                          | Falta el enlace de storage                           | `php artisan storage:link`.                                                                            |
+| Foto de perfil 404 o 403                    | Falta el enlace de storage o es absoluto y el contenedor no lo resuelve | `php artisan storage:link`; si usas Docker con bind mount, `ln -sfn ../storage/app/public public/storage`. |
 | Error al generar 150 h                      | Combinación inválida o mes sin días hábiles          | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12.                                   |
 | El puerto 8000 no abre en Codespaces        | Visibilidad del puerto                               | Abre la pestaña **Ports** y pon el puerto en público.                                                  |
 | `npm run build` falla por versión de Node   | Node antiguo                                         | Usa Node 22.12+ (Vite 8).                                                                              |
@@ -866,11 +1024,31 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 ## Documentación adicional
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): arquitectura, sistema de diseño, recetas y checklist de cambios.
+- [`DESIGN.md`](DESIGN.md): sistema visual completo, tokens, componentes, superficies, accesibilidad, créditos y checklist de demo.
+- [`PRODUCT.md`](PRODUCT.md): verdad de producto, usuarios, alcance y restricciones de la demo.
 - [`CHANGELOG.md`](CHANGELOG.md): historial de versiones y cambios relevantes.
 
 ---
 
 ## Créditos y licencias
 
-Proyecto académico de la Microred Socabaya. Construido con [Laravel](https://laravel.com), [Tailwind CSS](https://tailwindcss.com) y [Vite](https://vite.dev). Tipografía **Instrument Sans**. Las imágenes locales son de uso demostrativo.
+### Fotografía
+
+- **Obra:** *Young person's hand holding an old person's hand*.
+- **Autor:** Kampus Production.
+- **Fuente:** Pexels, foto [7551677](https://www.pexels.com/photo/young-persons-hand-holding-an-old-persons-hand-7551677/).
+- **Licencia:** [Pexels License](https://www.pexels.com/license/). Permite uso gratuito; el crédito se incluye de forma voluntaria.
+- **Transformación:** recorte a 1200×900 y exportación optimizada a JPG/WebP para la portada.
+- **Uso:** imagen de referencia. **No** es una fotografía oficial de la Microred Socabaya ni de una posta real.
+
+### Tipografías
+
+- **Archivo** — SIL Open Font License 1.1.
+- **Instrument Sans** — SIL Open Font License 1.1.
+- **Martian Mono** — SIL Open Font License 1.1.
+
+Las tres se sirven autoalojadas desde `public/fonts/hampi/` (WOFF2). Los textos completos de las licencias están en `public/fonts/hampi/licenses/`. No hay peticiones a Google Fonts ni Bunny Fonts en tiempo de ejecución.
+
+### Software y datos
+
+Proyecto académico de la Microred Socabaya. Construido con [Laravel](https://laravel.com) (MIT), [Tailwind CSS](https://tailwindcss.com) (MIT), [Vite](https://vite.dev) (MIT), [Lucide](https://lucide.dev) (ISC) y PHP. Los establecimientos, campañas, credenciales y citas son datos de demostración; no representan un servicio oficial ni una fuente institucional.

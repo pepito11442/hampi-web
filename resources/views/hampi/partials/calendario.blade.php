@@ -12,20 +12,28 @@
     $diasDelMes = $inicioMes->daysInMonth;
     $desplazamiento = ($inicioMes->dayOfWeek + 6) % 7; // lunes = 0
     $hoy = now()->toDateString();
+    $estilos = [
+        'manana' => 'border-l-2 border-l-maize-500 bg-maize-50/60',
+        'tarde' => 'border-l-2 border-l-cobalt-500 bg-cobalt-50/60',
+        'completo' => 'border-l-2 border-l-brand-600 bg-brand-50/60',
+        'sabado' => 'border-l-2 border-l-signal-500 bg-signal-50/60',
+    ];
 @endphp
 
 <div>
     {{-- Calendario de escritorio --}}
     <div class="hidden sm:block">
-        <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-ink-400">
+        <div class="grid grid-cols-7 border-l border-t border-ink-300 bg-ink-50">
             @foreach (['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as $dia)
-                <div class="py-1">{{ $dia }}</div>
+                <div class="border-b border-r border-ink-300 px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-600">
+                    {{ $dia }}
+                </div>
             @endforeach
         </div>
 
-        <div class="mt-1.5 grid grid-cols-7 gap-1.5">
+        <div class="grid grid-cols-7 border-l border-ink-300">
             @for ($i = 0; $i < $desplazamiento; $i++)
-                <div class="min-h-[88px]" aria-hidden="true"></div>
+                <div class="min-h-[100px] border-b border-r border-ink-200 bg-ink-50/50" aria-hidden="true"></div>
             @endfor
 
             @for ($dia = 1; $dia <= $diasDelMes; $dia++)
@@ -33,36 +41,32 @@
                     $fecha = \Carbon\Carbon::create($anio, $mes, $dia);
                     $clave = $fecha->format('Y-m-d');
                     $horario = $horarios->get($clave);
-                    $estilo = match ($horario?->turno) {
-                        'manana' => 'border-amber-200 bg-amber-50 text-amber-900',
-                        'tarde' => 'border-sky-200 bg-sky-50 text-sky-900',
-                        'completo' => 'border-brand-200 bg-brand-50 text-brand-900',
-                        'sabado' => 'border-violet-200 bg-violet-50 text-violet-900',
-                        default => $fecha->isSunday()
-                            ? 'border-ink-100/60 bg-ink-50/50 text-ink-400'
-                            : 'border-ink-100 bg-white text-ink-600',
-                    };
+                    $estilo = $horario ? ($estilos[$horario->turno] ?? 'border-l-2 border-l-ink-300') : '';
                 @endphp
 
-                <div class="min-h-[88px] rounded-xl border p-2 text-left transition-colors {{ $estilo }} {{ $clave === $hoy ? 'ring-2 ring-brand-300 ring-offset-1' : '' }}">
+                <div
+                    class="relative min-h-[100px] border-b border-r border-ink-200 p-2.5 text-left {{ $fecha->isSunday() && ! $horario ? 'bg-ink-50/60 text-ink-500' : 'bg-paper-50 text-ink-700' }} {{ $estilo }} {{ $clave === $hoy ? 'outline outline-2 -outline-offset-2 outline-ink-950' : '' }}"
+                    @if ($clave === $hoy) aria-current="date" @endif
+                >
                     <div class="flex items-center justify-between gap-1">
-                        <span class="text-xs font-bold">{{ $dia }}</span>
+                        <span class="font-mono text-[12px] font-semibold tabular">{{ $dia }}</span>
                         @if ($clave === $hoy)
-                            <span class="text-[9px] font-bold uppercase tracking-wide text-brand-700">Hoy</span>
+                            <span class="border border-ink-950 bg-ink-950 px-1 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-paper-50">Hoy</span>
                         @endif
                     </div>
 
                     @if ($horario)
-                        <span class="mt-1 inline-flex rounded-full bg-white/75 px-1.5 py-0.5 text-[9px] font-bold leading-none">
+                        <span class="mt-2 inline-flex items-center gap-1 border border-ink-300/70 bg-paper-50/80 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase leading-none tracking-[0.04em] text-ink-700">
                             {{ $horario->turno_label }}
                         </span>
-                        <p class="mt-1 text-[10px] leading-tight opacity-80">
+                        <p class="mt-1 font-mono text-[10px] leading-tight text-ink-700">
                             {{ $horario->hora_inicio }}–{{ $horario->hora_fin }}
                         </p>
+                        <p class="font-mono text-[10px] leading-tight text-ink-600">{{ $horario->horas }} h</p>
                     @elseif ($fecha->isSunday())
-                        <p class="mt-2 text-[10px] leading-tight">Sin atención</p>
+                        <p class="mt-2 font-mono text-[10px] uppercase leading-tight tracking-[0.04em]">Sin atención</p>
                     @else
-                        <p class="mt-2 text-[10px] leading-tight opacity-50">Libre</p>
+                        <p class="mt-2 font-mono text-[10px] uppercase leading-tight tracking-[0.04em] text-ink-500">Libre</p>
                     @endif
                 </div>
             @endfor
@@ -70,51 +74,49 @@
     </div>
 
     {{-- Agenda para móvil --}}
-    <div class="space-y-2 sm:hidden">
+    <div class="sm:hidden">
         @if ($horarios->isEmpty())
-            <p class="rounded-2xl border border-dashed border-ink-200 bg-white/70 px-4 py-8 text-center text-xs text-ink-500">
+            <p class="border border-dashed border-ink-300 bg-paper-50 px-4 py-8 text-center text-xs text-ink-600">
                 No hay turnos asignados para este mes.
             </p>
         @else
-            @foreach ($horarios as $horario)
-                @php
-                    $estilo = match ($horario->turno) {
-                        'manana' => 'border-amber-200 bg-amber-50 text-amber-900',
-                        'tarde' => 'border-sky-200 bg-sky-50 text-sky-900',
-                        'completo' => 'border-brand-200 bg-brand-50 text-brand-900',
-                        'sabado' => 'border-violet-200 bg-violet-50 text-violet-900',
-                        default => 'border-ink-100 bg-white text-ink-700',
-                    };
-                @endphp
+            <div class="border-t border-ink-300">
+                @foreach ($horarios as $horario)
+                    @php
+                        $estilo = $estilos[$horario->turno] ?? 'border-l-2 border-l-ink-300';
+                    @endphp
 
-                <div class="flex items-center justify-between gap-3 rounded-2xl border p-3 {{ $estilo }}">
-                    <div class="flex items-center gap-3">
-                        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/75 text-xs font-bold">
-                            {{ $horario->fecha->format('d') }}
-                        </span>
-                        <div>
-                            <p class="text-xs font-bold">
-                                {{ $diasSemana[$horario->fecha->dayOfWeek] }} {{ $horario->fecha->format('d/m') }}
-                            </p>
-                            <p class="mt-0.5 text-[11px] opacity-80">
-                                {{ $horario->hora_inicio }}–{{ $horario->hora_fin }} · {{ $horario->horas }} h
-                            </p>
+                    <div class="flex items-center justify-between gap-3 border-b border-r border-ink-200 bg-paper-50 p-3 {{ $estilo }}">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-11 w-11 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-mono text-[13px] font-semibold text-ink-800">
+                                {{ $horario->fecha->format('d') }}
+                            </span>
+                            <div>
+                                <p class="font-display text-sm font-bold text-ink-950">
+                                    {{ $diasSemana[$horario->fecha->dayOfWeek] }} {{ $horario->fecha->format('d/m') }}
+                                </p>
+                                <p class="mt-0.5 font-mono text-[10px] text-ink-600">
+                                    {{ $horario->hora_inicio }}–{{ $horario->hora_fin }} · {{ $horario->horas }} h
+                                </p>
+                            </div>
                         </div>
+                        <span class="border border-ink-300 bg-paper-50 px-1.5 py-1 font-mono text-[9px] font-semibold uppercase leading-none tracking-[0.04em] text-ink-700">
+                            {{ $horario->turno_label }}
+                        </span>
                     </div>
-                    <span class="rounded-full bg-white/80 px-2 py-1 text-[10px] font-bold">{{ $horario->turno_label }}</span>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
 
-            <p class="pt-1 text-center text-[11px] text-ink-400">Domingos: sin atención.</p>
+            <p class="pt-2 text-center font-mono text-[10px] uppercase tracking-[0.05em] text-ink-500">Domingos: sin atención.</p>
         @endif
     </div>
 
     {{-- Leyenda --}}
-    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-semibold text-ink-500">
-        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>Mañana 07:00–13:00</span>
-        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-sky-400"></span>Tarde 13:00–19:30</span>
-        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-brand-500"></span>Todo el día 07:00–19:00</span>
-        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-violet-400"></span>Sábado 07:00–15:00</span>
-        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-ink-200"></span>Domingo sin atención</span>
+    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.05em] text-ink-600">
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 border border-maize-500 bg-maize-400"></span>Mañana 07:00–13:00</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 border border-cobalt-500 bg-cobalt-400"></span>Tarde 13:00–19:30</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 border border-brand-600 bg-brand-500"></span>Todo el día 07:00–19:00</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 border border-signal-500 bg-signal-400"></span>Sábado 07:00–15:00</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 border border-ink-300 bg-ink-100"></span>Domingo sin atención</span>
     </div>
 </div>

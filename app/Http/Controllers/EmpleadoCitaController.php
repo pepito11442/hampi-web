@@ -63,7 +63,7 @@ class EmpleadoCitaController extends Controller
             $paciente = Ciudadano::where('dni', $dni)->first();
         }
 
-        $fecha = $this->fechaDelFormulario($request->query('fecha', old('fecha', '')), $medico);
+        $fecha = $this->fechaDelFormulario($request->query('fecha', old('fecha', '')), $medico, $agenda);
         $horario = $agenda->horarioDelDia($medico, $fecha);
         $slots = $agenda->slots($medico, $fecha);
 
@@ -245,7 +245,7 @@ class EmpleadoCitaController extends Controller
     /**
      * Fecha inicial: la indicada, o el primer turno próximo del médico.
      */
-    private function fechaDelFormulario(?string $fecha, User $medico): Carbon
+    private function fechaDelFormulario(?string $fecha, User $medico, AgendaCitas $agenda): Carbon
     {
         if ($fecha && Carbon::hasFormat($fecha, 'Y-m-d')) {
             $fechaCarbon = Carbon::createFromFormat('!Y-m-d', $fecha)->startOfDay();
@@ -253,11 +253,21 @@ class EmpleadoCitaController extends Controller
             return $fechaCarbon->lt(today()) ? today() : $fechaCarbon;
         }
 
-        $proximoHorario = Horario::where('user_id', $medico->id)
+        $proximosHorarios = Horario::where('user_id', $medico->id)
             ->whereDate('fecha', '>=', today())
             ->orderBy('fecha')
-            ->first();
+            ->get();
 
-        return $proximoHorario?->fecha?->copy()->startOfDay() ?? today();
+        // Si el turno de hoy ya terminó, abre el formulario en el próximo día
+        // que realmente tenga bloques libres.
+        foreach ($proximosHorarios as $horario) {
+            $dia = $horario->fecha->copy()->startOfDay();
+
+            if (! empty($agenda->slots($medico, $dia))) {
+                return $dia;
+            }
+        }
+
+        return $proximosHorarios->last()?->fecha?->copy()->startOfDay() ?? today();
     }
 }

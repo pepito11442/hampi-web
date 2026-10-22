@@ -205,12 +205,20 @@ class CitaMedicaTest extends TestCase
         ]);
 
         $this->post('/ingreso-dni', ['dni' => $ciudadano->dni])
+            ->assertRedirect(route('ciudadano.panel'));
+
+        $this->get(route('ciudadano.panel'))
             ->assertOk()
             ->assertSee($ciudadano->nombres)
             ->assertSee($medico->name)
             ->assertSee('Medicina General');
 
         $this->assertSame('Rosa Elena', $ciudadano->fresh()->nombres);
+    }
+
+    public function test_el_panel_ciudadano_sin_sesion_redirige_al_acceso(): void
+    {
+        $this->get('/mi-panel')->assertRedirect('/#acceso');
     }
 
     public function test_no_se_puede_regenerar_un_horario_con_citas_futuras(): void

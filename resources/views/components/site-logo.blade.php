@@ -1,22 +1,23 @@
 @props([
     'href' => '/',
-    'subtitulo' => 'Salud comunitaria · Arequipa',
+    'subtitulo' => 'Microred Socabaya',
     'badge' => false,
 ])
 
-<a href="{{ $href }}" {{ $attributes->merge(['class' => 'group flex items-center gap-3']) }} aria-label="Hampi, volver al inicio">
-    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow transition-transform duration-300 group-hover:scale-105">
-        <x-icon name="heart-pulse" class="h-6 w-6" stroke-width="2" />
+<a href="{{ $href }}" {{ $attributes->merge(['class' => 'group flex min-h-11 items-center gap-3']) }} aria-label="Hampi, volver al inicio">
+    <span class="relative grid h-10 w-10 shrink-0 place-items-center border-2 border-ink-950 bg-brand-700 text-paper-50 transition-colors group-hover:bg-brand-800">
+        <span class="font-display text-lg font-extrabold leading-none">H</span>
+        <span class="absolute -bottom-1 -right-1 h-2.5 w-2.5 border border-ink-950 bg-signal-500" aria-hidden="true"></span>
     </span>
     <span class="leading-tight">
         <span class="flex items-center gap-2">
-            <span class="text-lg font-bold tracking-tight text-ink-900">Hampi</span>
+            <span class="font-display text-lg font-extrabold tracking-[-0.03em] text-ink-950">Hampi</span>
             @if($badge)
-                <span class="hidden rounded-full border border-brand-200/70 bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700 sm:inline-block">
+                <span class="hidden border border-ink-300 px-1.5 py-0.5 font-mono text-[9px] font-medium uppercase tracking-[0.08em] text-ink-600 sm:inline-block">
                     Socabaya
                 </span>
             @endif
         </span>
-        <span class="block text-[11px] font-medium text-ink-400">{{ $subtitulo }}</span>
+        <span class="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.08em] text-ink-500">{{ $subtitulo }}</span>
     </span>
 </a>

@@ -4,6 +4,50 @@ Todos los cambios relevantes de este proyecto se registran aquí.
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Fechas en `AAAA-MM-DD`.
 
+## [2026-10-21] — Rediseño “El parte de la posta”
+
+### Añadido
+
+- Nuevo sistema visual y de interfaz para **todo el portal**: portada pública, páginas informativas, accesos, administración, paneles de personal y panel ciudadano.
+- Tipografías autoalojadas **Archivo**, **Instrument Sans** y **Martian Mono** en `public/fonts/hampi/`; Vite ya no carga fuentes desde Bunny.
+- Documento [`DESIGN.md`](DESIGN.md) con dirección visual, tokens, componentes, superficies, accesibilidad y créditos.
+- Foto de portada de referencia de **Kampus Production / Pexels** (foto 7551677), recortada a 1200×900 y exportada a JPG/WebP con crédito visible.
+
+### Cambiado
+
+- Reescritura de tokens, fondo único `bg-ledger`, tipografía, componentes, formularios, tablas, calendario y navegación en `resources/css/app.css`.
+- Portada con hoja asimétrica, formulario DNI en el primer viewport, filas de estado, foto con cinta y sello **DEMO ACADÉMICA**.
+- Páginas públicas, logins, dashboard administrativo, equipo, horarios, campañas, panel del trabajador, citas y panel ciudadano alineados al nuevo lenguaje visual.
+- Header autenticado: el personal ve **Panel administrativo** o **Mi panel de trabajo** en lugar de “Acceso con DNI”.
+- Horas visibles estandarizadas a formato 24 h en slots, citas y panel ciudadano.
+- La agenda médica abre en el próximo día con bloques disponibles.
+- El acceso ciudadano ahora usa PRG: `POST /ingreso-dni` redirige a `/mi-panel`; el panel exige sesión y vuelve a `/#acceso` sin ella.
+- Calendario con tipografía mayor y agenda móvil más legible.
+- Pizarrín público en dos columnas para evitar una columna vacía.
+- README ampliado con sistema visual, accesibilidad, verificación, créditos de imagen y fuentes.
+
+### Corregido
+
+- Formulario anidado en la gestión de equipo.
+- Semántica de listas `dl` en portada y campañas.
+- Foco del skip link y destino `main#contenido`.
+- Umbral del menú móvil alineado con el breakpoint `lg` (1024 px).
+- Fecha inicial del formulario de citas y consulta dinámica de disponibilidad.
+- Copia de estado vacío del panel ciudadano y tiempos a 24 h.
+
+### Eliminado
+
+- Rasters `hero-atencion.jpg/.webp` sin uso y sin procedencia verificable.
+- Claims institucionales no verificados y duplicaciones de la nota de demo.
+
+### Verificación
+
+- axe-core 4.10.2 sobre 15 pantallas: **0 violaciones** WCAG 2.2 A/AA configuradas.
+- Sin overflow horizontal en 320, 390, 768, 1024 y 1440 px.
+- Revisión de teclado, foco, Escape, reduced motion y render real con PHP 8.3 + MySQL 8.4.
+
+---
+
 ## [Sin publicar]
 
 ### Añadido

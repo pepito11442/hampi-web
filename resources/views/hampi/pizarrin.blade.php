@@ -21,13 +21,13 @@
     >
         <x-slot:actions>
             @if ($ultimaActualizacion)
-                <span class="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white px-4 py-2 text-xs font-semibold text-ink-600">
-                    <x-icon name="clock" class="h-4 w-4 text-brand-600" />
+                <span class="inline-flex min-h-10 items-center gap-2 border border-ink-300 bg-paper-50 px-3 font-mono text-[10px] uppercase tracking-[0.05em] text-ink-600">
+                    <x-icon name="clock" class="h-4 w-4 text-brand-700" />
                     Actualizado {{ $ultimaActualizacion->locale('es')->diffForHumans() }}
                 </span>
             @endif
             <a href="/directorio-postas" class="btn btn-secondary btn-sm">
-                <x-icon name="map-pin" class="h-4 w-4 text-brand-600" />
+                <x-icon name="map-pin" class="h-4 w-4" />
                 Ver postas
             </a>
         </x-slot:actions>
@@ -43,44 +43,43 @@
             >
                 <x-slot:action>
                     <a href="/medicos-hoy" class="btn btn-secondary btn-sm">
-                        <x-icon name="stethoscope" class="h-4 w-4 text-brand-600" />
+                        <x-icon name="stethoscope" class="h-4 w-4" />
                         Ver médicos de hoy
                     </a>
                 </x-slot:action>
             </x-empty-state>
         @else
-            {{-- Filtros por disponibilidad --}}
-            <div class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between" data-reveal>
+            <div class="flex flex-col gap-4 border-y border-ink-300 py-3 lg:flex-row lg:items-center lg:justify-between" data-reveal>
                 <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar vacunas por disponibilidad">
                     <button type="button" class="filter-pill" data-stock-filter="all" aria-pressed="true">
                         Todas
-                        <span class="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]" data-vaccine-count>{{ $vacunas->count() }}</span>
+                        <span class="border border-current px-1.5 py-0.5 text-[9px]" data-vaccine-count>{{ $vacunas->count() }}</span>
                     </button>
                     <button type="button" class="filter-pill" data-stock-filter="Disponible" aria-pressed="false">Disponibles</button>
                     <button type="button" class="filter-pill" data-stock-filter="Por agotarse" aria-pressed="false">Por agotarse</button>
                     <button type="button" class="filter-pill" data-stock-filter="Agotado" aria-pressed="false">Agotadas</button>
                 </div>
-                <p class="flex items-center gap-2 text-xs text-ink-500">
-                    <x-icon name="info" class="h-4 w-4 shrink-0 text-brand-600" />
+                <p class="flex items-center gap-2 text-xs text-ink-600">
+                    <x-icon name="info" class="h-4 w-4 shrink-0 text-brand-700" />
                     Confirma la disponibilidad al acudir al establecimiento.
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-6 grid gap-5 md:grid-cols-2">
                 @foreach ($vacunas as $vacuna)
                     @php
                         [$stockClass, $stockIcon] = $stockStyles[$vacuna->stock_estado] ?? ['badge-slate', 'info'];
                     @endphp
 
                     <article
-                        class="card card-hover flex flex-col p-5 {{ $vacuna->es_urgente ? 'ring-1 ring-amber-200' : '' }}"
+                        class="flex flex-col border bg-paper-50 p-5 {{ $vacuna->es_urgente ? 'border-maize-400 md:col-span-2' : 'border-ink-300' }}"
                         data-vaccine-card
                         data-stock="{{ $vacuna->stock_estado }}"
                         data-reveal
                     >
-                        <div class="flex items-start justify-between gap-3">
-                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl {{ $vacuna->es_urgente ? 'bg-amber-50 text-amber-600' : 'bg-brand-50 text-brand-700' }}">
-                                <x-icon name="syringe" class="h-5 w-5" />
+                        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-ink-200 pb-3">
+                            <span class="mono-label text-ink-500">
+                                {{ $vacuna->es_urgente ? 'Aviso destacado' : 'Aviso de vacunación' }} / {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
                             </span>
                             <span class="badge {{ $stockClass }}">
                                 <x-icon :name="$stockIcon" class="h-3.5 w-3.5" />
@@ -88,34 +87,37 @@
                             </span>
                         </div>
 
-                        @if ($vacuna->es_urgente)
-                            <span class="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-800">
-                                <x-icon name="sparkles" class="h-3 w-3" />
-                                Campaña especial
+                        <div class="mt-4 flex items-start gap-3">
+                            <span class="icon-seal {{ $vacuna->es_urgente ? 'border-maize-400 bg-maize-50 text-maize-800' : '' }}">
+                                <x-icon name="syringe" class="h-5 w-5" />
                             </span>
-                        @endif
-
-                        <h2 class="mt-3 text-base font-bold leading-snug text-ink-900">{{ $vacuna->titulo }}</h2>
-
-                        <div class="mt-4 space-y-3 rounded-2xl border border-ink-100 bg-ink-50/50 p-3.5">
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-ink-400">Grupo objetivo</p>
-                                <p class="mt-0.5 text-xs leading-relaxed text-ink-700">{{ $vacuna->grupo_objetivo }}</p>
-                            </div>
-                            <div class="border-t border-ink-100 pt-2.5">
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-ink-400">Requisitos</p>
-                                <p class="mt-0.5 text-xs leading-relaxed text-ink-700">{{ $vacuna->requisitos }}</p>
+                                @if ($vacuna->es_urgente)
+                                    <span class="mono-label text-maize-800">Campaña especial</span>
+                                @endif
+                                <h2 class="mt-1 font-display text-xl font-bold leading-tight tracking-[-0.03em] text-ink-950">{{ $vacuna->titulo }}</h2>
                             </div>
                         </div>
 
-                        <div class="mt-auto flex items-center justify-between gap-3 border-t border-ink-100 pt-4">
-                            <p class="flex items-center gap-1.5 text-[11px] text-ink-500">
+                        <dl class="mt-5 flex-1 divide-y divide-ink-200 border-y border-ink-200">
+                            <div class="py-3">
+                                <dt class="mono-label">Grupo objetivo</dt>
+                                <dd class="mt-1 text-sm leading-relaxed text-ink-700">{{ $vacuna->grupo_objetivo }}</dd>
+                            </div>
+                            <div class="py-3">
+                                <dt class="mono-label">Requisitos</dt>
+                                <dd class="mt-1 text-sm leading-relaxed text-ink-700">{{ $vacuna->requisitos }}</dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                            <p class="flex items-center gap-1.5 text-xs text-ink-600">
                                 <x-icon name="building-2" class="h-3.5 w-3.5 shrink-0 text-ink-400" />
                                 {{ $vacuna->posta->nombre ?? 'Microred Socabaya' }}
                             </p>
-                            <a href="/directorio-postas" class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-700 hover:text-brand-800">
+                            <a href="/directorio-postas" class="link-arrow">
                                 Cómo llegar
-                                <x-icon name="chevron-right" class="h-3.5 w-3.5" />
+                                <x-icon name="arrow-right" class="h-3.5 w-3.5" />
                             </a>
                         </div>
                     </article>

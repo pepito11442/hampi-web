@@ -5,34 +5,37 @@
     'icon' => 'shield-plus',
 ])
 
-<section class="relative overflow-hidden">
-    <div class="container-page relative py-10 sm:py-14">
-        <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="max-w-2xl">
-                @if ($eyebrow)
-                    <span class="eyebrow">{{ $eyebrow }}</span>
-                @endif
+<section class="border-b border-ink-300">
+    <div class="container-page py-8 sm:py-11">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-ink-300 pb-2">
+                    <span class="mono-label text-ink-600">Hampi / {{ $eyebrow ?? 'Microred Socabaya' }}</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-500">
+                        {{ now()->locale('es')->isoFormat('D MMM YYYY') }}
+                    </span>
+                </div>
 
-                <h1 class="mt-3 text-3xl font-bold leading-tight tracking-tight text-ink-900 sm:text-4xl">
+                <h1 class="section-title">
                     {{ $title ?? $slot }}
                 </h1>
 
                 @if ($description)
-                    <p class="mt-3 text-sm leading-relaxed text-ink-500 sm:text-base">{{ $description }}</p>
+                    <p class="section-lead mt-4">{{ $description }}</p>
                 @endif
             </div>
 
-            <div class="hidden shrink-0 sm:grid" aria-hidden="true">
-                <span class="grid h-20 w-20 place-items-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow">
-                    <x-icon :name="$icon" class="h-9 w-9" />
+            <div class="flex shrink-0 flex-col items-start gap-3 lg:items-end">
+                <span class="icon-seal hidden lg:grid" aria-hidden="true">
+                    <x-icon :name="$icon" class="h-5 w-5" />
                 </span>
+
+                @isset($actions)
+                    <div class="flex flex-wrap items-center gap-2">
+                        {{ $actions }}
+                    </div>
+                @endisset
             </div>
         </div>
-
-        @isset($actions)
-            <div class="mt-6 flex flex-wrap items-center gap-3">
-                {{ $actions }}
-            </div>
-        @endisset
     </div>
 </section>

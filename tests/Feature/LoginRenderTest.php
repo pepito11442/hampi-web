@@ -11,7 +11,7 @@ class LoginRenderTest extends TestCase
         $this->get('/equipo/login')
             ->assertOk()
             ->assertSee('Tu horario y tu perfil,', false)
-            ->assertSee('<span class="text-brand-300">en un solo lugar.</span>', false)
+            ->assertSee('<span class="text-signal-300">en un solo lugar.</span>', false)
             ->assertSee('Ingreso con DNI')
             ->assertSee('Horario mensual con turnos');
     }
@@ -20,9 +20,9 @@ class LoginRenderTest extends TestCase
     {
         $this->get('/personal/login')
             ->assertOk()
-            ->assertSee('Gestión de la atención,', false)
-            ->assertSee('<span class="text-brand-300">en tiempo real.</span>', false)
-            ->assertSee('Personal de salud')
-            ->assertSee('Rate limiting activo');
+            ->assertSee('La gestión de la microred,', false)
+            ->assertSee('<span class="text-signal-300">en una sola hoja.</span>', false)
+            ->assertSee('Acceso administrativo')
+            ->assertSee('Control de intentos');
     }
 }

@@ -65,7 +65,7 @@ class AgendaCitas
 
             $slots[] = [
                 'hora' => $hora,
-                'etiqueta' => $inicio->copy()->locale('es')->isoFormat('h:mm a'),
+                'etiqueta' => $inicio->format('H:i'),
             ];
         }
 

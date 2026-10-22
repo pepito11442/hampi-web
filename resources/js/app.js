@@ -43,7 +43,7 @@ function initMobileMenu() {
     });
 
     window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768 && !menu.hidden) {
+        if (window.innerWidth >= 1024 && !menu.hidden) {
             menu.hidden = true;
             toggle.setAttribute('aria-expanded', 'false');
             iconOpen?.classList.remove('hidden');

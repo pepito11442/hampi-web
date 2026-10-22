@@ -1,5 +1,84 @@
 @import "tailwindcss";
 
+/* Tipografías autoalojadas (Bunny Fonts, licencias OFL). */
+@font-face {
+    font-family: "Instrument Sans";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/hampi/instrument-sans-400.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Instrument Sans";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/hampi/instrument-sans-500.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Instrument Sans";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/hampi/instrument-sans-600.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Instrument Sans";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/hampi/instrument-sans-700.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/hampi/archivo-500.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/hampi/archivo-600.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/hampi/archivo-700.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("/fonts/hampi/archivo-800.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Martian Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/hampi/martian-mono-400.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Martian Mono";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/hampi/martian-mono-500.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Martian Mono";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/hampi/martian-mono-600.woff2") format("woff2");
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
@@ -10,47 +89,170 @@
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
+    --font-display:
+        "Archivo", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono:
+        "Martian Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    /* Identidad Hampi: turquesa sanitaria + azul profundo */
-    --color-brand-50: #edfcf9;
-    --color-brand-100: #d2f8f0;
-    --color-brand-200: #a8f0e3;
-    --color-brand-300: #70e3d3;
-    --color-brand-400: #35cebd;
-    --color-brand-500: #14b8a6;
-    --color-brand-600: #0d9488;
-    --color-brand-700: #0f766e;
-    --color-brand-800: #115e59;
-    --color-brand-900: #134e4a;
-    --color-brand-950: #042f2e;
+    /* Papel de la posta: hueso frío, no crema de landing. */
+    --color-paper-50: #fbfaf6;
+    --color-paper-100: #f4f2ea;
+    --color-paper-200: #e8e5d9;
+    --color-paper-300: #d6d2c2;
+    --color-paper-400: #bab5a4;
 
-    --color-ink-50: #f6f8fa;
-    --color-ink-100: #e9eff4;
-    --color-ink-200: #d3dfe8;
-    --color-ink-300: #aebfcd;
-    --color-ink-400: #7f97aa;
-    --color-ink-500: #5c7489;
-    --color-ink-600: #455d72;
-    --color-ink-700: #354a5d;
-    --color-ink-800: #24394a;
-    --color-ink-900: #0f2a3d;
-    --color-ink-950: #071b2a;
+    /* Tinta y grises verdes. */
+    --color-ink-50: #f3f4ef;
+    --color-ink-100: #e5e7df;
+    --color-ink-200: #cfd3c8;
+    --color-ink-300: #aab1a6;
+    --color-ink-400: #5f6a63;
+    --color-ink-500: #46514a;
+    --color-ink-600: #37423a;
+    --color-ink-700: #2a332c;
+    --color-ink-800: #202821;
+    --color-ink-900: #151b16;
+    --color-ink-950: #0b0f0c;
 
-    --color-mist-50: #f0f9ff;
-    --color-mist-100: #e0f2fe;
-    --color-mist-200: #bae6fd;
+    /* Verde posta. */
+    --color-brand-50: #eef6f0;
+    --color-brand-100: #d9ecdd;
+    --color-brand-200: #b5d8bd;
+    --color-brand-300: #83bd91;
+    --color-brand-400: #4f9d65;
+    --color-brand-500: #2f7f4a;
+    --color-brand-600: #1d6539;
+    --color-brand-700: #17522f;
+    --color-brand-800: #124026;
+    --color-brand-900: #0d2f1d;
+    --color-brand-950: #071c11;
 
-    --color-sand-50: #fdfbf7;
-    --color-sand-100: #f7f1e5;
-    --color-sand-200: #efe3cd;
+    /* Naranja señal. */
+    --color-signal-50: #fff3ec;
+    --color-signal-100: #ffe1d2;
+    --color-signal-200: #ffc2a8;
+    --color-signal-300: #ff9b73;
+    --color-signal-400: #f77643;
+    --color-signal-500: #e85d2a;
+    --color-signal-600: #c9471b;
+    --color-signal-700: #a23816;
+    --color-signal-800: #7c2b12;
+    --color-signal-900: #5f2412;
 
-    --shadow-card: 0 0 #0000;
-    --shadow-lift: 0 0 #0000;
-    --shadow-glow: 0 0 #0000;
-    --shadow-sm: 0 0 #0000;
+    /* Rojo sello. */
+    --color-stamp-50: #fdf1ef;
+    --color-stamp-100: #fbe0db;
+    --color-stamp-200: #f5c2b8;
+    --color-stamp-300: #eb9788;
+    --color-stamp-400: #dc6a57;
+    --color-stamp-500: #c94a37;
+    --color-stamp-600: #b3261e;
+    --color-stamp-700: #8f1f18;
+    --color-stamp-800: #6f1b15;
+    --color-stamp-900: #4f1511;
 
-    --radius-4xl: 2rem;
-    --radius-5xl: 2.5rem;
+    /* Cobalto de sello administrativo / enlace. */
+    --color-cobalt-50: #eef4fb;
+    --color-cobalt-100: #dbe7f7;
+    --color-cobalt-200: #b9d0ef;
+    --color-cobalt-300: #8bb1e4;
+    --color-cobalt-400: #5a8ed4;
+    --color-cobalt-500: #3a70c0;
+    --color-cobalt-600: #2a5aa6;
+    --color-cobalt-700: #234a87;
+    --color-cobalt-800: #1d3c6d;
+    --color-cobalt-900: #172f54;
+
+    /* Maíz para atención y campañas. */
+    --color-maize-50: #fdf9e7;
+    --color-maize-100: #fbf0c2;
+    --color-maize-200: #f6df84;
+    --color-maize-300: #efc94a;
+    --color-maize-400: #e7b32a;
+    --color-maize-500: #d99a16;
+    --color-maize-600: #b57811;
+    --color-maize-700: #8f5b13;
+    --color-maize-800: #6e4616;
+    --color-maize-900: #5a3a16;
+
+    /* Escalas puente para las vistas heredadas. Evitan violetas y celestes
+       fuera del mundo mientras se migra el marcado. */
+    --color-sky-50: #eef4fb;
+    --color-sky-100: #dbe7f7;
+    --color-sky-200: #b9d0ef;
+    --color-sky-300: #8bb1e4;
+    --color-sky-400: #5a8ed4;
+    --color-sky-500: #3a70c0;
+    --color-sky-600: #2a5aa6;
+    --color-sky-700: #234a87;
+    --color-sky-800: #1d3c6d;
+    --color-sky-900: #172f54;
+
+    --color-amber-50: #fdf9e7;
+    --color-amber-100: #fbf0c2;
+    --color-amber-200: #f6df84;
+    --color-amber-300: #efc94a;
+    --color-amber-400: #e7b32a;
+    --color-amber-500: #d99a16;
+    --color-amber-600: #b57811;
+    --color-amber-700: #8f5b13;
+    --color-amber-800: #6e4616;
+    --color-amber-900: #5a3a16;
+
+    --color-rose-50: #fdf1ef;
+    --color-rose-100: #fbe0db;
+    --color-rose-200: #f5c2b8;
+    --color-rose-300: #eb9788;
+    --color-rose-400: #dc6a57;
+    --color-rose-500: #c94a37;
+    --color-rose-600: #b3261e;
+    --color-rose-700: #8f1f18;
+    --color-rose-800: #6f1b15;
+    --color-rose-900: #4f1511;
+
+    --color-orange-50: #fff3ec;
+    --color-orange-100: #ffe1d2;
+    --color-orange-200: #ffc2a8;
+    --color-orange-300: #ff9b73;
+    --color-orange-400: #f77643;
+    --color-orange-500: #e85d2a;
+    --color-orange-600: #c9471b;
+    --color-orange-700: #a23816;
+    --color-orange-800: #7c2b12;
+    --color-orange-900: #5f2412;
+
+    --color-violet-50: #eef4fb;
+    --color-violet-100: #dbe7f7;
+    --color-violet-200: #b9d0ef;
+    --color-violet-300: #8bb1e4;
+    --color-violet-400: #5a8ed4;
+    --color-violet-500: #3a70c0;
+    --color-violet-600: #2a5aa6;
+    --color-violet-700: #234a87;
+    --color-violet-800: #1d3c6d;
+    --color-violet-900: #172f54;
+
+    --color-mist-50: #f4f2ea;
+    --color-mist-100: #f4f2ea;
+    --color-mist-200: #e8e5d9;
+
+    --color-sand-50: #fbfaf6;
+    --color-sand-100: #f4f2ea;
+    --color-sand-200: #e8e5d9;
+
+    --shadow-sm: 0 1px 2px rgba(20, 26, 21, 0.08);
+    --shadow-card:
+        0 1px 0 rgba(20, 26, 21, 0.05),
+        0 14px 30px -26px rgba(20, 26, 21, 0.38);
+    --shadow-lift:
+        0 2px 0 rgba(20, 26, 21, 0.05),
+        0 24px 50px -34px rgba(20, 26, 21, 0.46);
+    --shadow-glow:
+        0 1px 0 rgba(20, 26, 21, 0.06),
+        0 12px 30px -24px rgba(29, 101, 57, 0.38);
+
+    --radius-4xl: 0.5rem;
+    --radius-5xl: 0.5rem;
 }
 
 @layer base {
@@ -60,16 +262,32 @@
     }
 
     body {
-        @apply bg-mist-50 text-ink-800 antialiased;
+        @apply bg-paper-100 text-ink-800 antialiased;
+        font-feature-settings: "ss01" on, "cv01" on;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        letter-spacing: -0.025em;
     }
 
     ::selection {
-        @apply bg-brand-200 text-ink-950;
+        @apply bg-signal-200 text-ink-950;
     }
 
     :focus-visible {
-        outline: 3px solid var(--color-brand-400);
+        outline: 2px solid var(--color-signal-600);
         outline-offset: 3px;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+        font: inherit;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -94,103 +312,181 @@
     }
 
     .skip-link {
-        @apply fixed left-4 top-4 z-[100] -translate-y-24 rounded-full bg-ink-950 px-5 py-3 text-sm font-semibold text-white transition-transform focus:translate-y-0;
+        @apply fixed left-4 top-4 z-[100] -translate-y-24 border border-ink-950 bg-ink-950 px-5 py-3 text-sm font-semibold text-paper-50 transition-transform focus:translate-y-0;
+        border-radius: 4px;
     }
 
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-sm px-5 py-3 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 border border-transparent px-5 py-2.5 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+        border-radius: 6px;
+    }
+
+    .btn:active {
+        transform: translateY(1px);
     }
 
     .btn-primary {
-        @apply bg-brand-600 text-white shadow-glow hover:-translate-y-0.5 hover:bg-brand-700 active:translate-y-0;
+        @apply border-brand-700 bg-brand-700 text-paper-50 hover:border-brand-800 hover:bg-brand-800;
     }
 
     .btn-secondary {
-        @apply border border-ink-200 bg-white text-ink-800 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50 active:translate-y-0;
+        @apply border-ink-300 bg-paper-50 text-ink-900 hover:border-ink-500 hover:bg-paper-200;
     }
 
     .btn-ghost {
-        @apply border border-transparent text-ink-600 hover:bg-white/70 hover:text-brand-700;
+        @apply border-transparent text-ink-700 hover:bg-paper-200 hover:text-ink-950;
     }
 
     .btn-danger {
-        @apply border border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100;
+        @apply border-stamp-300 bg-stamp-50 text-stamp-700 hover:border-stamp-400 hover:bg-stamp-100;
     }
 
     .btn-sm {
-        @apply px-4 py-2 text-xs;
+        @apply min-h-10 px-3.5 py-2 text-xs;
     }
 
     .btn-lg {
-        @apply px-6 py-3.5 text-base;
+        @apply min-h-12 px-6 py-3 text-base;
     }
 
     .card {
-        @apply rounded-sm border border-ink-100 bg-white shadow-card;
+        @apply border border-ink-200 bg-paper-50 shadow-card;
+        border-radius: 4px;
     }
 
     .card-hover {
-        @apply transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift;
+        @apply transition-[border-color,box-shadow,transform] duration-200 hover:border-ink-400 hover:shadow-lift;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-2px);
+    }
+
+    .sheet {
+        @apply border border-ink-300 bg-paper-50 shadow-lift;
+        border-radius: 2px;
+    }
+
+    .sheet-head {
+        @apply flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-ink-900 bg-ink-950 px-5 py-3 text-paper-100 sm:px-7;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        line-height: 1.5;
+        text-transform: uppercase;
+    }
+
+    .sheet-rule {
+        @apply border-t border-ink-200;
     }
 
     .eyebrow {
-        @apply text-[11px] font-bold uppercase tracking-[0.2em] text-brand-700;
+        @apply text-ink-500;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .mono-label {
+        @apply text-ink-500;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        line-height: 1.5;
+        text-transform: uppercase;
     }
 
     .section-title {
-        @apply text-3xl font-bold leading-tight tracking-tight text-ink-900 sm:text-4xl;
+        @apply text-balance text-3xl font-bold leading-[1.05] text-ink-950 sm:text-4xl;
+        letter-spacing: -0.035em;
     }
 
     .section-lead {
-        @apply text-base leading-relaxed text-ink-500;
+        @apply text-base leading-relaxed text-ink-600;
+        max-width: 65ch;
     }
 
     .input {
-        @apply w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 shadow-sm transition placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100;
+        @apply block min-h-11 w-full border border-ink-300 bg-paper-50 px-3.5 py-2.5 text-base text-ink-900 shadow-sm transition placeholder:text-ink-400 focus:border-brand-600 focus:outline-none;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .input:focus {
+        box-shadow: 0 0 0 3px var(--color-brand-100);
     }
 
     .label {
-        @apply mb-2 block text-[11px] font-bold uppercase tracking-wider text-ink-600;
+        @apply mb-1.5 block text-ink-600;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        line-height: 1.5;
+        text-transform: uppercase;
     }
 
     .badge {
-        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none;
+        @apply inline-flex items-center gap-1.5 border px-1.5 py-1 text-[10px] font-semibold leading-none;
+        border-radius: 2px;
+        font-family: var(--font-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
     .badge-teal {
-        @apply bg-brand-50 text-brand-800 ring-1 ring-inset ring-brand-200/70;
+        @apply border-brand-200 bg-brand-50 text-brand-800;
     }
 
     .badge-sky {
-        @apply bg-sky-50 text-sky-800 ring-1 ring-inset ring-sky-200/70;
+        @apply border-cobalt-200 bg-cobalt-50 text-cobalt-800;
     }
 
     .badge-amber {
-        @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200/70;
+        @apply border-maize-200 bg-maize-50 text-maize-800;
     }
 
     .badge-red {
-        @apply bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200/70;
+        @apply border-stamp-200 bg-stamp-50 text-stamp-700;
     }
 
     .badge-slate {
-        @apply bg-ink-50 text-ink-600 ring-1 ring-inset ring-ink-200/70;
+        @apply border-ink-200 bg-ink-50 text-ink-700;
     }
 
     .nav-link {
-        @apply whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-800;
+        @apply inline-flex min-h-11 items-center whitespace-nowrap border-b-2 border-transparent px-3 text-[13px] font-semibold text-ink-600 transition-colors hover:bg-paper-200 hover:text-ink-950;
+        border-radius: 0;
     }
 
     .nav-link-active {
-        @apply bg-brand-50 text-brand-800;
+        @apply border-signal-600 text-ink-950;
     }
 
     .stat-number {
-        @apply text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl;
+        @apply text-ink-950;
+        font-family: var(--font-display);
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1;
     }
 
     .stat-label {
-        @apply mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-500;
+        @apply mt-1 text-ink-500;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        line-height: 1.5;
+        text-transform: uppercase;
+    }
+
+    .faq-item summary {
+        list-style: none;
     }
 
     .faq-item summary::-webkit-details-marker {
@@ -200,19 +496,104 @@
     .site-header {
         transition:
             box-shadow 200ms ease,
-            background-color 200ms ease;
+            background-color 200ms ease,
+            border-color 200ms ease;
     }
 
     .site-header.is-scrolled {
-        @apply shadow-card;
+        @apply border-ink-300 bg-paper-50 shadow-card;
     }
 
     .filter-pill {
-        @apply inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white px-4 py-2 text-xs font-semibold text-ink-600 transition hover:border-brand-300 hover:text-brand-800;
+        @apply inline-flex min-h-10 items-center gap-2 border border-ink-300 bg-paper-50 px-3.5 py-2 text-ink-600 transition-colors hover:border-ink-500 hover:text-ink-950;
+        border-radius: 2px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
     }
 
     .filter-pill[aria-pressed="true"] {
-        @apply border-brand-600 bg-brand-600 text-white shadow-sm;
+        @apply border-ink-950 bg-ink-950 text-paper-50;
+    }
+
+    .stamp {
+        @apply inline-flex items-center border-2 border-stamp-600 px-2 py-1 text-stamp-700;
+        border-radius: 2px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        line-height: 1.1;
+        text-transform: uppercase;
+        transform: rotate(-2deg);
+    }
+
+    .taped-photo {
+        @apply relative bg-paper-50 p-1.5 shadow-card;
+        border: 1px solid var(--color-ink-300);
+        transform: rotate(-1.5deg);
+    }
+
+    .taped-photo::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: -0.65rem;
+        z-index: 1;
+        height: 1.25rem;
+        width: 4.5rem;
+        transform: translateX(-50%) rotate(1.5deg);
+        background: rgba(239, 201, 74, 0.72);
+        border: 1px solid rgba(181, 120, 17, 0.18);
+    }
+
+    .taped-photo img {
+        @apply block h-full w-full object-cover;
+    }
+
+    .ledger-row {
+        @apply grid items-center gap-3 border-b border-ink-200 py-4 transition-colors hover:bg-paper-100;
+    }
+
+    .data-table {
+        @apply w-full border-collapse text-left text-sm;
+    }
+
+    .data-table th {
+        @apply border-b border-ink-300 pb-2 text-ink-500;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .data-table td {
+        @apply border-b border-ink-200 py-3 align-top text-ink-700;
+    }
+
+    .icon-seal {
+        @apply grid h-11 w-11 shrink-0 place-items-center border border-ink-300 bg-paper-100 text-brand-700;
+        border-radius: 2px;
+    }
+
+    .notice {
+        @apply border border-ink-300 bg-paper-50 p-4;
+        border-radius: 2px;
+    }
+
+    .notice-warning {
+        @apply border-maize-300 bg-maize-50 text-maize-900;
+    }
+
+    .notice-danger {
+        @apply border-stamp-300 bg-stamp-50 text-stamp-800;
+    }
+
+    .link-arrow {
+        @apply inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900;
     }
 }
 
@@ -221,40 +602,74 @@
         text-wrap: balance;
     }
 
-    .bg-aurora {
-        background-image: linear-gradient(
-            180deg,
-            #f0f9ff 0%,
-            #eaf7ff 35%,
-            #eefaf8 70%,
-            #f7fbfa 100%
-        );
+    .bg-ledger {
+        background-color: var(--color-paper-100);
+        background-image:
+            radial-gradient(
+                circle at 50% -10%,
+                rgba(251, 250, 246, 0.95),
+                transparent 55%
+            ),
+            linear-gradient(
+                to right,
+                rgba(20, 26, 21, 0.045) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                rgba(20, 26, 21, 0.035) 1px,
+                transparent 1px
+            );
+        background-size:
+            100% 100%,
+            28px 28px,
+            28px 28px;
+        background-position:
+            center top,
+            center top,
+            center top;
     }
 
     .bg-dot-grid {
         background-image: radial-gradient(
-            rgba(15, 42, 61, 0.08) 1px,
+            rgba(251, 250, 246, 0.2) 1px,
             transparent 1px
         );
-        background-size: 22px 22px;
+        background-size: 18px 18px;
+    }
+
+    .bg-aurora {
+        background-color: var(--color-paper-100);
     }
 
     .mask-fade-b {
         mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     }
+
+    .font-display {
+        font-family: var(--font-display);
+    }
+
+    .font-mono {
+        font-family: var(--font-mono);
+    }
+
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
 }
 
-/* Animaciones de entrada progresivas, activadas solo cuando JS está disponible. */
+/* Entrada progresiva, solo con JS disponible. */
 .js [data-reveal] {
     transition:
-        opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: var(--reveal-delay, 0ms);
 }
 
 .js [data-reveal].reveal-pending {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(10px);
 }
 
 .js [data-reveal].is-visible {
@@ -262,18 +677,34 @@
     transform: none;
 }
 
-@keyframes float-soft {
-    0%,
-    100% {
-        transform: translateY(0);
+@keyframes stamp-in {
+    0% {
+        opacity: 0;
+        transform: rotate(-2deg) scale(1.08);
     }
-    50% {
-        transform: translateY(-8px);
+    100% {
+        opacity: 0.92;
+        transform: rotate(-2deg) scale(1);
     }
 }
 
-.animate-float-soft {
-    animation: float-soft 7s ease-in-out infinite;
+.js .stamp {
+    animation: stamp-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes count-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.js [data-count] {
+    animation: count-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -283,7 +714,8 @@
         transform: none;
     }
 
-    .animate-float-soft {
+    .js .stamp,
+    .js [data-count] {
         animation: none;
     }
 }

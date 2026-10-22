@@ -7,26 +7,22 @@
     <x-page-hero
         eyebrow="Administración"
         title="Equipo de salud"
-        description="Crea las cuentas de médicos y enfermeros. Ellos ingresarán al panel del trabajador con su DNI y la contraseña que asignes."
+        description="Crea las cuentas de médicos y enfermeros. Ellos ingresan al panel del trabajador con su DNI y la contraseña que asignes."
         icon="users"
     >
         <x-slot:actions>
-            <a href="{{ route('admin.horarios.index') }}" class="btn btn-secondary btn-sm">
-                <x-icon name="calendar" class="h-4 w-4 text-brand-600" />
+            <a href="{{ route('admin.horarios.index') }}" class="btn btn-primary btn-sm">
+                <x-icon name="calendar" class="h-4 w-4" />
                 Ver horarios
-            </a>
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary btn-sm">
-                <x-icon name="arrow-left" class="h-4 w-4 text-brand-600" />
-                Volver al panel
             </a>
         </x-slot:actions>
     </x-page-hero>
 
     @include('hampi.partials.admin-nav')
 
-    <div class="container-page py-8 md:py-12">
+    <div class="container-page py-6 md:py-9">
         @if ($errors->any())
-            <div role="alert" class="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+            <div role="alert" class="mb-6 flex items-start gap-3 border border-stamp-300 bg-stamp-50 p-4 text-sm text-stamp-800">
                 <x-icon name="alert-circle" class="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
                     <p class="font-bold">Revisa los datos ingresados</p>
@@ -39,39 +35,43 @@
             </div>
         @endif
 
-        {{-- Filtros por rol --}}
-        <div class="mb-6 flex flex-wrap items-center gap-2">
-            @foreach ([
-                ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
-                ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
-                ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
-            ] as $tab)
-                <a
-                    href="{{ route('admin.equipo.index', ['rol' => $tab['key']]) }}"
-                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-colors {{ $rol === $tab['key'] ? 'border-ink-950 bg-ink-950 text-white' : 'border-ink-200 bg-white text-ink-600 hover:border-brand-300 hover:text-brand-800' }}"
-                    @if ($rol === $tab['key']) aria-current="page" @endif
-                >
-                    <x-icon :name="$tab['icon']" class="h-4 w-4" />
-                    {{ $tab['label'] }}
-                    <span class="rounded-full px-1.5 py-0.5 text-[10px] {{ $rol === $tab['key'] ? 'bg-white/15 text-white' : 'bg-ink-100 text-ink-500' }}">{{ $tab['count'] }}</span>
-                </a>
-            @endforeach
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-ink-300">
+            <div class="flex gap-1 overflow-x-auto" role="group" aria-label="Filtrar equipo por rol">
+                @foreach ([
+                    ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
+                    ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
+                    ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
+                ] as $tab)
+                    <a
+                        href="{{ route('admin.equipo.index', ['rol' => $tab['key']]) }}"
+                        class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $tab['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
+                        @if ($rol === $tab['key']) aria-current="page" @endif
+                    >
+                        <x-icon :name="$tab['icon']" class="h-4 w-4" />
+                        {{ $tab['label'] }}
+                        <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $tab['count'] }}</span>
+                    </a>
+                @endforeach
+            </div>
+
+            <p class="hidden font-mono text-[10px] uppercase tracking-[0.05em] text-ink-500 sm:block">
+                {{ $equipo->count() }} {{ $equipo->count() === 1 ? 'cuenta listada' : 'cuentas listadas' }}
+            </p>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-12">
+        <div class="mt-6 grid gap-6 lg:grid-cols-12">
             {{-- Crear cuenta --}}
-            <section class="card p-6 lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start" data-reveal>
-                <div class="flex items-start gap-3">
-                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
-                        <x-icon name="user-plus" class="h-5 w-5" />
-                    </span>
-                    <div>
-                        <h2 class="text-base font-bold text-ink-900">Nueva cuenta de trabajador</h2>
-                        <p class="mt-1 text-xs leading-relaxed text-ink-500">El acceso será con el DNI y la contraseña que definas aquí.</p>
-                    </div>
+            <section class="border border-ink-300 bg-paper-50 lg:col-span-5 xl:col-span-4" data-reveal>
+                <div class="border-b-2 border-ink-950 p-4">
+                    <p class="mono-label">Alta de personal</p>
+                    <h2 class="mt-1 flex items-center gap-2 font-display text-lg font-bold text-ink-950">
+                        <x-icon name="user-plus" class="h-5 w-5 text-brand-700" />
+                        Nueva cuenta de trabajador
+                    </h2>
+                    <p class="mt-1 text-xs leading-relaxed text-ink-600">El acceso será con el DNI y la contraseña que definas aquí.</p>
                 </div>
 
-                <form action="{{ route('admin.equipo.store') }}" method="POST" class="mt-6 space-y-4">
+                <form action="{{ route('admin.equipo.store') }}" method="POST" class="space-y-4 p-4">
                     @csrf
 
                     <div>
@@ -82,7 +82,7 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="dni" class="label">DNI</label>
-                            <input type="text" name="dni" id="dni" required value="{{ old('dni') }}" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" class="input tracking-[0.15em]">
+                            <input type="text" name="dni" id="dni" required value="{{ old('dni') }}" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" class="input font-mono tracking-[0.15em]">
                         </div>
                         <div>
                             <label for="role" class="label">Rol</label>
@@ -130,156 +130,167 @@
                         Crear cuenta
                     </button>
 
-                    <p class="text-[11px] leading-relaxed text-ink-400">
-                        El trabajador podrá cambiar su foto, biografía, títulos, experiencia y especialidad desde su panel. El nombre, DNI y rol solo los modifica administración.
+                    <p class="border-t border-ink-200 pt-3 font-mono text-[9px] uppercase leading-relaxed tracking-[0.05em] text-ink-500">
+                        El trabajador podrá editar su foto, biografía, títulos, experiencia y especialidad. El nombre, DNI y rol solo los modifica administración.
                     </p>
                 </form>
             </section>
 
             {{-- Listado --}}
             <section class="lg:col-span-7 xl:col-span-8">
+                <div class="flex flex-wrap items-end justify-between gap-3 border-b-2 border-ink-950 pb-2">
+                    <div>
+                        <p class="mono-label">Directorio interno</p>
+                        <h2 class="mt-1 font-display text-xl font-bold text-ink-950">Equipo registrado</h2>
+                    </div>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.05em] text-ink-500">Microred Socabaya</span>
+                </div>
+
                 @if ($equipo->isEmpty())
                     <x-empty-state
+                        class="mt-5"
                         icon="users"
                         title="Aún no hay trabajadores registrados"
                         description="Crea la primera cuenta de médico o enfermero con el formulario de la izquierda. Después podrás generarle su horario mensual."
                     />
                 @else
-                    <div class="space-y-4">
+                    <div class="divide-y divide-ink-200">
                         @foreach ($equipo as $empleado)
-                            <article class="card p-5" data-reveal style="--reveal-delay: {{ $loop->index * 40 }}ms">
+                            <article class="py-5" data-reveal style="--reveal-delay: {{ $loop->index * 30 }}ms">
                                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div class="flex items-start gap-3">
                                         @if ($empleado->foto_url)
-                                            <img src="{{ $empleado->foto_url }}" alt="Foto de {{ $empleado->name }}" class="h-12 w-12 shrink-0 rounded-2xl object-cover ring-2 ring-brand-50">
+                                            <img src="{{ $empleado->foto_url }}" alt="Foto de {{ $empleado->name }}" class="h-12 w-12 shrink-0 border border-ink-300 object-cover">
                                         @else
-                                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white">
+                                            <span class="grid h-12 w-12 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-display text-sm font-bold text-brand-800">
                                                 {{ $empleado->iniciales() }}
                                             </span>
                                         @endif
 
                                         <div class="min-w-0">
-                                            <h3 class="text-sm font-bold text-ink-900">{{ $empleado->name }}</h3>
+                                            <h3 class="font-display text-base font-bold text-ink-950">{{ $empleado->name }}</h3>
                                             <div class="mt-1 flex flex-wrap items-center gap-1.5">
                                                 <x-badge color="teal">{{ $empleado->rol_label }}</x-badge>
                                                 <x-badge :color="$empleado->activo ? 'sky' : 'red'">{{ $empleado->activo ? 'Activo' : 'Inactivo' }}</x-badge>
                                             </div>
-                                            <p class="mt-1.5 text-xs text-ink-500">
+                                            <p class="mt-1.5 text-xs text-ink-600">
                                                 {{ $empleado->especialidad ?: 'Especialidad por completar' }}
                                             </p>
                                         </div>
                                     </div>
 
                                     <a href="{{ route('admin.horarios.index', ['user_id' => $empleado->id]) }}" class="btn btn-secondary btn-sm shrink-0">
-                                        <x-icon name="calendar" class="h-4 w-4 text-brand-600" />
+                                        <x-icon name="calendar" class="h-4 w-4" />
                                         Horario
                                     </a>
                                 </div>
 
-                                <dl class="mt-4 grid gap-x-6 gap-y-2 border-t border-ink-100 pt-4 text-xs sm:grid-cols-2">
+                                <dl class="mt-4 grid gap-x-6 gap-y-2 border-t border-ink-200 pt-3 text-xs sm:grid-cols-2">
                                     <div class="flex items-center gap-2">
-                                        <dt class="font-semibold text-ink-400">DNI</dt>
-                                        <dd class="font-bold tracking-wider text-ink-700">{{ $empleado->dni }}</dd>
+                                        <dt class="mono-label">DNI</dt>
+                                        <dd class="font-mono font-semibold tracking-[0.08em] text-ink-800">{{ $empleado->dni }}</dd>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <dt class="font-semibold text-ink-400">Correo</dt>
+                                        <dt class="mono-label">Correo</dt>
                                         <dd class="truncate text-ink-700">{{ $empleado->email }}</dd>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <dt class="font-semibold text-ink-400">Teléfono</dt>
+                                        <dt class="mono-label">Teléfono</dt>
                                         <dd class="text-ink-700">{{ $empleado->telefono ?: 'No registrado' }}</dd>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <dt class="font-semibold text-ink-400">Establecimiento</dt>
+                                        <dt class="mono-label">Establecimiento</dt>
                                         <dd class="truncate text-ink-700">{{ $empleado->establecimiento }}</dd>
                                     </div>
                                 </dl>
 
-                                <details class="group mt-4 border-t border-ink-100 pt-4">
-                                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-1 py-1 text-xs font-bold text-brand-700 transition-colors hover:text-brand-800">
+                                <details class="group mt-3 border border-ink-300 bg-paper-100">
+                                    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 text-xs font-semibold text-ink-800">
                                         <span class="inline-flex items-center gap-2">
-                                            <x-icon name="settings" class="h-4 w-4" />
+                                            <x-icon name="settings" class="h-4 w-4 text-brand-700" />
                                             Editar datos de la cuenta
                                         </span>
-                                        <x-icon name="chevron-down" class="h-4 w-4 transition-transform group-open:rotate-180" />
+                                        <x-icon name="chevron-down" class="h-4 w-4 text-ink-500 transition-transform group-open:rotate-180" />
                                     </summary>
 
-                                    <form action="{{ route('admin.equipo.update', $empleado) }}" method="POST" class="mt-4 space-y-4 rounded-2xl border border-ink-100 bg-ink-50/40 p-4">
-                                        @csrf
+                                    <div class="border-t border-ink-300 p-3.5">
+                                        <form action="{{ route('admin.equipo.update', $empleado) }}" method="POST" class="space-y-4">
+                                            @csrf
 
-                                        <div class="grid gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label for="name-{{ $empleado->id }}" class="label">Nombre completo</label>
-                                                <input type="text" name="name" id="name-{{ $empleado->id }}" required value="{{ $empleado->name }}" class="input">
+                                            <div class="grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                    <label for="name-{{ $empleado->id }}" class="label">Nombre completo</label>
+                                                    <input type="text" name="name" id="name-{{ $empleado->id }}" required value="{{ $empleado->name }}" class="input">
+                                                </div>
+                                                <div>
+                                                    <label for="dni-{{ $empleado->id }}" class="label">DNI</label>
+                                                    <input type="text" name="dni" id="dni-{{ $empleado->id }}" required value="{{ $empleado->dni }}" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" class="input font-mono tracking-[0.15em]">
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label for="dni-{{ $empleado->id }}" class="label">DNI</label>
-                                                <input type="text" name="dni" id="dni-{{ $empleado->id }}" required value="{{ $empleado->dni }}" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" class="input tracking-[0.15em]">
-                                            </div>
-                                        </div>
 
-                                        <div class="grid gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label for="email-{{ $empleado->id }}" class="label">Correo</label>
-                                                <input type="email" name="email" id="email-{{ $empleado->id }}" required value="{{ $empleado->email }}" class="input">
+                                            <div class="grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                    <label for="email-{{ $empleado->id }}" class="label">Correo</label>
+                                                    <input type="email" name="email" id="email-{{ $empleado->id }}" required value="{{ $empleado->email }}" class="input">
+                                                </div>
+                                                <div>
+                                                    <label for="role-{{ $empleado->id }}" class="label">Rol</label>
+                                                    <select name="role" id="role-{{ $empleado->id }}" required class="input">
+                                                        <option value="enfermero" @selected($empleado->role === 'enfermero' || $empleado->role === 'enfermera')>Enfermero/a</option>
+                                                        <option value="doctor" @selected($empleado->role === 'doctor')>Médico/a</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label for="role-{{ $empleado->id }}" class="label">Rol</label>
-                                                <select name="role" id="role-{{ $empleado->id }}" required class="input">
-                                                    <option value="enfermero" @selected($empleado->role === 'enfermero' || $empleado->role === 'enfermera')>Enfermero/a</option>
-                                                    <option value="doctor" @selected($empleado->role === 'doctor')>Médico/a</option>
-                                                </select>
-                                            </div>
-                                        </div>
 
-                                        <div class="grid gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label for="especialidad-{{ $empleado->id }}" class="label">Especialidad</label>
-                                                <input type="text" name="especialidad" id="especialidad-{{ $empleado->id }}" value="{{ $empleado->especialidad }}" class="input">
+                                            <div class="grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                    <label for="especialidad-{{ $empleado->id }}" class="label">Especialidad</label>
+                                                    <input type="text" name="especialidad" id="especialidad-{{ $empleado->id }}" value="{{ $empleado->especialidad }}" class="input">
+                                                </div>
+                                                <div>
+                                                    <label for="telefono-{{ $empleado->id }}" class="label">Teléfono</label>
+                                                    <input type="text" name="telefono" id="telefono-{{ $empleado->id }}" value="{{ $empleado->telefono }}" class="input">
+                                                </div>
                                             </div>
+
                                             <div>
-                                                <label for="telefono-{{ $empleado->id }}" class="label">Teléfono</label>
-                                                <input type="text" name="telefono" id="telefono-{{ $empleado->id }}" value="{{ $empleado->telefono }}" class="input">
+                                                <label for="establecimiento-{{ $empleado->id }}" class="label">Establecimiento</label>
+                                                <input type="text" name="establecimiento" id="establecimiento-{{ $empleado->id }}" value="{{ $empleado->establecimiento }}" class="input">
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label for="establecimiento-{{ $empleado->id }}" class="label">Establecimiento</label>
-                                            <input type="text" name="establecimiento" id="establecimiento-{{ $empleado->id }}" value="{{ $empleado->establecimiento }}" class="input">
-                                        </div>
-
-                                        <div class="grid gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label for="password-{{ $empleado->id }}" class="label">Nueva contraseña <span class="font-normal text-ink-400">(opcional)</span></label>
-                                                <input type="password" name="password" id="password-{{ $empleado->id }}" autocomplete="new-password" placeholder="Dejar vacío para mantener" class="input">
+                                            <div class="grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                    <label for="password-{{ $empleado->id }}" class="label">Nueva contraseña <span class="normal-case tracking-normal text-ink-500">(opcional)</span></label>
+                                                    <input type="password" name="password" id="password-{{ $empleado->id }}" autocomplete="new-password" placeholder="Dejar vacío para mantener" class="input">
+                                                </div>
+                                                <div>
+                                                    <label for="password-confirmation-{{ $empleado->id }}" class="label">Confirmar contraseña</label>
+                                                    <input type="password" name="password_confirmation" id="password-confirmation-{{ $empleado->id }}" autocomplete="new-password" placeholder="Repite la nueva contraseña" class="input">
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label for="password-confirmation-{{ $empleado->id }}" class="label">Confirmar contraseña</label>
-                                                <input type="password" name="password_confirmation" id="password-confirmation-{{ $empleado->id }}" autocomplete="new-password" placeholder="Repite la nueva contraseña" class="input">
+
+                                            <label class="flex min-h-11 items-center gap-2.5 border border-ink-300 bg-paper-50 px-3 text-xs font-semibold text-ink-700">
+                                                <input type="checkbox" name="activo" value="1" class="h-4 w-4 border-ink-400 text-brand-700 focus:ring-brand-500" @checked($empleado->activo)>
+                                                Cuenta activa (puede ingresar al panel)
+                                            </label>
+
+                                            <div class="flex flex-wrap items-center justify-end gap-3 border-t border-ink-300 pt-3">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <x-icon name="check" class="h-4 w-4" />
+                                                    Guardar cambios
+                                                </button>
                                             </div>
-                                        </div>
+                                        </form>
 
-                                        <label class="flex items-center gap-2.5 text-xs font-semibold text-ink-600">
-                                            <input type="checkbox" name="activo" value="1" class="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500" @checked($empleado->activo)>
-                                            Cuenta activa (puede ingresar al panel)
-                                        </label>
-
-                                        <div class="flex flex-wrap items-center justify-between gap-3">
-                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                <x-icon name="check" class="h-4 w-4" />
-                                                Guardar cambios
+                                        <form action="{{ route('admin.equipo.destroy', $empleado) }}" method="POST" class="mt-3 flex justify-end border-t border-ink-200 pt-3" onsubmit="return confirm('¿Eliminar la cuenta de {{ $empleado->name }}? También se borrarán sus horarios. Esta acción no se puede deshacer.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <x-icon name="trash-2" class="h-4 w-4" />
+                                                Eliminar cuenta
                                             </button>
-                                        </div>
-                                    </form>
-
-                                    <form action="{{ route('admin.equipo.destroy', $empleado) }}" method="POST" class="mt-3" onsubmit="return confirm('¿Eliminar la cuenta de {{ $empleado->name }}? También se borrarán sus horarios. Esta acción no se puede deshacer.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-2 rounded-full px-2 py-1 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 hover:text-rose-700">
-                                            <x-icon name="trash-2" class="h-3.5 w-3.5" />
-                                            Eliminar cuenta
-                                        </button>
-                                    </form>
+                                        </form>
+                                    </div>
                                 </details>
                             </article>
                         @endforeach

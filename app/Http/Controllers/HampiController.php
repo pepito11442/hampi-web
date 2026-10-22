@@ -27,12 +27,18 @@ class HampiController extends Controller
         $stats = [
             'turnos' => $agenda->total($medicosHoy),
             'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
+            'postas' => Posta::where('estado_activo', true)->count(),
         ];
 
-        return view('hampi.login', compact('stats'));
+        $proximaCampana = CampanaPreventiva::activas()
+            ->orderBy('fecha_inicio')
+            ->get()
+            ->first(fn (CampanaPreventiva $campana) => $campana->estado !== 'Finalizada');
+
+        return view('hampi.login', compact('stats', 'proximaCampana'));
     }
 
-    // Validación e ingreso con DNI (Sin redirección)
+    // Validación e ingreso con DNI
     public function accesoPorDni(Request $request)
     {
         $dni = $request->input('dni', '72345678');
@@ -60,34 +66,30 @@ class HampiController extends Controller
 
         Session::put('ciudadano_dni', $ciudadano->dni);
 
-        $citas = Cita::with(['posta', 'medico'])
-            ->where('ciudadano_id', $ciudadano->id)
-            ->orderBy('fecha_hora')
-            ->get();
-
-        return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
+        return redirect()->route('ciudadano.panel');
     }
 
     // Pantalla 2: Panel del Paciente
     public function panelCiudadano()
     {
-        $dni = Session::get('ciudadano_dni', '72345678');
+        $dni = Session::get('ciudadano_dni');
+
+        if (! $dni) {
+            return redirect('/#acceso');
+        }
 
         $ciudadano = Ciudadano::where('dni', $dni)->first();
 
-        if ($ciudadano) {
-            $citas = Cita::with(['posta', 'medico'])
-                ->where('ciudadano_id', $ciudadano->id)
-                ->orderBy('fecha_hora')
-                ->get();
-        } else {
-            $ciudadano = (object)[
-                'nombres' => 'Rosa Elena',
-                'apellidos' => 'Quispe Mamani',
-                'dni' => $dni
-            ];
-            $citas = collect();
+        if (! $ciudadano) {
+            Session::forget('ciudadano_dni');
+
+            return redirect('/#acceso');
         }
+
+        $citas = Cita::with(['posta', 'medico'])
+            ->where('ciudadano_id', $ciudadano->id)
+            ->orderBy('fecha_hora')
+            ->get();
 
         return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
     }

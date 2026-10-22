@@ -3,20 +3,22 @@
         ['ruta' => 'admin.dashboard', 'etiqueta' => 'Panel', 'icono' => 'settings'],
         ['ruta' => 'admin.equipo.index', 'etiqueta' => 'Equipo de salud', 'icono' => 'users'],
         ['ruta' => 'admin.horarios.index', 'etiqueta' => 'Horarios', 'icono' => 'calendar'],
-        ['ruta' => 'admin.campanas.index', 'etiqueta' => 'Campañas preventivas', 'icono' => 'shield-check'],
+        ['ruta' => 'admin.campanas.index', 'etiqueta' => 'Campañas preventivas', 'etiqueta_corta' => 'Campañas', 'icono' => 'shield-check'],
     ];
 @endphp
 
-<div class="container-page relative z-10 pt-6">
-    <nav class="flex gap-1.5 overflow-x-auto rounded-2xl border border-ink-100 bg-white/85 p-1.5 shadow-card backdrop-blur" aria-label="Secciones de administración">
+<div class="container-page relative z-10">
+    <nav class="grid grid-cols-2 border-b border-ink-300 sm:flex sm:gap-1" aria-label="Secciones de administración">
         @foreach ($enlaces as $enlace)
             <a
                 href="{{ route($enlace['ruta']) }}"
-                class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-colors {{ request()->routeIs($enlace['ruta'].'*') ? 'bg-brand-600 text-white shadow-sm' : 'text-ink-600 hover:bg-brand-50 hover:text-brand-800' }}"
+                class="inline-flex min-h-11 items-center gap-2 border-b-2 px-3.5 text-xs font-semibold transition-colors sm:shrink-0 {{ request()->routeIs($enlace['ruta'].'*') ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
+                aria-label="{{ $enlace['etiqueta'] }}"
                 @if (request()->routeIs($enlace['ruta'].'*')) aria-current="page" @endif
             >
                 <x-icon :name="$enlace['icono']" class="h-4 w-4" />
-                {{ $enlace['etiqueta'] }}
+                <span class="sm:hidden">{{ $enlace['etiqueta_corta'] ?? $enlace['etiqueta'] }}</span>
+                <span class="hidden sm:inline">{{ $enlace['etiqueta'] }}</span>
             </a>
         @endforeach
     </nav>
