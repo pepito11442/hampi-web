@@ -49,11 +49,10 @@
                 <span class="text-paper-100/65">Folio MR-SOC-{{ now()->format('ymd') }}</span>
             </div>
 
-            <div class="grid gap-7 p-5 sm:p-8 lg:grid-cols-12 lg:gap-x-10">
+            <div class="grid gap-7 p-5 sm:p-8 lg:grid-cols-12 lg:gap-x-10 ">
                 <div class="lg:col-span-8">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <p class="mono-label">Atención primaria / Socabaya, Arequipa</p>
-                        <span class="stamp">Demo académica</span>
                     </div>
 
                     <h1 class="mt-4 max-w-3xl text-balance text-[2.7rem] font-bold leading-[0.96] tracking-[-0.05em] text-ink-950 sm:text-6xl lg:text-[4.5rem]">
@@ -204,7 +203,7 @@
 
     {{-- SERVICIOS: índice de la hoja --}}
     <section class="container-page py-12 sm:py-16">
-        <div class="grid gap-8 lg:grid-cols-12">
+        <div class="sheet p-5 sm:p-8 grid gap-8 lg:grid-cols-12">
             <div class="lg:col-span-4 lg:pr-8">
                 <h2 class="section-title text-3xl sm:text-4xl">Lo que puedes resolver aquí</h2>
                 <p class="section-lead mt-3">
@@ -241,7 +240,7 @@
 
     {{-- FAQ: preguntas al pie de la hoja --}}
     <section class="container-page py-12 sm:py-16">
-        <div class="grid gap-8 lg:grid-cols-12">
+        <div class="sheet p-5 sm:p-8 grid gap-8 lg:grid-cols-12">
             <div class="lg:col-span-4">
                 <h2 class="section-title text-3xl sm:text-4xl">Antes de venir</h2>
                 <p class="section-lead mt-3">
@@ -253,7 +252,7 @@
                 </a>
             </div>
 
-            <div class="border-t-2 border-ink-950 lg:col-span-8">
+            <div class=" border-t-2 border-ink-950 lg:col-span-8">
                 <details class="faq-item group border-b border-ink-200">
                     <summary class="flex min-h-14 cursor-pointer items-center justify-between gap-4 py-4 font-display text-base font-bold text-ink-950 transition-colors hover:text-brand-700">
                         ¿Necesito crear una cuenta para usar el portal?
@@ -339,7 +338,7 @@
                             <x-icon name="building-2" class="h-4 w-4 shrink-0 text-signal-300" />
                             Establecimientos
                         </dt>
-                        <dd class="mt-1 pl-6 text-paper-100/70">{{ $postasActivas }} {{ $postasActivas === 1 ? 'posta activa' : 'postas activas' }} en la Microred Socabaya.</dd>
+                        <dd class="mt-1 pl-6 text-paper-100/70">{{ $postasActivas }} {{ $postasActivas === 1 ? 'posta activa' : 'postas activas' }} en Socabaya.</dd>
                     </div>
                     <div class="border-b border-paper-50/15 pb-3">
                         <dt class="flex items-center gap-2 font-semibold text-paper-50">
@@ -347,13 +346,6 @@
                             Horario de referencia
                         </dt>
                         <dd class="mt-1 pl-6 text-paper-100/70">Lunes a viernes, 07:00–19:30 · Sábados, 07:00–15:00.</dd>
-                    </div>
-                    <div>
-                        <dt class="flex items-center gap-2 font-semibold text-paper-50">
-                            <x-icon name="info" class="h-4 w-4 shrink-0 text-signal-300" />
-                            Demo académica
-                        </dt>
-                        <dd class="mt-1 pl-6 text-paper-100/70">Datos simulados. No es un servicio oficial de la microred.</dd>
                     </div>
                 </dl>
                 <a href="/directorio-postas" class="link-arrow mt-5 text-paper-50 hover:text-signal-300">

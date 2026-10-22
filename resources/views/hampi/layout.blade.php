@@ -182,7 +182,7 @@
                 <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-600">
                     El tablón digital de la microred: médicos de turno, disponibilidad de vacunas, campañas preventivas y establecimientos de salud.
                 </p>
-                <span class="stamp mt-5">Demo académica</span>
+
             </div>
 
             <div class="md:col-span-2">
@@ -226,7 +226,7 @@
         <div class="border-t border-ink-300">
             <div class="container-page flex flex-col gap-2 py-5 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-500 sm:flex-row sm:items-center sm:justify-between">
                 <p>© {{ date('Y') }} Hampi · Microred Socabaya · Proyecto académico</p>
-                <p>Datos simulados para demostración · No es un servicio oficial</p>
+                <p>Es una creacion Del Grupo de Ore, Valdivia y Rodriguez con ayuda de opencode deepseek</p>
             </div>
         </div>
     </footer>

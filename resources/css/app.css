@@ -91,8 +91,7 @@
         "Noto Color Emoji";
     --font-display:
         "Archivo", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-    --font-mono:
-        "Martian Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
     /* Papel de la posta: hueso frío, no crema de landing. */
     --color-paper-50: #fbfaf6;
@@ -240,16 +239,10 @@
     --color-sand-100: #f4f2ea;
     --color-sand-200: #e8e5d9;
 
-    --shadow-sm: 0 1px 2px rgba(20, 26, 21, 0.08);
-    --shadow-card:
-        0 1px 0 rgba(20, 26, 21, 0.05),
-        0 14px 30px -26px rgba(20, 26, 21, 0.38);
-    --shadow-lift:
-        0 2px 0 rgba(20, 26, 21, 0.05),
-        0 24px 50px -34px rgba(20, 26, 21, 0.46);
-    --shadow-glow:
-        0 1px 0 rgba(20, 26, 21, 0.06),
-        0 12px 30px -24px rgba(29, 101, 57, 0.38);
+    --shadow-sm: 0 0 #0000;
+    --shadow-card: 0 0 #0000;
+    --shadow-lift: 0 0 #0000;
+    --shadow-glow: 0 0 #0000;
 
     --radius-4xl: 0.5rem;
     --radius-5xl: 0.5rem;
@@ -263,7 +256,9 @@
 
     body {
         @apply bg-paper-100 text-ink-800 antialiased;
-        font-feature-settings: "ss01" on, "cv01" on;
+        font-feature-settings:
+            "ss01" on,
+            "cv01" on;
     }
 
     h1,
@@ -361,7 +356,10 @@
     .card-hover:hover {
         transform: translateY(-2px);
     }
-
+    .sheet-doctor {
+        @apply border border-ink-300 bg-[white] shadow-lift;
+        border-radius: 1px;
+    }
     .sheet {
         @apply border border-ink-300 bg-paper-50 shadow-lift;
         border-radius: 2px;
@@ -378,6 +376,11 @@
 
     .sheet-rule {
         @apply border-t border-ink-200;
+    }
+    .tarjeta {
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
     .eyebrow {
@@ -596,7 +599,25 @@
         @apply inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900;
     }
 }
-
+.bg-ledger-carteles {
+    background-color: #e5e2da;
+    background-image:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(251, 250, 246, 0.35),
+            transparent 55%
+        ),
+        linear-gradient(to right, rgba(20, 26, 21, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(20, 26, 21, 0.035) 1px, transparent 1px);
+    background-size:
+        100% 100%,
+        28px 28px,
+        28px 28px;
+    background-position:
+        center top,
+        center top,
+        center top;
+}
 @layer utilities {
     .text-balance {
         text-wrap: balance;
