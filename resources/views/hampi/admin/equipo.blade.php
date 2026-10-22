@@ -4,22 +4,26 @@
 @section('meta_description', 'Crea y administra las cuentas de médicos y enfermeros de la Microred Socabaya.')
 
 @section('content')
-    <section class="container-page grid grid-cols-1 bg-ledger-carteles gap-8 p-5 sm:p-8 tarjeta backdrop-blur-sm pb-16 sm:pb-20">
-        <x-page-hero
-            eyebrow="Administración"
-            title="Equipo de salud"
-            description="Crea las cuentas de médicos y enfermeros. Ellos ingresan al panel del trabajador con su DNI y la contraseña que asignes."
-            icon="users"
-        >
-            <x-slot:actions>
-                <a href="{{ route('admin.horarios.index') }}" class="btn btn-primary btn-sm">
-                    <x-icon name="calendar" class="h-4 w-4" />
-                    Ver horarios
-                </a>
-            </x-slot:actions>
-        </x-page-hero>
+    <x-page-board>
+        <x-slot:hero>
+            <x-page-hero
+                eyebrow="Administración"
+                title="Equipo de salud"
+                description="Crea las cuentas de médicos y enfermeros. Ellos ingresan al panel del trabajador con su DNI y la contraseña que asignes."
+                icon="users"
+            >
+                <x-slot:actions>
+                    <a href="{{ route('admin.horarios.index') }}" class="btn btn-primary btn-sm">
+                        <x-icon name="calendar" class="h-4 w-4" />
+                        Ver horarios
+                    </a>
+                </x-slot:actions>
+            </x-page-hero>
+        </x-slot:hero>
 
-        @include('hampi.partials.admin-nav')
+        <x-slot:nav>
+            @include('hampi.partials.admin-nav')
+        </x-slot:nav>
 
         <div class="container-page py-6 md:py-9 ">
             @if ($errors->any())
@@ -300,5 +304,5 @@
                 </section>
             </div>
         </div>
-    </section>
+    </x-page-board>
 @endsection

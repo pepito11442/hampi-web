@@ -14,22 +14,26 @@
         $progreso = $user ? (int) min(100, round(($totalHoras / 150) * 100)) : 0;
         $horasTexto = rtrim(rtrim(number_format($totalHoras, 1, '.', ''), '0'), '.');
     @endphp
-    <section class="container-page grid grid-cols-1 bg-ledger-carteles gap-8 p-5 sm:p-8 tarjeta backdrop-blur-sm pb-16 sm:pb-20">
-        <x-page-hero
-            eyebrow="Administración"
-            title="Horarios mensuales"
-            description="Cada médico y enfermero cumple 150 horas al mes. El generador reparte los turnos respetando los domingos sin atención."
-            icon="calendar"
-        >
-            <x-slot:actions>
-                <a href="{{ route('admin.equipo.index') }}" class="btn btn-primary btn-sm">
-                    <x-icon name="users" class="h-4 w-4" />
-                    Gestionar equipo
-                </a>
-            </x-slot:actions>
-        </x-page-hero>
+    <x-page-board>
+        <x-slot:hero>
+            <x-page-hero
+                eyebrow="Administración"
+                title="Horarios mensuales"
+                description="Cada médico y enfermero cumple 150 horas al mes. El generador reparte los turnos respetando los domingos sin atención."
+                icon="calendar"
+            >
+                <x-slot:actions>
+                    <a href="{{ route('admin.equipo.index') }}" class="btn btn-primary btn-sm">
+                        <x-icon name="users" class="h-4 w-4" />
+                        Gestionar equipo
+                    </a>
+                </x-slot:actions>
+            </x-page-hero>
+        </x-slot:hero>
 
-        @include('hampi.partials.admin-nav')
+        <x-slot:nav>
+            @include('hampi.partials.admin-nav')
+        </x-slot:nav>
 
         <div class="container-page py-6 md:py-9">
             @if ($errors->any())
@@ -274,5 +278,5 @@
                 @endif
             @endif
         </div>
-    </section>
+    </x-page-board>
 @endsection

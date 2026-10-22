@@ -8,29 +8,33 @@
         $vacunasDisponibles = $vacunas->where('stock_estado', 'Disponible')->count();
         $vacunasUrgentes = $vacunas->where('es_urgente', true)->count();
     @endphp
-    <section class="container-page grid grid-cols-1 bg-ledger-carteles gap-8 p-5 sm:p-8 tarjeta backdrop-blur-sm pb-16 sm:pb-20">
-        <x-page-hero
-            eyebrow="Administración"
-            title="Panel de gestión"
-            :description="'Centro de Salud San Martín de Socabaya · Responsable: ' . (Auth::user()->name ?? 'Personal de salud')"
-            icon="settings"
-        >
-            <x-slot:actions>
-                <a href="/" class="btn btn-primary btn-sm">
-                    <x-icon name="external-link" class="h-4 w-4" />
-                    Ver portal público
-                </a>
-                <form action="/personal/logout" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        <x-icon name="log-out" class="h-4 w-4" />
-                        Cerrar sesión
-                    </button>
-                </form>
-            </x-slot:actions>
-        </x-page-hero>
+    <x-page-board>
+        <x-slot:hero>
+            <x-page-hero
+                eyebrow="Administración"
+                title="Panel de gestión"
+                :description="'Centro de Salud San Martín de Socabaya · Responsable: ' . (Auth::user()->name ?? 'Personal de salud')"
+                icon="settings"
+            >
+                <x-slot:actions>
+                    <a href="/" class="btn btn-primary btn-sm">
+                        <x-icon name="external-link" class="h-4 w-4" />
+                        Ver portal público
+                    </a>
+                    <form action="/personal/logout" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <x-icon name="log-out" class="h-4 w-4" />
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </x-slot:actions>
+            </x-page-hero>
+        </x-slot:hero>
 
-        @include('hampi.partials.admin-nav')
+        <x-slot:nav>
+            @include('hampi.partials.admin-nav')
+        </x-slot:nav>
 
         <div class="container-page py-6 md:py-9 ">
             @if ($errors->any())
@@ -312,5 +316,5 @@
                 <p>Demo académica · Datos simulados</p>
             </div>
         </div>
-    </section>
+    </x-page-board>
 @endsection
