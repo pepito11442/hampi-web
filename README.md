@@ -360,7 +360,7 @@ A partir de ahí, ejecuta Artisan con la ruta explícita:
 No uses `php artisan` en este caso, porque `php` seguiría apuntando a la versión del Codespace sin `pdo_mysql`.
 
 ### 4. Levantar MySQL
-
+paso antes verifica estar en /workspaces/hampi-web (main) sino estas facil pones cd /workspaces/hampi-web
 #### Opción A: Docker Compose (recomendada)
 
 ```bash
