@@ -598,6 +598,8 @@ npm run build
 
 En el menú, **“Vacunas”** lleva al pizarrín de vacunación y **“Campañas preventivas”** a la página de campañas. En la barra inferior móvil se abrevia como **“Preventivas”**. En móvil también está disponible el menú hamburguesa del encabezado. Los enlaces del portal se definen una sola vez en `config/navegacion.php`.
 
+En **Médicos del día** se muestra la foto de perfil del médico cuando la tiene cargada; si no, se usan sus iniciales.
+
 ### Personal de salud
 
 | Acción                           | Ruta                                              | Protección                                 |

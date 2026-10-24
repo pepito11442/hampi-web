@@ -26,6 +26,7 @@ class MedicoDelDia
         public ?int $user_id = null,
         public ?int $manual_id = null,
         public ?int $horario_id = null,
+        public ?string $foto_url = null,
     ) {
     }
 }

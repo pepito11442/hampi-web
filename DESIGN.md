@@ -206,7 +206,7 @@ Primer viewport:
 Debajo: servicios en ledger, preguntas frecuentes y cierre tipo ventanilla. La acción de DNI está en el primer viewport a 390×844.
 
 ### Páginas públicas
-- **Médicos de hoy:** rol por turno, estado, especialidad y posta; acceso a directorio.
+- **Médicos de hoy:** rol por turno, estado, especialidad y posta; foto de perfil si el médico la cargó y, si no, iniciales; acceso a directorio.
 - **Pizarrín de vacunas:** avisos con stock, grupo objetivo, requisitos y establecimiento; filtros por estado.
 - **Campañas preventivas:** campaña destacada en ficha oscura, siguientes campañas en ledger y pasos de acceso.
 - **Directorio de postas:** fichas con categoría, dirección, horario, teléfono y servicios; sin mapa embebido.

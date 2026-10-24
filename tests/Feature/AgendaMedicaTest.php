@@ -7,6 +7,7 @@ use App\Models\Posta;
 use App\Models\TurnoMedico;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AgendaMedicaTest extends TestCase
@@ -32,6 +33,24 @@ class AgendaMedicaTest extends TestCase
             ->assertSee('Cardiología')
             ->assertSee('07:00')
             ->assertDontSee('Enfermero Agenda');
+    }
+
+    public function test_la_agenda_publica_muestra_la_foto_del_medico_si_existe(): void
+    {
+        Storage::fake('public');
+
+        $doctor = User::factory()->doctor()->create([
+            'name' => 'Dra. Foto Pública',
+            'foto_perfil' => 'perfiles/doctora.jpg',
+        ]);
+        Storage::disk('public')->put('perfiles/doctora.jpg', 'contenido');
+
+        $this->crearHorario($doctor, 'manana');
+
+        $this->get('/medicos-hoy')
+            ->assertOk()
+            ->assertSee('/storage/perfiles/doctora.jpg')
+            ->assertSee('Foto de Dra. Foto Pública');
     }
 
     public function test_el_panel_administrativo_muestra_el_horario_generado_de_hoy(): void

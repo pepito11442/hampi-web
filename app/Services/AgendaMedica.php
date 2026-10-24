@@ -76,6 +76,7 @@ class AgendaMedica
                 en_tarde: in_array($horario->turno, ['tarde', 'completo'], true),
                 user_id: $user->id,
                 horario_id: $horario->id,
+                foto_url: $user->foto_url,
             ));
         }
 

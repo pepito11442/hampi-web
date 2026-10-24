@@ -88,9 +88,20 @@
 
                                         <li class="flex flex-col gap-3 py-4 transition-colors hover:bg-paper-50 sm:flex-row sm:items-center sm:justify-between">
                                             <div class="flex items-start gap-3">
-                                                <span class="grid h-10 w-10 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-mono text-[11px] font-semibold text-brand-800">
-                                                    {{ mb_strtoupper($iniciales) }}
-                                                </span>
+                                                @if ($turno->foto_url)
+                                                    <img
+                                                        src="{{ $turno->foto_url }}"
+                                                        alt="Foto de {{ $turno->medico_nombre }}"
+                                                        width="40"
+                                                        height="40"
+                                                        loading="lazy"
+                                                        class="h-10 w-10 shrink-0 border border-ink-300 object-cover"
+                                                    >
+                                                @else
+                                                    <span class="grid h-10 w-10 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-mono text-[11px] font-semibold text-brand-800">
+                                                        {{ mb_strtoupper($iniciales) }}
+                                                    </span>
+                                                @endif
                                                 <div>
                                                     <h3 class="font-display text-base font-bold leading-tight text-ink-950">{{ $turno->medico_nombre }}</h3>
                                                     <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-600">
