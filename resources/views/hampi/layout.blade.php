@@ -226,7 +226,7 @@
         <div class="border-t border-ink-300">
             <div class="container-page flex flex-col gap-2 py-5 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-500 sm:flex-row sm:items-center sm:justify-between">
                 <p>© {{ date('Y') }} Hampi · Microred Socabaya · Proyecto académico</p>
-                <p>Es una creacion Del Grupo de Ore, Valdivia y Rodriguez con ayuda de opencode deepseek</p>
+                <p>Elaborado por Ore, Valdivia y Rodríguez · con apoyo de OpenCode y DeepSeek</p>
             </div>
         </div>
     </footer>

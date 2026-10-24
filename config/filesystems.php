@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // URL relativa: las fotos se resuelven contra el host actual.
+            // Así funcionan igual en local, Codespaces o un dominio propio.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

@@ -130,6 +130,7 @@ class EmpleadoYEquipoTest extends TestCase
         $this->assertSame('Medicina Familiar', $empleado->especialidad);
         $this->assertNotNull($empleado->foto_perfil);
         Storage::disk('public')->assertExists($empleado->foto_perfil);
+        $this->assertStringStartsWith('/storage/perfiles/', $empleado->foto_url);
     }
 
     public function test_administrador_puede_ocultar_una_campana_publicada(): void

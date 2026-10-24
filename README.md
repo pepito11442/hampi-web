@@ -167,6 +167,15 @@ Si Laravel corre dentro de Docker con el proyecto montado desde Windows/WSL, el 
 ln -sfn ../storage/app/public public/storage
 ```
 
+En Windows con XAMPP, `php artisan storage:link` puede fallar o dejar un enlace que Windows no resuelve (es lo que pasa si el enlace se creó desde WSL). En ese caso, elimina el enlace roto y crea una unión de directorios:
+
+```powershell
+cmd /c rmdir public\storage
+cmd /c mklink /J public\storage storage\app\public
+```
+
+La unión es transparente para Laravel y para el navegador: las fotos se sirven igual desde `/storage/perfiles/...`.
+
 ### 6. Compilar assets
 
 ```bash
@@ -581,7 +590,7 @@ npm run build
 | Inicio y acceso con DNI | `/` · `inicio`                             | `HampiController@index` · `hampi/login.blade.php` |
 | Panel ciudadano         | `/mi-panel` · `ciudadano.panel`            | `HampiController@panelCiudadano`                  |
 | Médicos del día         | `/medicos-hoy` · `medicos.index`           | `HampiController@verMedicos`                      |
-| Campañas de vacunación  | `/pizarrin-vacunas` · `pizarrin.index`     | `HampiController@verPizarrin`                     |
+| Pizarrín de vacunas     | `/pizarrin-vacunas` · `pizarrin.index`     | `HampiController@verPizarrin`                     |
 | Campañas preventivas    | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas`          |
 | Directorio de postas    | `/directorio-postas` · `postas.index`      | `HampiController@verPostas`                       |
 
@@ -685,7 +694,7 @@ Las tres fuentes están **autoalojadas** en `public/fonts/hampi/` como WOFF2, co
 | `cobalt-700` | `#234a87` | Información administrativa. |
 | `maize-400` | `#e7b32a` | Atención, campañas y cinta de la foto. |
 
-El fondo se define una sola vez con `.bg-ledger` (papel hueso + retícula tenue). No hay secciones full-width opacas que rompan esa hoja. El color nunca es el único portador de un estado: los badges siempre incluyen texto y, cuando aporta, un icono.
+El fondo global es `.bg-ledger` (papel hueso + retícula tenue). Las páginas internas se montan sobre un tablero `.bg-ledger-carteles` mediante el componente `x-page-board`: el hero y el contenido viven en hojas blancas separadas, de modo que todas las pantallas comparten la misma silueta. La portada y los accesos conservan su tratamiento propio. El color nunca es el único portador de un estado: los badges siempre incluyen texto y, cuando aporta, un icono.
 
 ### Composición de la portada
 
@@ -704,7 +713,8 @@ Debajo aparecen los servicios en formato ledger, las preguntas frecuentes y un c
 
 | Superficie | Tratamiento |
 | --- | --- |
-| Portada y páginas públicas | Hoja publicada: más aire, foto, ledger y cierre editorial. |
+| Portada | Hoja publicada: más aire, foto, ledger y cierre editorial. |
+| Páginas públicas y paneles | Tablero `x-page-board`: hero y contenido en hojas separadas sobre `bg-ledger-carteles`. |
 | Accesos | `auth-shell` de dos columnas en escritorio; una columna en móvil. |
 | Administración | “Copia de escritorio”: `page-hero`, tabs, tablas, formularios y confirmaciones. |
 | Personal de salud | Hoja de turno: resumen de horas, calendario, perfil y agenda. |
@@ -718,6 +728,7 @@ Los paneles internos comparten el header y el fondo, pero no muestran la barra i
 | --- | --- |
 | `x-site-logo` | Logo H, wordmark, bajada de Microred y badge de Socabaya. |
 | `x-page-hero` | Cabecera editorial con eyebrow, `h1`, descripción, acciones y sello. |
+| `x-page-board` | Tablero común de las páginas internas: hero y contenido en hojas sobre el fondo de carteles. |
 | `x-auth-shell` | Marco compartido de los dos accesos internos. |
 | `x-empty-state` | Estado vacío con icono, explicación y acción. |
 | `.sheet` / `.sheet-head` | Hoja y banda de folio con datos monoespaciados. |
@@ -745,7 +756,7 @@ Los paneles internos comparten el header y el fondo, pero no muestran la barra i
 - `resources/js/app.js`: menú móvil, reveal, password toggle, filtros y disponibilidad de citas.
 - `resources/views/hampi/layout.blade.php`: header, navegación, fondo único, footer y barra móvil.
 - `resources/views/hampi/partials/calendario.blade.php`: calendario y agenda móvil.
-- `resources/views/components/`: logo, page hero, auth shell, empty state e iconos.
+- `resources/views/components/`: logo, page hero, page board, auth shell, empty state e iconos.
 - `public/fonts/hampi/`: fuentes autoalojadas.
 - `DESIGN.md`: documento maestro del sistema visual.
 
@@ -992,7 +1003,8 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 
 - No ejecutes `db:seed` en producción salvo que quieras datos demo.
 - Cambia las contraseñas demo y el usuario root de MySQL.
-- Las fotos se guardan en `storage/app/public/perfiles`; en varios servidores conviene moverlas a S3 u otro almacenamiento compartido.
+- Laravel 11 dejó de recibir parches de seguridad en marzo de 2026. Para un despliegue real, actualiza a Laravel 12/13 (PHP 8.3+) antes de exponer datos de pacientes.
+- Las fotos se guardan en `storage/app/public/perfiles` y se sirven desde `/storage/perfiles/...`; ejecuta `php artisan storage:link` y verifica que la URL responda 200. En varios servidores conviene moverlas a S3 u otro almacenamiento compartido.
 - El sistema no incluye recuperación de contraseña por correo para el personal; administración puede asignar una nueva desde `/admin/equipo`.
 - El rate limiting del login es de 5 intentos por minuto y se registra en el log.
 
@@ -1015,7 +1027,7 @@ El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos 
 | `403` o redirección al entrar a `/admin`    | La cuenta no tiene rol administrativo                | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel.                         |
 | No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI                    | Entra en `/equipo/login` con DNI y contraseña.                                                         |
 | `429 Too Many Requests`                     | Rate limit del login                                 | Espera un minuto o limpia la caché del rate limiter.                                                   |
-| Foto de perfil 404 o 403                    | Falta el enlace de storage o es absoluto y el contenedor no lo resuelve | `php artisan storage:link`; si usas Docker con bind mount, `ln -sfn ../storage/app/public public/storage`. |
+| Foto de perfil 404 o no se ve               | Falta `public/storage` o el enlace no resuelve (típico en Windows/WSL) | Repite el [paso 5](#5-enlazar-el-almacenamiento-público); en Windows usa `mklink /J`. |
 | Error al generar 150 h                      | Combinación inválida o mes sin días hábiles          | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12.                                   |
 | El puerto 8000 no abre en Codespaces        | Visibilidad del puerto                               | Abre la pestaña **Ports** y pon el puerto en público.                                                  |
 | `npm run build` falla por versión de Node   | Node antiguo                                         | Usa Node 22.12+ (Vite 8).                                                                              |

@@ -80,7 +80,7 @@ El color pertenece a un mundo de papelería de salud, no a un dashboard SaaS.
 Reglas:
 
 - **Nunca comunicar un estado solo con color.** Los badges llevan texto (“Disponible”, “Por agotarse”, “Agotado”, “Confirmada”) y, cuando aporta, icono.
-- El fondo de página es **uno solo**: `bg-ledger` (papel hueso con retícula tenue). No se usan secciones full-width opacas que rompan la hoja.
+- El fondo global es `bg-ledger` (papel hueso con retícula tenue). Las páginas internas montan un tablero `bg-ledger-carteles` con el componente `x-page-board`, que agrupa el hero y el contenido en dos hojas blancas separadas. La portada y los accesos conservan su tratamiento propio.
 - El verde no es decorativo: identifica la acción principal y la pertenencia a la posta.
 - El rojo se reserva para sello, error y acciones destructivas; no para “destacar” contenido.
 - El naranja señala lo activo y lo que requiere atención; no reemplaza al rojo de error.
@@ -100,6 +100,8 @@ Reglas:
 ### La hoja
 
 `.sheet` es el contenedor de referencia: borde de 1px, fondo `paper-50`, sombra suave y radio de 2px. `.sheet-head` es una banda de tinta negra con datos monoespaciados (folio, fecha, sección). Las reglas internas usan `.sheet-rule` o `border-ink-200`.
+
+`.sheet-doctor` es la variante de las páginas internas (fondo blanco, borde y sombra). El componente `x-page-board` coloca el hero y el contenido en dos `.sheet-doctor` sobre un tablero `bg-ledger-carteles`, con el nav administrativo entre ambas hojas cuando corresponde.
 
 ### Ritmo
 
@@ -137,6 +139,15 @@ Cabecera editorial de páginas internas y públicas:
 - regla inferior.
 
 Es la firma visual que mantiene unida la portada con los paneles sin repetir el hero de marketing.
+
+### `page-board`
+Tablero común de las páginas internas. Recibe el hero como slot y el contenido como slot por defecto; opcionalmente recibe el `admin-nav` en un slot intermedio. Renderiza:
+- fondo `bg-ledger-carteles` con sombra y blur;
+- hero dentro de `.sheet-doctor`;
+- contenido dentro de otra `.sheet-doctor`;
+- padding y separación uniformes.
+
+Todas las pantallas internas (públicas, del personal y de administración) lo usan para que el hero y el contenido compartan la misma silueta. La portada y los accesos no lo usan.
 
 ### `auth-shell`
 Marco de dos columnas en escritorio:
@@ -288,7 +299,7 @@ La auditoría automatizada es una ayuda, no una certificación. Antes de publica
 | `resources/views/hampi/layout.blade.php` | Header, navegación, fondo único, footer y barra móvil. |
 | `resources/views/hampi/login.blade.php` | Portada y formulario DNI. |
 | `resources/views/hampi/partials/calendario.blade.php` | Calendario de escritorio y agenda móvil. |
-| `resources/views/components/` | `site-logo`, `page-hero`, `auth-shell`, `empty-state`, `icon`. |
+| `resources/views/components/` | `site-logo`, `page-hero`, `page-board`, `auth-shell`, `empty-state`, `icon`. |
 | `public/fonts/hampi/` | Fuentes WOFF2 autoalojadas. |
 | `public/images/comunidad-cuidado.*` | Foto de referencia de la portada, optimizada. |
 | `DESIGN.md` | Este documento. |
@@ -297,7 +308,7 @@ La auditoría automatizada es una ayuda, no una certificación. Antes de publica
 ### Para añadir una pantalla
 
 1. Definir si es **persuadir** (público) u **operar** (panel).
-2. Reutilizar `x-page-hero`, `.sheet`, `.mono-label`, `.badge`, `.btn` y `.input`.
+2. Reutilizar `x-page-board`, `x-page-hero`, `.sheet`, `.mono-label`, `.badge`, `.btn` y `.input`.
 3. Usar una sola `h1`; el resto de la jerarquía en `h2`/`h3`.
 4. Incluir estados vacíos, error y carga; no inventar datos.
 5. Verificar 320px, teclado, foco, zoom 200%, contraste y reduced motion.
