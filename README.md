@@ -1036,6 +1036,7 @@ php artisan storage:link
 
 ## Documentación adicional
 
+- [`DOCUMENTACION.md`](DOCUMENTACION.md): explicación didáctica del código, flujos, tests y guion de exposición.
 - [`DESIGN.md`](DESIGN.md): sistema visual completo, tokens, componentes, superficies, accesibilidad, créditos y checklist de demo.
 - [`PRODUCT.md`](PRODUCT.md): verdad de producto, usuarios, alcance y restricciones de la demo.
 - [`CHANGELOG.md`](CHANGELOG.md): historial de versiones y cambios relevantes.
