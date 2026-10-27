@@ -71,7 +71,7 @@ class EmpleadoCitaController extends Controller
 
         $fecha = $this->fechaDelFormulario($request->query('fecha', old('fecha', '')), $medico, $agenda);
         $horario = $agenda->horarioDelDia($medico, $fecha);
-        $slots = $agenda->slots($medico, $fecha);
+        $bloques = $agenda->slots($medico, $fecha);
 
         $postas = Posta::where('estado_activo', true)->orderBy('nombre')->get();
         $postaPredeterminada = $postas->firstWhere('nombre', $medico->establecimiento)?->id
@@ -84,7 +84,7 @@ class EmpleadoCitaController extends Controller
             'paciente',
             'fecha',
             'horario',
-            'slots',
+            'bloques',
             'postas',
             'postaPredeterminada',
         ));
@@ -102,7 +102,7 @@ class EmpleadoCitaController extends Controller
             'posta_id' => [
                 'required',
                 'integer',
-                Rule::exists('postas', 'id')->where(fn ($query) => $query->where('estado_activo', true)),
+                Rule::exists('postas', 'id')->where(fn ($consulta) => $consulta->where('estado_activo', true)),
             ],
             'fecha' => ['required', 'date', 'after_or_equal:today'],
             'hora' => ['required', 'date_format:H:i'],
@@ -227,13 +227,13 @@ class EmpleadoCitaController extends Controller
         }
 
         $horario = $agenda->horarioDelDia($request->user(), $fecha);
-        $slots = $agenda->slots($request->user(), $fecha);
+        $bloques = $agenda->slots($request->user(), $fecha);
 
         $mensaje = null;
 
         if (! $horario) {
             $mensaje = 'No tienes un turno asignado para esa fecha.';
-        } elseif (empty($slots)) {
+        } elseif (empty($bloques)) {
             $mensaje = 'No quedan horarios disponibles para ese día.';
         }
 
@@ -243,7 +243,7 @@ class EmpleadoCitaController extends Controller
             'horario' => $horario
                 ? $horario->hora_inicio.' a '.$horario->hora_fin
                 : null,
-            'slots' => $slots,
+            'slots' => $bloques,
             'mensaje' => $mensaje,
         ]);
     }

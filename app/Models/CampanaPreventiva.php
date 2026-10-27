@@ -36,9 +36,9 @@ class CampanaPreventiva extends Model
     }
 
     /** Limita la consulta a las campañas publicadas en el portal. */
-    public function scopeActivas(Builder $query): Builder
+    public function scopeActivas(Builder $consulta): Builder
     {
-        return $query->where('activa', true);
+        return $consulta->where('activa', true);
     }
 
     /** Periodo legible para las vistas ("05/10/2026 al 12/10/2026"). */

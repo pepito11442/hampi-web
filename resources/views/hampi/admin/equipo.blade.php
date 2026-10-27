@@ -46,15 +46,15 @@
                         ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
                         ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
                         ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
-                    ] as $tab)
+                    ] as $pestana)
                         <a
-                            href="{{ route('admin.equipo.index', ['rol' => $tab['key']]) }}"
-                            class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $tab['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
-                            @if ($rol === $tab['key']) aria-current="page" @endif
+                            href="{{ route('admin.equipo.index', ['rol' => $pestana['key']]) }}"
+                            class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $pestana['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
+                            @if ($rol === $pestana['key']) aria-current="page" @endif
                         >
-                            <x-icon :name="$tab['icon']" class="h-4 w-4" />
-                            {{ $tab['label'] }}
-                            <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $tab['count'] }}</span>
+                            <x-icon :name="$pestana['icon']" class="h-4 w-4" />
+                            {{ $pestana['label'] }}
+                            <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $pestana['count'] }}</span>
                         </a>
                     @endforeach
                 </div>

@@ -21,17 +21,17 @@ class HorarioController extends Controller
     {
         $rol = (string) $request->query('rol', 'todos');
 
-        $query = User::whereIn('role', User::ROLES_PERSONAL)->orderBy('name');
+        $consulta = User::whereIn('role', User::ROLES_PERSONAL)->orderBy('name');
 
         if ($rol === 'doctores') {
-            $query->where('role', User::ROL_DOCTOR);
+            $consulta->where('role', User::ROL_DOCTOR);
         } elseif ($rol === 'enfermeros') {
-            $query->whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA]);
+            $consulta->whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA]);
         } else {
             $rol = 'todos';
         }
 
-        $personal = $query->get();
+        $personal = $consulta->get();
 
         $conteos = [
             'todos' => User::whereIn('role', User::ROLES_PERSONAL)->count(),
@@ -51,7 +51,7 @@ class HorarioController extends Controller
         $mes = max(1, min(12, (int) $request->query('mes', now()->month)));
 
         $horarios = collect();
-        $totalHoras = 0.0;
+        $horasTotales = 0.0;
 
         if ($user) {
             $inicio = Carbon::create($anio, $mes, 1);
@@ -65,7 +65,7 @@ class HorarioController extends Controller
                 ->get()
                 ->keyBy(fn (Horario $horario) => $horario->fecha->format('Y-m-d'));
 
-            $totalHoras = (float) $horarios->sum('horas');
+            $horasTotales = (float) $horarios->sum('horas');
         }
 
         return view('hampi.admin.horarios', compact(
@@ -74,7 +74,7 @@ class HorarioController extends Controller
             'anio',
             'mes',
             'horarios',
-            'totalHoras',
+            'horasTotales',
             'rol',
             'conteos',
         ));
@@ -98,11 +98,11 @@ class HorarioController extends Controller
 
         abort_unless($user->esPersonal(), 404);
 
-        $inicioMes = Carbon::create((int) $datos['anio'], (int) $datos['mes'], 1)->startOfDay();
-        $finMes = $inicioMes->copy()->endOfMonth();
+        $inicioDelMes = Carbon::create((int) $datos['anio'], (int) $datos['mes'], 1)->startOfDay();
+        $finMes = $inicioDelMes->copy()->endOfMonth();
 
         $tieneCitasFuturas = Cita::where('user_id', $user->id)
-            ->whereBetween('fecha_hora', [$inicioMes, $finMes])
+            ->whereBetween('fecha_hora', [$inicioDelMes, $finMes])
             ->where('fecha_hora', '>=', now())
             ->whereIn('estado', AgendaCitas::ESTADOS_ACTIVOS)
             ->exists();

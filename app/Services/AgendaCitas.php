@@ -55,7 +55,7 @@ class AgendaCitas
             ->map(fn (Cita $cita) => $cita->fecha_hora->format('H:i'))
             ->all();
 
-        $slots = [];
+        $bloques = [];
         $ahora = now();
 
         for ($inicio = $inicioTurno->copy(); $inicio->lt($finTurno); $inicio->addMinutes(self::DURACION_MINUTOS)) {
@@ -69,13 +69,13 @@ class AgendaCitas
                 continue;
             }
 
-            $slots[] = [
+            $bloques[] = [
                 'hora' => $hora,
                 'etiqueta' => $inicio->format('H:i'),
             ];
         }
 
-        return $slots;
+        return $bloques;
     }
 
     /**

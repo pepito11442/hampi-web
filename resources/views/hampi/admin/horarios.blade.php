@@ -11,8 +11,8 @@
             9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre',
         ];
         $turnosAsignados = $horarios->count();
-        $progreso = $user ? (int) min(100, round(($totalHoras / 150) * 100)) : 0;
-        $horasTexto = rtrim(rtrim(number_format($totalHoras, 1, '.', ''), '0'), '.');
+        $progreso = $user ? (int) min(100, round(($horasTotales / 150) * 100)) : 0;
+        $horasTexto = rtrim(rtrim(number_format($horasTotales, 1, '.', ''), '0'), '.');
     @endphp
     <x-page-board>
         <x-slot:hero>
@@ -56,15 +56,15 @@
                         ['key' => 'todos', 'label' => 'Todo el equipo', 'count' => $conteos['todos'], 'icon' => 'users'],
                         ['key' => 'doctores', 'label' => 'Médicos', 'count' => $conteos['doctores'], 'icon' => 'stethoscope'],
                         ['key' => 'enfermeros', 'label' => 'Enfermería', 'count' => $conteos['enfermeros'], 'icon' => 'heart-pulse'],
-                    ] as $tab)
+                    ] as $pestana)
                         <a
-                            href="{{ route('admin.horarios.index', array_filter(['rol' => $tab['key'], 'anio' => $anio, 'mes' => $mes])) }}"
-                            class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $tab['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
-                            @if ($rol === $tab['key']) aria-current="page" @endif
+                            href="{{ route('admin.horarios.index', array_filter(['rol' => $pestana['key'], 'anio' => $anio, 'mes' => $mes])) }}"
+                            class="inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors {{ $rol === $pestana['key'] ? 'border-signal-600 bg-paper-50 text-ink-950' : 'border-transparent text-ink-600 hover:bg-paper-200 hover:text-ink-950' }}"
+                            @if ($rol === $pestana['key']) aria-current="page" @endif
                         >
-                            <x-icon :name="$tab['icon']" class="h-4 w-4" />
-                            {{ $tab['label'] }}
-                            <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $tab['count'] }}</span>
+                            <x-icon :name="$pestana['icon']" class="h-4 w-4" />
+                            {{ $pestana['label'] }}
+                            <span class="border border-current px-1.5 py-0.5 font-mono text-[9px]">{{ $pestana['count'] }}</span>
                         </a>
                     @endforeach
                 </div>
@@ -159,15 +159,15 @@
                                             <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-500">de 150 h</span>
                                         </div>
                                     </div>
-                                    <span class="badge {{ $totalHoras >= 150 ? 'badge-teal' : 'badge-amber' }}">
+                                    <span class="badge {{ $horasTotales >= 150 ? 'badge-teal' : 'badge-amber' }}">
                                         {{ $turnosAsignados }} {{ $turnosAsignados === 1 ? 'turno' : 'turnos' }}
                                     </span>
                                 </div>
-                                <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $totalHoras }}" aria-label="Avance de horas del trabajador">
+                                <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $horasTotales }}" aria-label="Avance de horas del trabajador">
                                     <div class="h-full bg-brand-700 transition-[width] duration-500" style="width: {{ $progreso }}%"></div>
                                 </div>
                                 <p class="mt-1.5 font-mono text-[9px] uppercase tracking-[0.05em] text-ink-500">
-                                    {{ $totalHoras >= 150 ? 'Cumple la meta mensual de 150 horas' : 'Aún no se alcanzan las 150 horas' }}
+                                    {{ $horasTotales >= 150 ? 'Cumple la meta mensual de 150 horas' : 'Aún no se alcanzan las 150 horas' }}
                                 </p>
                             </div>
 
@@ -226,8 +226,8 @@
                                     Turnos asignados a {{ $user->name }}. Los domingos no se atiende y los sábados solo se trabaja de 07:00 a 15:00.
                                 </p>
                             </div>
-                            <x-badge :color="$totalHoras >= 150 ? 'teal' : 'amber'">
-                                {{ $totalHoras >= 150 ? '150 h cumplidas' : 'Meta: 150 h' }}
+                            <x-badge :color="$horasTotales >= 150 ? 'teal' : 'amber'">
+                                {{ $horasTotales >= 150 ? '150 h cumplidas' : 'Meta: 150 h' }}
                             </x-badge>
                         </div>
 

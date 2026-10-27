@@ -10,13 +10,13 @@
             5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
             9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre',
         ];
-        $inicioMes = \Carbon\Carbon::create($anio, $mes, 1);
-        $mesAnterior = $inicioMes->copy()->subMonth();
-        $mesSiguiente = $inicioMes->copy()->addMonth();
+        $inicioDelMes = \Carbon\Carbon::create($anio, $mes, 1);
+        $mesAnterior = $inicioDelMes->copy()->subMonth();
+        $mesSiguiente = $inicioDelMes->copy()->addMonth();
         $turnosAsignados = $horarios->count();
-        $cumpleMeta = $totalHoras >= 150;
-        $progreso = (int) min(100, round(($totalHoras / 150) * 100));
-        $horasTexto = rtrim(rtrim(number_format($totalHoras, 1, '.', ''), '0'), '.');
+        $cumpleMeta = $horasTotales >= 150;
+        $progreso = (int) min(100, round(($horasTotales / 150) * 100));
+        $horasTexto = rtrim(rtrim(number_format($horasTotales, 1, '.', ''), '0'), '.');
     @endphp
 
     <x-page-board>
@@ -88,11 +88,11 @@
                                     {{ $cumpleMeta ? 'Cumplida' : 'En curso' }}
                                 </span>
                             </p>
-                            <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $totalHoras }}" aria-label="Avance de horas mensuales">
+                            <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $horasTotales }}" aria-label="Avance de horas mensuales">
                                 <div class="h-full bg-brand-700 transition-[width] duration-500" style="width: {{ $progreso }}%"></div>
                             </div>
                             <p class="mt-1.5 font-mono text-[9px] uppercase tracking-[0.05em] text-ink-500">
-                                {{ $cumpleMeta ? '150 h completadas' : 'Faltan ' . rtrim(rtrim(number_format(150 - $totalHoras, 1, '.', ''), '0'), '.') . ' h' }}
+                                {{ $cumpleMeta ? '150 h completadas' : 'Faltan ' . rtrim(rtrim(number_format(150 - $horasTotales, 1, '.', ''), '0'), '.') . ' h' }}
                             </p>
                         </div>
                     </section>

@@ -40,12 +40,12 @@ class EmpleadoController extends Controller
      */
     public function login(Request $request)
     {
-        $throttleKey = 'empleado|'.Str::lower((string) $request->input('dni')).'|'.$request->ip();
+        $claveLimite = 'empleado|'.Str::lower((string) $request->input('dni')).'|'.$request->ip();
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        if (RateLimiter::tooManyAttempts($claveLimite, 5)) {
             Log::warning("Intento de fuerza bruta en panel de empleados desde {$request->ip()} con DNI {$request->input('dni')}.");
 
-            $segundos = RateLimiter::availableIn($throttleKey);
+            $segundos = RateLimiter::availableIn($claveLimite);
 
             return response()->view('errors.429', [
                 'mensaje' => "Demasiados intentos fallidos. Intente nuevamente en {$segundos} segundos.",
@@ -65,7 +65,7 @@ class EmpleadoController extends Controller
             && Hash::check($credenciales['password'], $user->password);
 
         if (! $puedeIngresar) {
-            RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($claveLimite, 60);
 
             return back()->withErrors([
                 'dni' => 'El DNI o la contraseña no son correctos.',
@@ -73,7 +73,7 @@ class EmpleadoController extends Controller
         }
 
         Auth::login($user, $request->boolean('remember'));
-        RateLimiter::clear($throttleKey);
+        RateLimiter::clear($claveLimite);
         $request->session()->regenerate();
 
         return redirect()->route('empleado.panel');
@@ -96,9 +96,9 @@ class EmpleadoController extends Controller
 
         [$anio, $mes] = $this->periodo($request);
         $horarios = $this->horariosDelMes($user, $anio, $mes);
-        $totalHoras = (float) $horarios->sum('horas');
+        $horasTotales = (float) $horarios->sum('horas');
 
-        return view('empleado.panel', compact('user', 'horarios', 'totalHoras', 'anio', 'mes'));
+        return view('empleado.panel', compact('user', 'horarios', 'horasTotales', 'anio', 'mes'));
     }
 
     /**

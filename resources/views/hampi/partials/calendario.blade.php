@@ -4,13 +4,13 @@
         5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
         9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre',
     ];
-    $diasSemana = [
+    $diasDeLaSemana = [
         0 => 'Domingo', 1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles',
         4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado',
     ];
-    $inicioMes = \Carbon\Carbon::create($anio, $mes, 1);
-    $diasDelMes = $inicioMes->daysInMonth;
-    $desplazamiento = ($inicioMes->dayOfWeek + 6) % 7; // lunes = 0
+    $inicioDelMes = \Carbon\Carbon::create($anio, $mes, 1);
+    $diasDelMes = $inicioDelMes->daysInMonth;
+    $desplazamiento = ($inicioDelMes->dayOfWeek + 6) % 7; // lunes = 0
     $hoy = now()->toDateString();
     $estilos = [
         'manana' => 'border-l-2 border-l-maize-500 bg-maize-50/60',
@@ -93,7 +93,7 @@
                             </span>
                             <div>
                                 <p class="font-display text-sm font-bold text-ink-950">
-                                    {{ $diasSemana[$horario->fecha->dayOfWeek] }} {{ $horario->fecha->format('d/m') }}
+                                    {{ $diasDeLaSemana[$horario->fecha->dayOfWeek] }} {{ $horario->fecha->format('d/m') }}
                                 </p>
                                 <p class="mt-0.5 font-mono text-[10px] text-ink-600">
                                     {{ $horario->hora_inicio }}–{{ $horario->hora_fin }} · {{ $horario->horas }} h

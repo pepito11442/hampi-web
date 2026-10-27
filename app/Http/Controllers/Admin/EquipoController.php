@@ -22,17 +22,17 @@ class EquipoController extends Controller
     {
         $rol = (string) $request->query('rol', 'todos');
 
-        $query = User::whereIn('role', User::ROLES_PERSONAL)->orderBy('name');
+        $consulta = User::whereIn('role', User::ROLES_PERSONAL)->orderBy('name');
 
         if ($rol === 'doctores') {
-            $query->where('role', User::ROL_DOCTOR);
+            $consulta->where('role', User::ROL_DOCTOR);
         } elseif ($rol === 'enfermeros') {
-            $query->whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA]);
+            $consulta->whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA]);
         } else {
             $rol = 'todos';
         }
 
-        $equipo = $query->get();
+        $equipo = $consulta->get();
 
         $conteos = [
             'todos' => User::whereIn('role', User::ROLES_PERSONAL)->count(),

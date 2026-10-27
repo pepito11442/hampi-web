@@ -192,11 +192,11 @@
                                             data-citas-hora
                                             data-disponibilidad-url="{{ route('empleado.citas.disponibilidad') }}"
                                             required
-                                            @disabled(empty($slots))
+                                            @disabled(empty($bloques))
                                         >
-                                            @forelse ($slots as $slot)
-                                                <option value="{{ $slot['hora'] }}" @selected(old('hora') === $slot['hora'])>
-                                                    {{ $slot['etiqueta'] }}
+                                            @forelse ($bloques as $bloque)
+                                                <option value="{{ $bloque['hora'] }}" @selected(old('hora') === $bloque['hora'])>
+                                                    {{ $bloque['etiqueta'] }}
                                                 </option>
                                             @empty
                                                 <option value="">Sin horarios disponibles</option>
@@ -235,7 +235,7 @@
                                     type="submit"
                                     class="btn btn-primary shrink-0"
                                     data-citas-submit
-                                    @disabled(empty($slots) || $postas->isEmpty())
+                                    @disabled(empty($bloques) || $postas->isEmpty())
                                 >
                                     <x-icon name="calendar-check" class="h-4 w-4" />
                                     Confirmar cita

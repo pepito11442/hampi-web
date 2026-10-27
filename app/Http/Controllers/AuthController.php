@@ -27,13 +27,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         // Identificador único: email + IP del usuario
-        $throttleKey = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+        $claveLimite = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
 
         // Si ya superó los 5 intentos, registrar en el LOG y BLOQUEAR con 429
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        if (RateLimiter::tooManyAttempts($claveLimite, 5)) {
             Log::warning("Alerta de Seguridad: Posible ataque de fuerza bruta detectado desde la IP {$request->ip()} intentando acceder a la cuenta {$request->email}.");
 
-            $segundos = RateLimiter::availableIn($throttleKey);
+            $segundos = RateLimiter::availableIn($claveLimite);
             return response()->view('errors.429', [
                 'mensaje' => "Demasiados intentos fallidos. Intente nuevamente en {$segundos} segundos."
             ], 429);
@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credenciales)) {
             // Si acertó, limpiamos el contador de intentos
-            RateLimiter::clear($throttleKey);
+            RateLimiter::clear($claveLimite);
 
             $user = Auth::user();
 
@@ -68,7 +68,7 @@ class AuthController extends Controller
         }
 
         // Si falló, sumamos 1 intento al contador (se reinicia en 60 segundos)
-        RateLimiter::hit($throttleKey, 60);
+        RateLimiter::hit($claveLimite, 60);
 
         return back()->withErrors([
             'email' => 'El correo o la contraseña no son correctos.'

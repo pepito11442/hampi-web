@@ -160,19 +160,19 @@ class HampiController extends Controller
         $token = config('services.reniec.token');
 
         try {
-            $response = Http::withHeaders([
+            $respuesta = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
                 'Referer' => 'https://apis.net.pe/consulta-dni-api',
                 'User-Agent' => 'laravel/framework',
             ])->timeout(5)->get(config('services.reniec.url'), ['numero' => $dni]);
 
-            if ($response->successful()) {
-                $data = $response->json();
+            if ($respuesta->successful()) {
+                $datos = $respuesta->json();
                 
                 return response()->json([
                     'success' => true,
-                    'nombres' => $data['nombres'],
-                    'apellidos' => ($data['apellidoPaterno'] ?? '') . ' ' . ($data['apellidoMaterno'] ?? ''),
+                    'nombres' => $datos['nombres'],
+                    'apellidos' => ($datos['apellidoPaterno'] ?? '') . ' ' . ($datos['apellidoMaterno'] ?? ''),
                     'origen' => 'Padrón RENIEC Oficial'
                 ]);
             }

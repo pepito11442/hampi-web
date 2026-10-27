@@ -39,17 +39,17 @@ class AgendaMedica
         $programados = Horario::query()
             ->with('user')
             ->whereDate('fecha', $fecha->toDateString())
-            ->whereHas('user', fn ($query) => $query
+            ->whereHas('user', fn ($consulta) => $consulta
                 ->where('role', User::ROL_DOCTOR)
                 ->where('activo', true))
             ->get();
 
         // Los registros manuales no tienen fecha: representan el rol de hoy.
-        $manuales = $fecha->isToday()
+        $turnosManuales = $fecha->isToday()
             ? TurnoMedico::with('posta')->get()
             : collect();
 
-        $manualesPorNombre = $manuales->keyBy(
+        $turnosManualesPorNombre = $turnosManuales->keyBy(
             fn (TurnoMedico $turno) => $this->normalizarNombre($turno->medico_nombre)
         );
 
@@ -65,7 +65,7 @@ class AgendaMedica
 
             $clave = $this->normalizarNombre($user->name);
             $nombresProgramados[$clave] = true;
-            $manual = $manualesPorNombre->get($clave);
+            $registroManual = $turnosManualesPorNombre->get($clave);
 
             $medicos->push(new MedicoDelDia(
                 clave: 'horario-'.$horario->id,
@@ -75,7 +75,7 @@ class AgendaMedica
                 turno_clave: $horario->turno,
                 hora_inicio: $horario->hora_inicio,
                 hora_fin: $horario->hora_fin,
-                consultorio: $manual?->consultorio ?: 'Consultorio de la Microred',
+                consultorio: $registroManual?->consultorio ?: 'Consultorio de la Microred',
                 estado: $this->estadoHorario($horario, $fecha),
                 fuente: 'horario',
                 en_manana: in_array($horario->turno, ['manana', 'completo', 'sabado'], true),
@@ -86,29 +86,29 @@ class AgendaMedica
             ));
         }
 
-        foreach ($manuales as $manual) {
-            $clave = $this->normalizarNombre($manual->medico_nombre);
+        foreach ($turnosManuales as $turnoManual) {
+            $clave = $this->normalizarNombre($turnoManual->medico_nombre);
 
             if (isset($nombresProgramados[$clave])) {
                 continue;
             }
 
-            $esManana = $manual->turno === 'Mañana';
+            $esManana = $turnoManual->turno === 'Mañana';
 
             $medicos->push(new MedicoDelDia(
-                clave: 'manual-'.$manual->id,
-                medico_nombre: $manual->medico_nombre,
-                especialidad: $manual->especialidad ?: 'Medicina General',
-                turno: $manual->turno,
+                clave: 'manual-'.$turnoManual->id,
+                medico_nombre: $turnoManual->medico_nombre,
+                especialidad: $turnoManual->especialidad ?: 'Medicina General',
+                turno: $turnoManual->turno,
                 turno_clave: $esManana ? 'manana' : 'tarde',
                 hora_inicio: $esManana ? '07:00' : '13:00',
                 hora_fin: $esManana ? '13:00' : '19:30',
-                consultorio: $manual->consultorio,
-                estado: $manual->estado,
+                consultorio: $turnoManual->consultorio,
+                estado: $turnoManual->estado,
                 fuente: 'manual',
                 en_manana: $esManana,
                 en_tarde: ! $esManana,
-                manual_id: $manual->id,
+                manual_id: $turnoManual->id,
             ));
         }
 

@@ -18,12 +18,12 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        $respuesta = $next($request);
 
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $respuesta->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $respuesta->headers->set('X-Content-Type-Options', 'nosniff');
+        $respuesta->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        return $response;
+        return $respuesta;
     }
 }
