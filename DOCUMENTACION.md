@@ -1701,7 +1701,7 @@ En este proyecto hay **37 tests** y más de **240 comprobaciones** (`assertions`
 
 ### 16.3 Ejemplo de un test
 
-Un test de Hampi se ve así:
+Un test de Hampi se ve así (ejemplo simplificado):
 
 ```php
 public function test_el_admin_publica_un_aviso(): void
