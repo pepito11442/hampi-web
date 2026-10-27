@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/HampiController.php
 
 namespace App\Http\Controllers;
 
@@ -13,9 +12,15 @@ use App\Services\AgendaMedica;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Portal público: portada, acceso ciudadano y páginas informativas.
+ *
+ * La ciudadanía no crea cuenta; se identifica con su DNI y consulta sus
+ * citas y la información publicada por la microred.
+ */
 class HampiController extends Controller
 {
-    // Pantalla 1: Acceso / Inicio
+    /** Portada con indicadores del día y acceso por DNI. */
     public function index(AgendaMedica $agenda)
     {
         // Limpiar cualquier sesión anterior
@@ -38,7 +43,12 @@ class HampiController extends Controller
         return view('hampi.login', compact('stats', 'proximaCampana'));
     }
 
-    // Validación e ingreso con DNI
+    /**
+     * Registra o actualiza la ficha del ciudadano y abre su sesión.
+     *
+     * RENIEC es opcional: si no responde, se conservan los nombres que ya
+     * existan o los que el usuario escribió manualmente.
+     */
     public function accesoPorDni(Request $request)
     {
         $dni = $request->input('dni', '72345678');
@@ -69,7 +79,7 @@ class HampiController extends Controller
         return redirect()->route('ciudadano.panel');
     }
 
-    // Pantalla 2: Panel del Paciente
+    /** Panel del ciudadano con sus próximas citas e historial. */
     public function panelCiudadano()
     {
         $dni = Session::get('ciudadano_dni');
@@ -94,7 +104,7 @@ class HampiController extends Controller
         return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
     }
 
-    // Pantalla 3: Médicos y Turnos del Día
+    /** Rol de médicos del día, separado por turno. */
     public function verMedicos(AgendaMedica $agenda)
     {
         $medicos = $agenda->delDia();
@@ -104,21 +114,21 @@ class HampiController extends Controller
         return view('hampi.medicos', compact('medicos', 'turnosManana', 'turnosTarde'));
     }
 
-    // Pantalla 4: El Pizarrín Digital de Vacunas
+    /** Pizarrín público de vacunas y disponibilidad. */
     public function verPizarrin()
     {
         $vacunas = VacunaAviso::with('posta')->orderBy('es_urgente', 'desc')->get();
         return view('hampi.pizarrin', compact('vacunas'));
     }
 
-    // Pantalla 5: Directorio de Postas de Socabaya
+    /** Directorio de establecimientos activos de la microred. */
     public function verPostas()
     {
         $postas = Posta::where('estado_activo', true)->get();
         return view('hampi.postas', compact('postas'));
     }
 
-    // Pantalla 6: Campañas preventivas de la Microred
+    /** Campañas preventivas activas publicadas por la microred. */
     public function verCampanasPreventivas()
     {
         $campanas = CampanaPreventiva::activas()
@@ -128,13 +138,19 @@ class HampiController extends Controller
         return view('hampi.campanas', compact('campanas'));
     }
 
+    /** Cierra la sesión ciudadana sin afectar al personal autenticado. */
     public function logoutCiudadano()
     {
         Session::forget(['ciudadano_dni', 'ciudadano_id']);
         return redirect('/');
     }
 
-    // Consulta en vivo a RENIEC
+    /**
+     * Consulta los nombres del DNI en RENIEC.
+     *
+     * Es un servicio opcional: si no hay token o la API falla, el
+     * formulario permite completar los nombres manualmente.
+     */
     public function consultarDniReniec($dni)
     {
         if (!preg_match('/^[0-9]{8}$/', $dni)) {

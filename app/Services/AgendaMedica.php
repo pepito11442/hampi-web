@@ -24,6 +24,12 @@ use Illuminate\Support\Str;
 class AgendaMedica
 {
     /**
+     * Devuelve la agenda combinada para una fecha (hoy por defecto).
+     *
+     * Incluye los horarios mensuales de médicos activos y, solo para hoy,
+     * los registros manuales del rol. Si ambos coinciden por nombre, se
+     * conserva una sola entrada.
+     *
      * @return Collection<int, MedicoDelDia>
      */
     public function delDia(?CarbonInterface $fecha = null): Collection
@@ -110,6 +116,8 @@ class AgendaMedica
     }
 
     /**
+     * Filtra los turnos que pertenecen al bloque de la mañana.
+     *
      * @param  Collection<int, MedicoDelDia>  $medicos
      * @return Collection<int, MedicoDelDia>
      */
@@ -119,6 +127,8 @@ class AgendaMedica
     }
 
     /**
+     * Filtra los turnos que pertenecen al bloque de la tarde.
+     *
      * @param  Collection<int, MedicoDelDia>  $medicos
      * @return Collection<int, MedicoDelDia>
      */
@@ -128,6 +138,8 @@ class AgendaMedica
     }
 
     /**
+     * Cuenta los médicos de la agenda.
+     *
      * @param  Collection<int, MedicoDelDia>  $medicos
      */
     public function total(Collection $medicos): int
@@ -136,6 +148,8 @@ class AgendaMedica
     }
 
     /**
+     * Cuenta los médicos que están atendiendo en este momento.
+     *
      * @param  Collection<int, MedicoDelDia>  $medicos
      */
     public function atendiendo(Collection $medicos): int
@@ -143,6 +157,7 @@ class AgendaMedica
         return $medicos->where('estado', 'Atendiendo')->count();
     }
 
+    /** Normaliza el nombre para comparar horarios y rol manual sin duplicar. */
     private function normalizarNombre(string $nombre): string
     {
         $nombre = preg_replace('/^(Dr\.?|Dra\.?|Lic\.?|Téc\.?|Tec\.?)\s+/iu', '', trim($nombre)) ?? $nombre;
@@ -152,6 +167,7 @@ class AgendaMedica
         return trim($nombre);
     }
 
+    /** Convierte la clave interna del turno en su etiqueta visible. */
     private function etiquetaTurno(string $turno): string
     {
         return match ($turno) {
@@ -163,6 +179,7 @@ class AgendaMedica
         };
     }
 
+    /** Calcula si el turno ya terminó, está en curso o aún no empieza. */
     private function estadoHorario(Horario $horario, CarbonInterface $fecha): string
     {
         $inicio = Carbon::parse($fecha->toDateString().' '.($horario->hora_inicio ?? '00:00'));

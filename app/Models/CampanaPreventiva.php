@@ -6,6 +6,12 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Campaña preventiva publicada por la microred.
+ *
+ * El estado ("En curso", "Próxima", "Finalizada") se calcula a partir de
+ * las fechas, no se guarda en la base de datos.
+ */
 class CampanaPreventiva extends Model
 {
     protected $table = 'campanas_preventivas';
@@ -29,11 +35,13 @@ class CampanaPreventiva extends Model
         ];
     }
 
+    /** Limita la consulta a las campañas publicadas en el portal. */
     public function scopeActivas(Builder $query): Builder
     {
         return $query->where('activa', true);
     }
 
+    /** Periodo legible para las vistas ("05/10/2026 al 12/10/2026"). */
     public function getPeriodoAttribute(): string
     {
         if (! $this->fecha_inicio && ! $this->fecha_fin) {
@@ -50,6 +58,7 @@ class CampanaPreventiva extends Model
         return $inicio ?: $fin;
     }
 
+    /** Estado calculado según las fechas de la campaña. */
     public function getEstadoAttribute(): string
     {
         $hoy = Carbon::today();

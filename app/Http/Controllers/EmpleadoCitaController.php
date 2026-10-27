@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Agenda de citas del médico autenticado.
+ *
+ * Cada médico solo puede ver, crear y cerrar sus propias citas. Los
+ * bloques se calculan a partir de su horario mensual.
+ */
 class EmpleadoCitaController extends Controller
 {
     /**

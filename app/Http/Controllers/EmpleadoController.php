@@ -14,8 +14,15 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
+/**
+ * Acceso y panel del personal de salud (médicos y enfermería).
+ *
+ * El ingreso es con DNI + contraseña; cada trabajador solo ve su propio
+ * horario y puede actualizar su perfil profesional.
+ */
 class EmpleadoController extends Controller
 {
+    /** Muestra el formulario de acceso del personal. */
     public function showLogin()
     {
         if (Auth::check() && Auth::user()->esPersonal()) {
@@ -25,6 +32,12 @@ class EmpleadoController extends Controller
         return view('empleado.login');
     }
 
+    /**
+     * Autentica al personal con DNI y contraseña.
+     *
+     * Aplica el mismo límite de intentos que el acceso administrativo y
+     * rechaza cuentas inactivas o con rol ciudadano.
+     */
     public function login(Request $request)
     {
         $throttleKey = 'empleado|'.Str::lower((string) $request->input('dni')).'|'.$request->ip();
@@ -66,6 +79,7 @@ class EmpleadoController extends Controller
         return redirect()->route('empleado.panel');
     }
 
+    /** Cierra la sesión del personal y regenera el token CSRF. */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -75,6 +89,7 @@ class EmpleadoController extends Controller
         return redirect('/')->with('mensaje', 'Sesión cerrada correctamente.');
     }
 
+    /** Muestra el horario del mes y el perfil del trabajador autenticado. */
     public function panel(Request $request)
     {
         $user = $request->user();
@@ -86,6 +101,12 @@ class EmpleadoController extends Controller
         return view('empleado.panel', compact('user', 'horarios', 'totalHoras', 'anio', 'mes'));
     }
 
+    /**
+     * Actualiza los datos profesionales y la foto de perfil.
+     *
+     * La foto reemplaza a la anterior en el disco público. El nombre, DNI
+     * y rol no se pueden cambiar desde aquí.
+     */
     public function updatePerfil(Request $request)
     {
         $user = $request->user();
@@ -118,6 +139,8 @@ class EmpleadoController extends Controller
     }
 
     /**
+     * Normaliza el año y mes solicitados a un rango válido.
+     *
      * @return array{0: int, 1: int}
      */
     private function periodo(Request $request): array
@@ -131,6 +154,7 @@ class EmpleadoController extends Controller
         ];
     }
 
+    /** Devuelve los turnos del trabajador para el mes indicado. */
     private function horariosDelMes(User $user, int $anio, int $mes)
     {
         $inicio = Carbon::create($anio, $mes, 1);

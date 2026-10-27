@@ -52,7 +52,7 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 | Herramientas de desarrollo | Laravel Boost (dev), Composer, npm                                                 |
 | Sistema visual             | “El parte de la posta” · documentado en `DESIGN.md`                                |
 
-SQLite **ya no se usa para la aplicación**. El archivo `database/laravel` dejó de versionarse y la app espera una conexión MySQL/MariaDB. Los tests conservan SQLite en memoria porque es rápido y no requiere un servidor; esa configuración vive en `phpunit.xml`.
+La aplicación usa **MySQL/MariaDB** como base de datos principal. La suite de pruebas usa **SQLite en memoria** (`phpunit.xml`) para no depender de un servidor; esa es la única conexión SQLite del proyecto.
 
 ---
 
@@ -955,10 +955,6 @@ La tabla `users` se amplió con `dni`, `telefono`, `especialidad`, `biografia`, 
 php artisan migrate --seed
 php artisan storage:link
 ```
-
-### Si vienes de la versión SQLite
-
-El archivo `database/laravel` ya no se versiona ni se usa. Para conservar datos reales, expórtalos antes de cambiar de motor y migra la información con un proceso de conversión; el seeder solo crea datos de demostración. Para un entorno académico/demo, lo más simple es crear la base MySQL y ejecutar `migrate --seed`.
 
 ### Buenas prácticas
 

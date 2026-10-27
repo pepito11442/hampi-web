@@ -3,7 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Cita médica de un ciudadano con un profesional y una posta.
+ *
+ * El estado determina si la cita ocupa un bloque de la agenda: solo
+ * "Confirmada" y "Pendiente" reservan horario.
+ */
 class Cita extends Model
 {
     protected $guarded = [];
@@ -15,17 +22,20 @@ class Cita extends Model
         ];
     }
 
-    public function ciudadano()
+    /** Ciudadano que reservó la cita. */
+    public function ciudadano(): BelongsTo
     {
         return $this->belongsTo(Ciudadano::class);
     }
 
-    public function medico()
+    /** Médico que atiende la cita; puede ser null en citas históricas. */
+    public function medico(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function posta()
+    /** Establecimiento donde se atiende la cita. */
+    public function posta(): BelongsTo
     {
         return $this->belongsTo(Posta::class);
     }

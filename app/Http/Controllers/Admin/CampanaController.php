@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\CampanaPreventiva;
 use Illuminate\Http\Request;
 
+/**
+ * Gestión de campañas preventivas desde administración.
+ */
 class CampanaController extends Controller
 {
+    /** Lista todas las campañas, activas e inactivas. */
     public function index()
     {
         $campanas = CampanaPreventiva::orderByDesc('activa')
@@ -17,6 +21,7 @@ class CampanaController extends Controller
         return view('hampi.admin.campanas', compact('campanas'));
     }
 
+    /** Publica una campaña nueva. */
     public function store(Request $request)
     {
         $datos = $request->validate([
@@ -35,6 +40,7 @@ class CampanaController extends Controller
         return back()->with('mensaje', 'Campaña preventiva publicada correctamente.');
     }
 
+    /** Publica u oculta una campaña del portal público. */
     public function toggleEstado(CampanaPreventiva $campana)
     {
         $campana->update(['activa' => ! $campana->activa]);
@@ -47,6 +53,7 @@ class CampanaController extends Controller
         );
     }
 
+    /** Elimina una campaña de forma permanente. */
     public function destroy(CampanaPreventiva $campana)
     {
         $campana->delete();

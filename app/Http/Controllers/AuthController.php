@@ -8,13 +8,22 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Acceso administrativo con correo y contraseña.
+ *
+ * El personal de salud usa su propio formulario en /equipo/login.
+ */
 class AuthController extends Controller
 {
+    /** Muestra el formulario de acceso administrativo. */
     public function showLoginForm()
     {
         return view('hampi.auth_login');
     }
 
+    /**
+     * Valida las credenciales, aplica rate limiting y abre la sesión.
+     */
     public function login(Request $request)
     {
         // Identificador único: email + IP del usuario
@@ -66,6 +75,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    /** Cierra la sesión administrativa y regenera el token CSRF. */
     public function logout(Request $request)
     {
         Auth::logout();

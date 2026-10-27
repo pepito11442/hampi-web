@@ -3,7 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Turno mensual asignado a un trabajador para una fecha concreta.
+ *
+ * El generador mensual crea un registro por día hábil y sábado; los
+ * domingos no tienen atención.
+ */
 class Horario extends Model
 {
     /** Definición única de los turnos disponibles. */
@@ -51,21 +58,25 @@ class Horario extends Model
         ];
     }
 
-    public function user()
+    /** Trabajador al que pertenece el turno. */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** Etiqueta legible del turno ("Mañana", "Tarde", etc.). */
     public function getTurnoLabelAttribute(): string
     {
         return self::TURNOS[$this->turno]['label'] ?? ucfirst((string) $this->turno);
     }
 
+    /** Hora de inicio en formato HH:MM, sin segundos. */
     public function getHoraInicioAttribute($value): ?string
     {
         return $value ? substr((string) $value, 0, 5) : null;
     }
 
+    /** Hora de fin en formato HH:MM, sin segundos. */
     public function getHoraFinAttribute($value): ?string
     {
         return $value ? substr((string) $value, 0, 5) : null;

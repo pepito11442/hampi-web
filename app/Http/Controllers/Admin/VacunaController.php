@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreVacunaRequest;
 use App\Models\VacunaAviso;
 
+/**
+ * Publicación de avisos en el pizarrín de vacunas.
+ */
 class VacunaController extends Controller
 {
+    /** Publica un aviso con stock, grupo objetivo y requisitos. */
     public function store(StoreVacunaRequest $request)
     {
         VacunaAviso::create([
@@ -22,6 +26,7 @@ class VacunaController extends Controller
         return redirect('/admin/dashboard')->with('mensaje', 'Aviso publicado en el Pizarrín exitosamente.');
     }
 
+    /** Retira un aviso del pizarrín. */
     public function destroy($id)
     {
         $vacuna = VacunaAviso::findOrFail($id);

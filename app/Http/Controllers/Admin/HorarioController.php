@@ -11,8 +11,12 @@ use App\Services\HorarioGenerator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+/**
+ * Generación y consulta de los horarios mensuales del personal.
+ */
 class HorarioController extends Controller
 {
+    /** Muestra el calendario del trabajador y mes seleccionados. */
     public function index(Request $request)
     {
         $rol = (string) $request->query('rol', 'todos');
@@ -76,6 +80,12 @@ class HorarioController extends Controller
         ));
     }
 
+    /**
+     * Regenera el horario del mes.
+     *
+     * Se bloquea si el trabajador tiene citas futuras activas en ese mes
+     * para no dejarlas fuera de turno.
+     */
     public function generar(Request $request, HorarioGenerator $generador)
     {
         $datos = $request->validate([
@@ -120,6 +130,7 @@ class HorarioController extends Controller
             ->with('mensaje', 'Horario generado: 150 horas mensuales distribuidas en el calendario.');
     }
 
+    /** Elimina el horario del mes si no hay citas futuras activas. */
     public function destroy(User $empleado, int $anio, int $mes)
     {
         abort_unless($empleado->esPersonal(), 404);

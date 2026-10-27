@@ -8,8 +8,15 @@ use App\Models\User;
 use App\Models\VacunaAviso;
 use App\Services\AgendaMedica;
 
+/**
+ * Panel general de administración.
+ *
+ * Reúne el parte del día, los indicadores de vacunas y el acceso a las
+ * secciones de equipo, horarios y campañas.
+ */
 class DashboardController extends Controller
 {
+    /** Muestra el resumen operativo del día. */
     public function index(AgendaMedica $agenda)
     {
         $vacunas = VacunaAviso::all();

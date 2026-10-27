@@ -8,6 +8,12 @@ use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 
+/**
+ * Reglas de disponibilidad de la agenda médica.
+ *
+ * Calcula bloques de 30 minutos a partir del horario mensual del médico y
+ * valida que una cita no se salga del turno ni quede en el pasado.
+ */
 class AgendaCitas
 {
     /** Duración de cada bloque de atención. */

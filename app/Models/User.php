@@ -4,10 +4,18 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Cuenta de acceso del personal de salud y la administración.
+ *
+ * Los roles se definen en constantes: administración entra con correo y
+ * el personal de salud con DNI + contraseña. Los ciudadanos no tienen
+ * cuenta y se identifican solo con su DNI.
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -54,26 +62,31 @@ class User extends Authenticatable
         ];
     }
 
-    public function horarios()
+    /** Turnos mensuales asignados al trabajador. */
+    public function horarios(): HasMany
     {
         return $this->hasMany(Horario::class);
     }
 
-    public function citas()
+    /** Citas que el médico tiene agendadas con sus pacientes. */
+    public function citas(): HasMany
     {
         return $this->hasMany(Cita::class);
     }
 
+    /** Indica si la cuenta puede entrar al panel administrativo. */
     public function esAdmin(): bool
     {
         return in_array($this->role, self::ROLES_ADMIN, true);
     }
 
+    /** Indica si la cuenta pertenece al personal de salud. */
     public function esPersonal(): bool
     {
         return in_array($this->role, self::ROLES_PERSONAL, true);
     }
 
+    /** Etiqueta legible del rol para las vistas. */
     public function getRolLabelAttribute(): string
     {
         return match ($this->role) {
@@ -84,6 +97,12 @@ class User extends Authenticatable
         };
     }
 
+    /**
+     * URL pública de la foto de perfil.
+     *
+     * Devuelve null si no hay foto o si el archivo ya no existe en el
+     * disco público, para que la vista use las iniciales como respaldo.
+     */
     public function getFotoUrlAttribute(): ?string
     {
         if (! $this->foto_perfil) {
@@ -95,6 +114,7 @@ class User extends Authenticatable
         return $disk->exists($this->foto_perfil) ? $disk->url($this->foto_perfil) : null;
     }
 
+    /** Iniciales del nombre para el avatar de respaldo. */
     public function iniciales(): string
     {
         $partes = preg_split('/\s+/', trim((string) $this->name)) ?: [];

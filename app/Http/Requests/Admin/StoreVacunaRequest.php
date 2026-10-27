@@ -4,8 +4,12 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Valida la publicación de un aviso en el pizarrín de vacunas.
+ */
 class StoreVacunaRequest extends FormRequest
 {
+    /** Solo administración puede publicar avisos. */
     public function authorize(): bool
     {
         return $this->user()?->esAdmin() ?? false;

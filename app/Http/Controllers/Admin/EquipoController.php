@@ -9,8 +9,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
+/**
+ * Administración de las cuentas del personal de salud.
+ *
+ * Solo crea y edita médicos y enfermeros; las cuentas administrativas no
+ * se gestionan desde este módulo.
+ */
 class EquipoController extends Controller
 {
+    /** Lista el equipo, filtrable por médicos o enfermería. */
     public function index(Request $request)
     {
         $rol = (string) $request->query('rol', 'todos');
@@ -36,6 +43,7 @@ class EquipoController extends Controller
         return view('hampi.admin.equipo', compact('equipo', 'rol', 'conteos'));
     }
 
+    /** Crea la cuenta de un trabajador con acceso por DNI. */
     public function store(Request $request)
     {
         $datos = $request->validate([
@@ -58,6 +66,7 @@ class EquipoController extends Controller
         return back()->with('mensaje', 'Cuenta creada. El trabajador ya puede ingresar con su DNI.');
     }
 
+    /** Actualiza los datos, el rol, el estado o la contraseña de un trabajador. */
     public function update(Request $request, User $empleado)
     {
         abort_unless($empleado->esPersonal(), 404);
@@ -87,6 +96,7 @@ class EquipoController extends Controller
         return back()->with('mensaje', 'Datos del trabajador actualizados.');
     }
 
+    /** Elimina la cuenta del trabajador y su foto de perfil. */
     public function destroy(User $empleado)
     {
         abort_unless($empleado->esPersonal(), 404);

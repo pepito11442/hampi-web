@@ -9,7 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 class SecurityHeaders
 {
     /**
-     * Handle an incoming request.
+     * Agrega cabeceras de seguridad a todas las respuestas.
+     *
+     * Evita el incrustado del portal en sitios externos, fuerza la
+     * detección de tipos MIME y limita la información del referente.
      *
      * @param  Closure(Request): (Response)  $next
      */

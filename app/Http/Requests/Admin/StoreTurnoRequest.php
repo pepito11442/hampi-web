@@ -4,8 +4,12 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Valida el alta de un médico en el rol manual del día.
+ */
 class StoreTurnoRequest extends FormRequest
 {
+    /** Solo administración puede modificar el rol. */
     public function authorize(): bool
     {
         return $this->user()?->esAdmin() ?? false;
