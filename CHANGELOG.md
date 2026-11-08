@@ -122,7 +122,7 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Cambiado
 
-- **Migración de la base de datos de SQLite a MySQL/MariaDB**:
+- **Migración de la base de datos de SQLite a MySQL**:
   - `.env.example` ahora usa `DB_CONNECTION=mysql`, base `hampi` y configuración de XAMPP/Docker.
   - `database/laravel` se retiró del control de versiones y se agregó a `database/.gitignore`.
   - SQLite queda únicamente para la suite de pruebas (`phpunit.xml`, `:memory:`).
@@ -150,7 +150,7 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Notas
 
-- **Cambio incompatible:** la aplicación requiere MySQL/MariaDB; no arranca con SQLite como base principal. Ejecuta `php artisan migrate --seed` sobre una base nueva.
+- **Cambio incompatible:** la aplicación requiere MySQL; no arranca con SQLite como base principal. Ejecuta `php artisan migrate --seed` sobre una base nueva.
 - Ejecuta `php artisan storage:link` para que las fotos de perfil sean accesibles.
 - Credenciales demo: administración `enfermeria@hampi.pe` / `socabaya2024`; personal con DNI y contraseña `socabaya2024` (ver README).
 - `public/build` sigue ignorado: ejecuta `npm install && npm run build` después de clonar.

@@ -148,7 +148,7 @@ PHP genera el HTML. El CSS y el JavaScript ya están preparados de antemano por 
 | --- | --- | --- |
 | **PHP 8.2** | Lenguaje del servidor | Sí |
 | **Laravel 11** | Framework que organiza PHP | Sí |
-| **MySQL / MariaDB** | Base de datos principal | Sí |
+| **MySQL 8** | Base de datos principal | Sí |
 | **Blade** | Motor de plantillas de Laravel | Sí |
 | **HTML + CSS + JS** | Lo que recibe el navegador | Sí (los archivos ya compilados) |
 | **Tailwind CSS 4** | Diseño visual mediante clases | Solo para construir el CSS |
@@ -1812,7 +1812,7 @@ npm run dev
 
 - PHP 8.2+ con `pdo_mysql`, `intl`, `fileinfo`.
 - Composer.
-- MySQL 8 o MariaDB.
+- MySQL 8.
 - Node.js 22.12+ y npm (solo para construir assets).
 
 ### 17.2 Instalación local

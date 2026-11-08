@@ -42,7 +42,7 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 | Componente                 | Tecnología                                                                         |
 | -------------------------- | ---------------------------------------------------------------------------------- |
 | Backend                    | Laravel 11.57 · PHP 8.2+ con `pdo_mysql` e `intl`                                  |
-| Base de datos              | **MySQL 8 / MariaDB 10.4+** en desarrollo y producción                             |
+| Base de datos              | **MySQL 8** en desarrollo y producción                                              |
 | Tests                      | PHPUnit con SQLite `:memory:` (solo pruebas automáticas)                           |
 | Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+ · fuentes autoalojadas              |
 | Autenticación              | Guard `web`, sesiones de Laravel y middleware de roles                             |
@@ -52,7 +52,7 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 | Herramientas de desarrollo | Laravel Boost (dev), Composer, npm                                                 |
 | Sistema visual             | “El parte de la posta” · documentado en `DESIGN.md`                                |
 
-La aplicación usa **MySQL/MariaDB** como base de datos principal. La suite de pruebas usa **SQLite en memoria** (`phpunit.xml`) para no depender de un servidor; esa es la única conexión SQLite del proyecto.
+La aplicación usa **MySQL 8** como base de datos principal. La suite de pruebas usa **SQLite en memoria** (`phpunit.xml`) para no depender de un servidor; esa es la única conexión SQLite del proyecto.
 
 ---
 
@@ -62,9 +62,9 @@ La aplicación usa **MySQL/MariaDB** como base de datos principal. La suite de p
     - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql` ni `intl`; la sección [Codespaces](#codespaces) explica cómo compilarlas o usar PHP 8.3.
 - Composer 2.
 - Node.js **22.12+** (Vite 8) y npm.
-- MySQL 8 o MariaDB 10.4+.
+- MySQL 8.
     - En Windows puedes usar XAMPP.
-    - En Linux/macOS puedes instalar MySQL/MariaDB o usar Docker.
+    - En Linux/macOS puedes instalar MySQL o usar Docker.
 - Opcional: Docker + Docker Compose para levantar MySQL con `docker compose up -d`.
 
 Verifica las versiones:
@@ -242,7 +242,7 @@ Si **no aparece `pdo_mysql` o `intl`**, sigue el paso 3. Si ya aparecen ambos, s
 
 > Cuando MySQL esté corriendo, `php artisan db:show` debe listar las 16 tablas y terminar sin errores. Esa orden usa `intl` para formatear los números, así que también sirve como comprobación final.
 
-Si `docker --version` falla, usa la opción con MariaDB del paso 4.
+Si `docker --version` falla, usa la opción B del paso 4 (MySQL instalado en el Codespace).
 
 ### 3. Instalar `pdo_mysql` e `intl` si faltan
 
@@ -387,17 +387,17 @@ Si no arranca o se reinicia:
 docker compose logs mysql
 ```
 
-#### Opción B: MariaDB instalado en el Codespace
+#### Opción B: MySQL instalado en el Codespace
 
 Si Docker no está disponible:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y mariadb-server
-sudo service mariadb start
+sudo apt-get install -y mysql-server
+sudo service mysql start
 
-sudo mariadb -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mariadb -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVILEGES ON hampi.* TO 'hampi'@'%'; FLUSH PRIVILEGES;"
+sudo mysql -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVILEGES ON hampi.* TO 'hampi'@'%'; FLUSH PRIVILEGES;"
 ```
 
 Luego configura `.env`:
@@ -443,7 +443,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Si usas MariaDB, cambia `DB_USERNAME` y `DB_PASSWORD` por `hampi` / `hampi`.
+Si creaste el usuario `hampi` con la Opción B, usa `hampi` / `hampi` en `DB_USERNAME` y `DB_PASSWORD`.
 
 Para aplicar cambios de configuración:
 
@@ -543,7 +543,7 @@ Puedes agregarlo de dos formas:
 | `419 Page Expired`                     | `APP_URL` o sesión desincronizada          | Ajusta `APP_URL` y ejecuta `php artisan config:clear`. |
 | El puerto 8000 no abre                 | Visibilidad del puerto                     | Ponlo en **Public** en la pestaña **Ports**.           |
 | `Permission denied` en storage         | Permisos de escritura                      | `chmod -R ug+rwx storage bootstrap/cache`.             |
-| `docker: command not found`            | Docker no está disponible en ese Codespace | Usa la opción MariaDB del paso 4.                      |
+| `docker: command not found`            | Docker no está disponible en ese Codespace | Usa la Opción B (MySQL instalado) del paso 4.          |
 
 ### 11. Resumen rápido
 
@@ -934,7 +934,7 @@ npm run build
 
 ### Motor y configuración
 
-- Motor principal: **MySQL/MariaDB**.
+- Motor principal: **MySQL 8**.
 - Configuración en `.env` (`DB_CONNECTION=mysql`, host, puerto, base, usuario y contraseña).
 - SQLite solo se usa en tests (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:` en `phpunit.xml`).
 
