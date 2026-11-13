@@ -63,7 +63,7 @@
                         Médicos de turno, vacunas, campañas y establecimientos de la Microred Socabaya. Sin crear una cuenta: entra con tu DNI.
                     </p>
 
-                    <form id="acceso" action="/ingreso-dni" method="POST" class="mt-6 border border-ink-300 bg-paper-100/70 p-4 sm:p-5">
+                    <form id="acceso" action="/ingreso-dni" method="POST" class="mt-6 scroll-mt-24 border border-ink-300 bg-paper-100/70 p-4 sm:p-5 lg:scroll-mt-32">
                         @csrf
 
                         <div class="flex flex-wrap items-end justify-between gap-2">
