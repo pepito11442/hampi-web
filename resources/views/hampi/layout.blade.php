@@ -180,7 +180,7 @@
             <div class="md:col-span-4">
                 <x-site-logo subtitulo="Microred Socabaya · Arequipa" />
                 <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-600">
-                    El tablón digital de la microred: médicos de turno, disponibilidad de vacunas, campañas preventivas y establecimientos de salud.
+                    El tablón de la microred: médicos de turno, disponibilidad de vacunas, campañas preventivas y establecimientos de salud.
                 </p>
 
             </div>
