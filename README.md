@@ -1,6 +1,6 @@
 # Hampi · Portal de Salud Comunitaria (Microred Socabaya)
 
-Hola soy el anticristo 67
+Hola soy el anticristo
 
 Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa, Perú). Centraliza la información de la comunidad y el trabajo del personal de salud en tres accesos:
 
