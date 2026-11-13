@@ -1,7 +1,5 @@
 # Hampi · Portal de Salud Comunitaria (Microred Socabaya)
 
-Hola soy el anticristo
-
 Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa, Perú). Centraliza la información de la comunidad y el trabajo del personal de salud en tres accesos:
 
 - **Ciudadanía:** ingreso con DNI, panel de citas, médicos de turno, campañas de vacunación, campañas preventivas y directorio de postas.
@@ -49,7 +47,7 @@ Aplicación web desarrollada con **Laravel** para la Microred Socabaya (Arequipa
 | Frontend                   | Blade + Tailwind CSS 4 + Vite 8 · Node.js 22.12+ · fuentes autoalojadas              |
 | Autenticación              | Guard `web`, sesiones de Laravel y middleware de roles                             |
 | Archivos                   | Disco `public` de Laravel para fotos de perfil                                     |
-| Entorno de desarrollo      | GitHub Codespaces, XAMPP o Docker Compose                                          |
+| Entorno de desarrollo      | GitHub Codespaces, WSL2/Ubuntu o Docker Compose                                    |
 | API externa                | RENIEC vía `apis.net.pe` (opcional; sin token se ingresan los nombres manualmente) |
 | Herramientas de desarrollo | Laravel Boost (dev), Composer, npm                                                 |
 | Sistema visual             | “El parte de la posta” · documentado en `DESIGN.md`                                |
@@ -60,12 +58,13 @@ La aplicación usa **MySQL 8** como base de datos principal. La suite de pruebas
 
 ## Requisitos
 
-- PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`), **`pdo_mysql`** e **`intl`**.
+- PHP **8.2 o superior** con las extensiones habituales de Laravel (`mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`), **`dom`**, **`pdo_mysql`**, **`sqlite3`** e **`intl`**.
     - En GitHub Codespaces, el PHP preinstalado puede no incluir `pdo_mysql` ni `intl`; la sección [Codespaces](#codespaces) explica cómo compilarlas o usar PHP 8.3.
 - Composer 2.
 - Node.js **22.12+** (Vite 8) y npm.
 - MySQL 8.
-    - En Windows puedes usar XAMPP.
+    - En Windows se recomienda **WSL2 con Ubuntu**.
+    - **XAMPP 8.1.2 no es compatible**: trae PHP 8.1 y Laravel 11 necesita PHP 8.2+. Si usas XAMPP, actualiza PHP antes de continuar.
     - En Linux/macOS puedes instalar MySQL o usar Docker.
 - Opcional: Docker + Docker Compose para levantar MySQL con `docker compose up -d`.
 
@@ -77,21 +76,52 @@ composer -V
 node -v
 npm -v
 mysql --version
-php -m | grep -i -E 'pdo_mysql|intl'
+php -m | grep -E 'dom|pdo_mysql|sqlite3|intl'
 ```
 
-La salida de `php -m | grep` debe incluir `pdo_mysql` e `intl`. En XAMPP, si `php`, `composer` o `mysql` no están en el `PATH`, usa las rutas completas. Por ejemplo, en Windows:
-
-```powershell
-C:\xampp\php\php.exe -v
-C:\xampp\mysql\bin\mysql.exe --version
-```
+La salida de `php -m | grep` debe incluir `dom`, `pdo_mysql`, `sqlite3` e `intl`. Si falta alguno, instala el paquete correspondiente (`php-xml`, `php-mysql` o `php-sqlite3`) antes de ejecutar `composer install`.
 
 ---
 
 ## Instalación local
 
-### 1. Clonar e instalar dependencias PHP
+> **Ruta recomendada en Windows:** WSL2 con Ubuntu. Laravel 11 necesita PHP 8.2 o superior; XAMPP 8.1.2 trae PHP 8.1 y no sirve para este proyecto. Si ya tienes XAMPP, actualízalo o usa WSL.
+
+### 1. Preparar PHP, Composer y Node
+
+En Windows, instala WSL2 con Ubuntu y abre la terminal de Ubuntu:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Dentro de Ubuntu (o en Linux/macOS):
+
+```bash
+sudo apt update
+sudo apt install -y php-cli php-xml php-mysql php-sqlite3 php-bcmath php-intl php-mbstring php-zip php-curl unzip composer
+```
+
+Comprueba que las extensiones necesarias estén activas:
+
+```bash
+php -v
+composer -V
+php -m | grep -E 'dom|pdo_mysql|sqlite3|intl'
+```
+
+Debe aparecer `dom`, `pdo_mysql`, `sqlite3` e `intl`. Si falta `dom`, instala `php-xml`; si falta `pdo_mysql`, instala `php-mysql`. No ejecutes `composer update` ni `--ignore-platform-req` para saltarte el problema.
+
+Instala Node 22 con `nvm`:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 22
+nvm use 22
+```
+
+### 2. Clonar e instalar dependencias PHP
 
 ```bash
 git clone https://github.com/pepito11442/hampi-web.git
@@ -99,36 +129,40 @@ cd hampi-web
 composer install
 ```
 
-### 2. Crear la base de datos MySQL
+### 3. Crear la base de datos MySQL
 
-Con XAMPP o un MySQL local (root sin contraseña, configuración habitual de desarrollo):
-
-```bash
-mysql -u root -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-```
-
-Si tu root tiene contraseña:
+Instala MySQL dentro de WSL/Ubuntu:
 
 ```bash
-mysql -u root -p -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo apt install -y mysql-server
+sudo service mysql start
 ```
 
-O con Docker:
+Crea la base y un usuario dedicado. **No uses `root`**: en Ubuntu, `root` de MySQL usa autenticación por socket y Laravel falla con `Access denied for user 'root'@'localhost' (1698)`.
 
 ```bash
-docker compose up -d
+sudo mysql -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVILEGES ON hampi.* TO 'hampi'@'%'; FLUSH PRIVILEGES;"
 ```
 
-El `docker-compose.yml` crea la base `hampi` y publica MySQL en el puerto `3306`. Si ya tienes XAMPP/MySQL ocupando ese puerto, detén uno de los dos o cambia el mapeo a `3307:3306` y ajusta `DB_PORT` en el `.env`.
+Comprueba la conexión:
 
-### 3. Configurar el entorno
+```bash
+mysql -h 127.0.0.1 -u hampi -phampi -e "SHOW DATABASES;"
+```
+
+Debe aparecer `hampi`.
+
+**Alternativa con Docker:** si prefieres no instalar MySQL, ejecuta `docker compose up -d`. En ese caso el `.env` usa `DB_USERNAME=root` y `DB_PASSWORD=` vacío. No tengas Docker y MySQL local escuchando a la vez en el puerto 3306.
+
+### 4. Configurar el entorno
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Edita `.env` con tus datos de conexión. Para XAMPP/Docker con root sin contraseña:
+Edita `.env` con `nano .env` y deja estos valores:
 
 ```dotenv
 APP_TIMEZONE=America/Lima
@@ -137,15 +171,24 @@ DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=hampi
+DB_USERNAME=hampi
+DB_PASSWORD=hampi
+```
+
+> Las líneas del `.env` van **dentro del archivo**, no se pegan en la terminal. Si escribes `DB_CONNECTION=mysql` en PowerShell o Bash, el sistema intentará ejecutarlo como comando y fallará.
+
+Si usas Docker Compose, cambia a:
+
+```dotenv
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
 `APP_TIMEZONE` controla la fecha que usa la agenda de médicos. El valor por defecto es `America/Lima`; si despliegas en otra zona, ajústalo para que “hoy” coincida con la fecha local.
 
-Si usas un usuario distinto, cambia `DB_USERNAME` y `DB_PASSWORD`. Nunca subas `.env` al repositorio.
+Nunca subas `.env` al repositorio.
 
-### 4. Migrar y cargar datos de demostración
+### 5. Migrar y cargar datos de demostración
 
 ```bash
 php artisan migrate --seed
@@ -155,7 +198,7 @@ Esto crea el esquema, el administrador, cuatro cuentas de personal, un ciudadano
 
 > En una base ya existente no uses `migrate:fresh` sin respaldo. Para un entorno local de demostración sí puedes hacer `php artisan migrate:fresh --seed`.
 
-### 5. Enlazar el almacenamiento público
+### 6. Enlazar el almacenamiento público
 
 Necesario para las fotos de perfil:
 
@@ -163,41 +206,47 @@ Necesario para las fotos de perfil:
 php artisan storage:link
 ```
 
-Si Laravel corre dentro de Docker con el proyecto montado desde Windows/WSL, el enlace absoluto puede apuntar a una ruta que no existe dentro del contenedor. En ese caso, crea un enlace **relativo**:
-
-```bash
-ln -sfn ../storage/app/public public/storage
-```
-
-En Windows con XAMPP, `php artisan storage:link` puede fallar o dejar un enlace que Windows no resuelve (es lo que pasa si el enlace se creó desde WSL). En ese caso, elimina el enlace roto y crea una unión de directorios:
+En WSL/Linux el enlace simbólico funciona directamente. En Windows nativo, si el enlace no resuelve, elimina el enlace roto y crea una unión de directorios:
 
 ```powershell
 cmd /c rmdir public\storage
 cmd /c mklink /J public\storage storage\app\public
 ```
 
-La unión es transparente para Laravel y para el navegador: las fotos se sirven igual desde `/storage/perfiles/...`.
-
-### 6. Compilar assets
+### 7. Compilar assets
 
 ```bash
 npm install
 npm run build
 ```
 
-### 7. Levantar el servidor
+### 8. Levantar el servidor
 
 ```bash
 php artisan serve
 ```
 
-Abre `http://127.0.0.1:8000`.
-
-Si el puerto está ocupado:
+Abre `http://127.0.0.1:8000`. Si el puerto está ocupado:
 
 ```bash
 php artisan serve --port=8001
 ```
+
+### 9. Comprobar que todo funciona
+
+```bash
+php artisan test
+```
+
+Deben pasar los **37 tests**. Luego entra a la portada y prueba las credenciales demo.
+
+### Si usas XAMPP o tienes dos MySQL
+
+- XAMPP 8.1.2 incluye PHP 8.1 y **no es compatible con Laravel 11**. Necesitas PHP 8.2+.
+- Si arrancas MySQL en WSL y también el MySQL de XAMPP, los dos pelean por el puerto 3306. Windows muestra `Port 3306 in use by wslrelay.exe` y XAMPP no arranca.
+- Elige uno: **recomendado WSL** (cierra XAMPP) o XAMPP (detén MySQL en WSL con `sudo service mysql stop` y apaga WSL con `wsl --shutdown`).
+- El phpMyAdmin de XAMPP no sirve contra el MySQL de WSL: intenta entrar con los usuarios `pma` y `root`, que solo existen en XAMPP. Para ver la base usa HeidiSQL, DBeaver o MySQL Workbench con host `127.0.0.1`, puerto `3306`, usuario `hampi` y contraseña `hampi`.
+- Si reinicias WSL o la PC, MySQL se detiene. Vuelve a levantarlo con `sudo service mysql start` antes de `php artisan serve`.
 
 ---
 
@@ -441,11 +490,21 @@ DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=hampi
-DB_USERNAME=root
-DB_PASSWORD=
 ```
 
-Si creaste el usuario `hampi` con la Opción B, usa `hampi` / `hampi` en `DB_USERNAME` y `DB_PASSWORD`.
+Las credenciales dependen de la opción que elegiste en el paso 4:
+
+```dotenv
+# Opción A: docker compose up -d (MySQL del contenedor)
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Opción B: MySQL instalado en el Codespace
+DB_USERNAME=hampi
+DB_PASSWORD=hampi
+```
+
+Si ya tenías el `.env` con otros valores, ejecuta `php artisan config:clear` después de cambiarlos.
 
 Para aplicar cambios de configuración:
 
@@ -1016,10 +1075,16 @@ php artisan storage:link
 
 | Síntoma                                     | Causa probable                                       | Solución                                                                                               |
 | ------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | Inicia MySQL (XAMPP/Docker/servicio) y revisa `DB_HOST`/`DB_PORT`.                                     |
+| `composer` o `mysql` «no se reconoce» en PowerShell | No están instalados en Windows               | Trabaja dentro de WSL/Ubuntu, no en PowerShell. Sigue la [instalación local](#instalación-local).      |
+| `composer install` pide `ext-dom`           | Falta el paquete `php-xml`                           | `sudo apt install -y php-xml` y repite `composer install`. No uses `composer update` ni `--ignore-platform-req=ext-dom`. |
+| `Access denied for user 'root'@'localhost' (1698)` | `root` de MySQL usa autenticación por socket en Ubuntu | Crea y usa el usuario `hampi`/`hampi` en `.env`, y ejecuta `php artisan config:clear`.            |
+| `Port 3306 in use by wslrelay.exe`          | MySQL de WSL y el de XAMPP pelean por el puerto      | Usa solo uno: cierra XAMPP (recomendado) o detén MySQL en WSL con `sudo service mysql stop`.            |
+| phpMyAdmin falla con `pma@localhost` o `root@localhost` | El phpMyAdmin de XAMPP apunta al MySQL de WSL | No lo necesitas. Usa HeidiSQL/DBeaver/MySQL Workbench con `127.0.0.1:3306`, usuario `hampi`, contraseña `hampi`. |
+| En la terminal aparece `APP_TIMEZONE=America/Lima` «no se reconoce» | Pegaste las líneas del `.env` como comandos | Esas líneas van dentro del archivo `.env`: edítalo con `nano .env`.                                  |
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL no está corriendo o el host/puerto no coincide | `sudo service mysql start` (WSL) o `docker compose up -d`; revisa `DB_HOST`/`DB_PORT`.                 |
 | `Unknown database 'hampi'`                  | La base no existe                                    | `CREATE DATABASE hampi ...` o `docker compose up -d`.                                                  |
-| `SQLSTATE[HY000] [1045] Access denied`      | Usuario/contraseña incorrectos                       | Ajusta `DB_USERNAME` y `DB_PASSWORD`; en XAMPP root suele ir sin contraseña.                           |
-| `could not find driver`                     | Falta `pdo_mysql`                                    | En local habilítalo en `php.ini` y reinicia PHP/Apache; en Codespaces sigue [Codespaces](#codespaces). |
+| `SQLSTATE[HY000] [1045] Access denied`      | Usuario/contraseña incorrectos                       | Ajusta `DB_USERNAME` y `DB_PASSWORD` (`hampi`/`hampi` en WSL; `root` sin contraseña en Docker) y ejecuta `php artisan config:clear`. |
+| `could not find driver`                     | Falta `pdo_mysql`                                    | `sudo apt install -y php-mysql`; en Codespaces sigue [Codespaces](#codespaces).                        |
 | `The "intl" PHP extension is required`      | Falta `intl`                                         | En local habilita `extension=intl` en `php.ini`; en Codespaces compílala (paso 3) o usa `php8.3-intl`. |
 | `php8.5-mysql` no existe en apt             | El PHP del Codespace no es el de Ubuntu              | Compila `pdo_mysql` como se explica en [Codespaces](#codespaces) o usa PHP 8.3.                        |
 | `Could not open input file: artisan`        | Estás fuera de la carpeta del proyecto               | `cd /workspaces/hampi-web`.                                                                            |
@@ -1029,7 +1094,7 @@ php artisan storage:link
 | `403` o redirección al entrar a `/admin`    | La cuenta no tiene rol administrativo                | Usa una cuenta `admin`/`admision`; el personal de salud tiene su propio panel.                         |
 | No puedo entrar a `/empleado` con mi correo | El acceso del personal es por DNI                    | Entra en `/equipo/login` con DNI y contraseña.                                                         |
 | `429 Too Many Requests`                     | Rate limit del login                                 | Espera un minuto o limpia la caché del rate limiter.                                                   |
-| Foto de perfil 404 o no se ve               | Falta `public/storage` o el enlace no resuelve (típico en Windows/WSL) | Repite el [paso 5](#5-enlazar-el-almacenamiento-público); en Windows usa `mklink /J`. |
+| Foto de perfil 404 o no se ve               | Falta `public/storage` o el enlace no resuelve (típico en Windows) | Repite el [paso 6](#6-enlazar-el-almacenamiento-público); en Windows nativo usa `mklink /J`. |
 | Error al generar 150 h                      | Combinación inválida o mes sin días hábiles          | Revisa el mes; el generador solo acepta años 2020–2100 y meses 1–12.                                   |
 | El puerto 8000 no abre en Codespaces        | Visibilidad del puerto                               | Abre la pestaña **Ports** y pon el puerto en público.                                                  |
 | `npm run build` falla por versión de Node   | Node antiguo                                         | Usa Node 22.12+ (Vite 8).                                                                              |

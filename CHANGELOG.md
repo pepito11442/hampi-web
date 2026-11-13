@@ -4,6 +4,20 @@ Todos los cambios relevantes de este proyecto se registran aquí.
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Fechas en `AAAA-MM-DD`.
 
+## [2026-11-13] — Guía de instalación local para WSL2
+
+### Cambiado
+
+- La sección **Instalación local** del README ahora usa **WSL2 + Ubuntu** como ruta recomendada en Windows, con PHP 8.2+, extensiones (`dom`, `pdo_mysql`, `sqlite3`, `intl`) y MySQL 8 instalado dentro de WSL.
+- Las credenciales de ejemplo pasan a un usuario dedicado **`hampi`/`hampi`** en lugar de `root`, porque en Ubuntu `root` usa autenticación por socket y Laravel falla con el error `1698`.
+- `.env.example` documenta las credenciales para WSL y la excepción de Docker Compose (`root` con contraseña vacía).
+- La sección 17 de `DOCUMENTACION.md` se alinea con el README y añade una tabla de errores frecuentes.
+
+### Corregido
+
+- Instrucciones contradictorias sobre XAMPP: se aclara que **XAMPP 8.1.2 no es compatible** con Laravel 11 por traer PHP 8.1.
+- Se documenta el conflicto del puerto **3306** entre MySQL de WSL y XAMPP (`wslrelay.exe`), el fallo de phpMyAdmin con `pma`/`root` y el error de pegar las variables del `.env` en la terminal.
+
 ## [2026-10-21] — Rediseño “El parte de la posta”
 
 ### Añadido

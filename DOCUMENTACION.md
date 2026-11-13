@@ -1810,12 +1810,38 @@ npm run dev
 
 ### 17.1 Requisitos
 
-- PHP 8.2+ con `pdo_mysql`, `intl`, `fileinfo`.
-- Composer.
+- PHP 8.2+ con `dom` (`php-xml`), `pdo_mysql` (`php-mysql`), `sqlite3` (`php-sqlite3`), `intl`, `mbstring`, `zip`, `curl` y `fileinfo`.
+- Composer 2.
 - MySQL 8.
 - Node.js 22.12+ y npm (solo para construir assets).
 
-### 17.2 Instalación local
+En Windows se recomienda **WSL2 con Ubuntu**. XAMPP 8.1.2 no sirve como ruta principal porque trae PHP 8.1 y Laravel 11 exige PHP 8.2 o superior. Si se usa XAMPP, hay que actualizar PHP y ejecutar Laravel desde Windows; es más trabajo y más errores.
+
+### 17.2 Instalación local (WSL2 + Ubuntu)
+
+La guía completa, con los errores frecuentes y sus soluciones, está en el [README](README.md#instalación-local). Resumen:
+
+```bash
+sudo apt update
+sudo apt install -y php-cli php-xml php-mysql php-sqlite3 php-bcmath php-intl php-mbstring php-zip php-curl unzip composer
+
+php -v
+composer -V
+php -m | grep -E 'dom|pdo_mysql|sqlite3|intl'
+```
+
+Deben aparecer `dom`, `pdo_mysql`, `sqlite3` e `intl`. Si falta `dom`, instala `php-xml`; si falta `pdo_mysql`, instala `php-mysql`. No uses `composer update` ni `--ignore-platform-req=ext-dom` para saltar el problema.
+
+Instala Node 22 con `nvm`:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 22
+nvm use 22
+```
+
+Clona e instala:
 
 ```bash
 git clone https://github.com/pepito11442/hampi-web.git
@@ -1825,22 +1851,32 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Crear la base:
+Instala MySQL dentro de WSL y crea la base con un usuario dedicado. **No uses `root`**: en Ubuntu usa autenticación por socket y Laravel falla con `Access denied for user 'root'@'localhost' (1698)`.
 
 ```bash
-mysql -u root -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo apt install -y mysql-server
+sudo service mysql start
+
+sudo mysql -e "CREATE DATABASE hampi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE USER 'hampi'@'%' IDENTIFIED BY 'hampi'; GRANT ALL PRIVILEGES ON hampi.* TO 'hampi'@'%'; FLUSH PRIVILEGES;"
+
+mysql -h 127.0.0.1 -u hampi -phampi -e "SHOW DATABASES;"
 ```
 
-Configurar `.env`:
+Configurar `.env` con `nano .env`:
 
 ```dotenv
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=hampi
-DB_USERNAME=root
-DB_PASSWORD=
+DB_USERNAME=hampi
+DB_PASSWORD=hampi
 ```
+
+> Las líneas del `.env` van dentro del archivo. Si se pegan en PowerShell o Bash, el sistema intenta ejecutarlas como comandos y falla.
+
+Si se usa Docker Compose como alternativa, el `.env` lleva `DB_USERNAME=root` y `DB_PASSWORD=` vacío. No tengas Docker y MySQL local escuchando a la vez en el puerto 3306.
 
 Variables principales del `.env`:
 
@@ -1890,6 +1926,26 @@ php artisan serve
 ```
 
 Abrir `http://127.0.0.1:8000`.
+
+Comprobar que todo quedó bien:
+
+```bash
+php artisan test
+```
+
+Deben pasar los **37 tests**. Si reinicias WSL o la PC, MySQL se detiene: ejecuta `sudo service mysql start` antes de `php artisan serve`.
+
+#### Errores frecuentes en la instalación local
+
+| Error | Causa | Solución |
+| --- | --- | --- |
+| `composer` o `mysql` «no se reconoce» en PowerShell | No están instalados en Windows | Trabajar dentro de WSL/Ubuntu. |
+| `composer install` pide `ext-dom` | Falta `php-xml` | `sudo apt install -y php-xml` y repetir `composer install`. |
+| `Access denied for user 'root'@'localhost' (1698)` | `root` usa `auth_socket` en Ubuntu | Usar `hampi`/`hampi` en `.env` y `php artisan config:clear`. |
+| `Port 3306 in use by wslrelay.exe` | MySQL de WSL y XAMPP pelean por el puerto | Usar solo uno; se recomienda WSL y cerrar XAMPP. |
+| phpMyAdmin falla con `pma@localhost` o `root@localhost` | El phpMyAdmin de XAMPP apunta al MySQL de WSL | Usar HeidiSQL/DBeaver/MySQL Workbench con `127.0.0.1:3306`, `hampi`/`hampi`. |
+| `APP_TIMEZONE=America/Lima` «no se reconoce» | Se pegó el `.env` en la terminal | Editar el archivo con `nano .env`. |
+| `Vite manifest not found` | Assets sin compilar | `npm install && npm run build`. |
 
 ### 17.3 Codespaces
 
