@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Horario;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Services\FotoPerfil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -104,10 +105,11 @@ class EmpleadoController extends Controller
     /**
      * Actualiza los datos profesionales y la foto de perfil.
      *
-     * La foto reemplaza a la anterior en el disco público. El nombre, DNI
-     * y rol no se pueden cambiar desde aquí.
+     * La foto se reduce a 400×400 y se guarda en la base de datos para que
+     * no se pierda en hostings con disco efímero. El nombre, DNI y rol no
+     * se pueden cambiar desde aquí.
      */
-    public function updatePerfil(Request $request)
+    public function updatePerfil(Request $request, FotoPerfil $fotos)
     {
         $user = $request->user();
 
@@ -121,12 +123,23 @@ class EmpleadoController extends Controller
             'foto_perfil' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
+        unset($datos['foto_perfil']);
+
         if ($request->hasFile('foto_perfil')) {
+            try {
+                $foto = $fotos->procesar($request->file('foto_perfil'));
+            } catch (\RuntimeException) {
+                return back()->withErrors(['foto_perfil' => 'No pudimos leer esa imagen. Prueba con otra foto.'])->withInput();
+            }
+
+            // La foto antigua del disco ya no se usa.
             if ($user->foto_perfil) {
                 Storage::disk('public')->delete($user->foto_perfil);
             }
 
-            $datos['foto_perfil'] = $request->file('foto_perfil')->store('perfiles', 'public');
+            $datos['foto_perfil'] = null;
+            $datos['foto_data'] = $foto['data'];
+            $datos['foto_mime'] = $foto['mime'];
         }
 
         $user->update($datos);

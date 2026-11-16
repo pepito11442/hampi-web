@@ -82,6 +82,8 @@ class HorarioGenerator
             Horario::insert($filas);
         });
 
+        \App\Support\CachePortal::limpiar();
+
         return self::HORAS_MENSUALES;
     }
 

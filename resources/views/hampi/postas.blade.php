@@ -83,14 +83,23 @@
 
                             <div class="flex flex-wrap items-start gap-2 lg:col-span-3 lg:justify-end">
                                 <a
-                                    href="https://www.google.com/maps/search/?api=1&query={{ $mapQuery }}"
+                                    href="https://www.google.com/maps/dir/?api=1&destination={{ $mapQuery }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="btn btn-primary btn-sm"
                                 >
                                     <x-icon name="navigation" class="h-4 w-4" />
-                                    Ver ubicación
-                                    <span class="sr-only">de {{ $posta->nombre }} en Google Maps</span>
+                                    Cómo llegar
+                                    <span class="sr-only">a {{ $posta->nombre }} con Google Maps</span>
+                                </a>
+                                <a
+                                    href="https://www.google.com/maps/search/?api=1&query={{ $mapQuery }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn btn-secondary btn-sm"
+                                >
+                                    <x-icon name="map" class="h-4 w-4" />
+                                    Ver mapa
                                 </a>
 
                                 @if ($posta->telefono)

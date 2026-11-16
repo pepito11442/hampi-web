@@ -226,6 +226,7 @@
                                         src="{{ $user->foto_url }}"
                                         alt="Foto de perfil de {{ $user->name }}"
                                         class="h-20 w-20 shrink-0 border-2 border-paper-50 object-cover"
+                                        width="80" height="80" decoding="async"
                                     >
                                 @else
                                     <span class="grid h-20 w-20 shrink-0 place-items-center border-2 border-paper-50 bg-brand-700 font-display text-2xl font-bold text-paper-50">

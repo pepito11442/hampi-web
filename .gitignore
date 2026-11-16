@@ -21,6 +21,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+/.impeccable
 _ide_helper.php
 Homestead.json
 Homestead.yaml

@@ -154,13 +154,20 @@ class EmpleadoCitaController extends Controller
             ]);
         }
 
-        $cita = DB::transaction(function () use ($ciudadano, $datos, $medico, $fechaHora) {
+        $codigoNuevo = null;
+
+        $cita = DB::transaction(function () use ($ciudadano, $datos, $medico, $fechaHora, &$codigoNuevo) {
             $ciudadano = $ciudadano ?: Ciudadano::create([
                 'dni' => $datos['dni'],
                 'nombres' => strip_tags($datos['nombres']),
                 'apellidos' => strip_tags($datos['apellidos']),
                 'telefono' => ! empty($datos['telefono']) ? strip_tags($datos['telefono']) : null,
             ]);
+
+            // Primera vez del paciente: se le entrega un código para el portal.
+            if (! $ciudadano->tieneCodigo()) {
+                $codigoNuevo = $ciudadano->generarCodigo();
+            }
 
             return Cita::create([
                 'ciudadano_id' => $ciudadano->id,
@@ -174,7 +181,34 @@ class EmpleadoCitaController extends Controller
 
         return redirect()
             ->route('empleado.citas.index')
-            ->with('mensaje', 'Cita agendada para '.$cita->ciudadano->nombres.' '.$cita->ciudadano->apellidos.' el '.$fechaHora->locale('es')->isoFormat('ddd D MMM, h:mm a').'.');
+            ->with('mensaje', 'Cita agendada para '.$cita->ciudadano->nombres.' '.$cita->ciudadano->apellidos.' el '.$fechaHora->locale('es')->isoFormat('ddd D MMM, h:mm a').'.')
+            ->with('codigo_ciudadano', $codigoNuevo ? [
+                'dni' => $cita->ciudadano->dni,
+                'nombre' => $cita->ciudadano->nombre_completo,
+                'codigo' => $codigoNuevo,
+            ] : null);
+    }
+
+    /**
+     * Genera un código de acceso nuevo para el paciente de una cita propia.
+     *
+     * Sirve cuando el paciente olvidó su código o sospecha que otra
+     * persona lo conoce: el código anterior deja de funcionar.
+     */
+    public function nuevoCodigo(Request $request, Cita $cita)
+    {
+        abort_unless((int) $cita->user_id === (int) $request->user()->id, 404);
+
+        $ciudadano = $cita->ciudadano;
+        $codigo = $ciudadano->generarCodigo();
+
+        return redirect()
+            ->route('empleado.citas.index')
+            ->with('codigo_ciudadano', [
+                'dni' => $ciudadano->dni,
+                'nombre' => $ciudadano->nombre_completo,
+                'codigo' => $codigo,
+            ]);
     }
 
     /**

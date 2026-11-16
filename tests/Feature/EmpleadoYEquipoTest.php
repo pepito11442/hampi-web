@@ -128,9 +128,13 @@ class EmpleadoYEquipoTest extends TestCase
 
         $this->assertSame('nuevo-correo@hampi.pe', $empleado->email);
         $this->assertSame('Medicina Familiar', $empleado->especialidad);
-        $this->assertNotNull($empleado->foto_perfil);
-        Storage::disk('public')->assertExists($empleado->foto_perfil);
-        $this->assertStringStartsWith('/storage/perfiles/', $empleado->foto_url);
+        // La foto se guarda reducida dentro de la base (disco efímero en el hosting).
+        $this->assertNotNull($empleado->foto_data);
+        $this->assertStringStartsWith('/fotos/'.$empleado->id.'/', $empleado->foto_url);
+
+        $this->get($empleado->foto_url)
+            ->assertOk()
+            ->assertHeader('Content-Type', $empleado->foto_mime);
     }
 
     public function test_administrador_puede_ocultar_una_campana_publicada(): void

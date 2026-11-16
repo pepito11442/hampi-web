@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureRole::class,
+            'ciudadano' => \App\Http\Middleware\EnsureCiudadano::class,
         ]);
 
         // Los invitados al panel del empleado van a su propio login.

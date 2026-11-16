@@ -651,7 +651,11 @@ npm run build
 | Página                  | Ruta                                       | Controlador / vista                               |
 | ----------------------- | ------------------------------------------ | ------------------------------------------------- |
 | Inicio y acceso con DNI | `/` · `inicio`                             | `HampiController@index` · `hampi/login.blade.php` |
-| Panel ciudadano         | `/mi-panel` · `ciudadano.panel`            | `HampiController@panelCiudadano`                  |
+| Ingreso DNI + código    | `POST /ingreso-dni` · `ciudadano.login`    | `CiudadanoController@login`                       |
+| Crear código (1.ª vez)  | `/crear-codigo` · `ciudadano.registro`     | `CiudadanoController@registrar`                   |
+| Panel ciudadano         | `/mi-panel` · `ciudadano.panel`            | `CiudadanoController@panel`                       |
+| Pedir una cita          | `/mi-panel/nueva-cita`                     | `CiudadanoController@crearCita` / `guardarCita`   |
+| Cita en calendario      | `/mi-panel/citas/{cita}/calendario.ics`    | `CiudadanoController@calendario`                  |
 | Médicos del día         | `/medicos-hoy` · `medicos.index`           | `HampiController@verMedicos`                      |
 | Pizarrín de vacunas     | `/pizarrin-vacunas` · `pizarrin.index`     | `HampiController@verPizarrin`                     |
 | Campañas preventivas    | `/campanas-preventivas` · `campanas.index` | `HampiController@verCampanasPreventivas`          |
@@ -713,8 +717,9 @@ Ingresan en `/equipo/login` con su **DNI** y la contraseña. La administración 
 
 ### Ciudadanía
 
-- DNI de demostración: **`72345678`** (Rosa Elena Quispe Mamani).
-- Se ingresa desde el formulario de la portada; no requiere contraseña.
+- DNI de demostración: **`72345678`** (Rosa Elena Quispe Mamani) · código de acceso **`246810`**.
+- Se ingresa desde el formulario de la portada con **DNI + código de 6 dígitos**. El DNI solo ya no basta: así nadie ve las citas de otra persona.
+- Una persona nueva crea su código en `/crear-codigo`. Si ya tiene ficha (porque el personal le agendó una cita), el código se le entrega en la posta: el médico lo ve al agendar o con el botón **Código portal**, y admisión puede generarlo desde el panel administrativo.
 - El seeder incluye una cita de demostración para este DNI.
 
 > Cambia todas las contraseñas demo antes de publicar el sistema. El registro de personal es cerrado: solo administración crea cuentas.
@@ -916,7 +921,8 @@ Solo los usuarios con rol `doctor` pueden agendar citas a sus pacientes desde el
 2. Busca al paciente por DNI en `/empleado/citas/crear`.
 3. Si el paciente ya existe, se muestra su ficha. Si no existe, el médico completa nombres, apellidos y teléfono; la ficha se crea al confirmar la cita.
 4. Elige el establecimiento, la fecha y uno de los bloques libres de 30 minutos.
-5. Al confirmar, la cita queda en estado **Confirmada** y aparece de inmediato en `/mi-panel` del ciudadano.
+5. Al confirmar, la cita queda en estado **Confirmada** y aparece de inmediato en `/mi-panel` del ciudadano. Si el paciente aún no tenía código de acceso, se muestra **una sola vez** para entregárselo.
+6. El ciudadano también puede pedir su cita en línea desde `/mi-panel/nueva-cita`: queda como **Reservada** (`Pendiente`) con la etiqueta *Pedida en línea* en la agenda del médico.
 
 Reglas de disponibilidad y seguridad:
 
@@ -1028,6 +1034,12 @@ php artisan storage:link
 
 ## Despliegue en producción
 
+### Gratis (recomendado para la demo)
+
+La guía completa está en **[`DESPLIEGUE.md`](DESPLIEGUE.md)**: Render (plan Free con Docker) + Aiven for MySQL (Free) + Brevo para correos. El repositorio ya incluye `Dockerfile`, `render.yaml`, la configuración de Apache/PHP con OPcache y un flujo de GitHub Actions que mantiene despierto el servicio.
+
+### Servidor propio
+
 1. Configura `.env` de producción:
 
     ```dotenv
@@ -1041,6 +1053,7 @@ php artisan storage:link
     DB_DATABASE=hampi
     DB_USERNAME=hampi
     DB_PASSWORD=una-contraseña-segura
+    CACHE_STORE=file
     ```
 
 2. Instala dependencias y compila:
@@ -1050,23 +1063,29 @@ php artisan storage:link
     npm ci
     npm run build
     php artisan migrate --force
-    php artisan storage:link
     php artisan optimize
     ```
 
 3. Asegura permisos de escritura en `storage/` y `bootstrap/cache/`.
 
-4. Configura HTTPS y un servidor web (Nginx/Apache) apuntando a `public/`.
+4. Configura HTTPS y un servidor web (Nginx/Apache) apuntando a `public/`. Activa OPcache.
 
-5. Mantén respaldos de la base y del directorio `storage/app/public/perfiles`.
+5. Mantén respaldos de la base (las fotos de perfil ahora se guardan dentro de la base).
 
 ### Notas de seguridad
 
-- No ejecutes `db:seed` en producción salvo que quieras datos demo.
+- No ejecutes `db:seed` en producción salvo que quieras datos demo (en Docker usa `SEED_DEMO=true`, que solo siembra si la base está vacía).
 - Cambia las contraseñas demo y el usuario root de MySQL.
-- Laravel 11 dejó de recibir parches de seguridad en marzo de 2026. Para un despliegue real, actualiza a Laravel 12/13 (PHP 8.3+) antes de exponer datos de pacientes.
-- Las fotos se guardan en `storage/app/public/perfiles` y se sirven desde `/storage/perfiles/...`; ejecuta `php artisan storage:link` y verifica que la URL responda 200. En varios servidores conviene moverlas a S3 u otro almacenamiento compartido.
-- El sistema no incluye recuperación de contraseña por correo para el personal; administración puede asignar una nueva desde `/admin/equipo`.
+- **Laravel 11 dejó de recibir parches de seguridad en marzo de 2026.** Antes de exponer datos reales de pacientes, actualiza a Laravel 12 en un equipo con PHP 8.2+ y Composer:
+
+    ```bash
+    composer require laravel/framework:^12.0 -W
+    php artisan test
+    ```
+
+    El código no usa APIs eliminadas en Laravel 12; si las pruebas pasan, haz commit de `composer.json` y `composer.lock`.
+- El portal envía cabeceras CSP con nonce, HSTS (en HTTPS), `X-Frame-Options` y `Permissions-Policy`. Si agregas scripts en línea, usa `nonce="{{ Vite::cspNonce() }}"`; para confirmaciones usa `data-confirm="…"` en el formulario.
+- El acceso ciudadano exige DNI + código (guardado con hash) y bloquea 5 minutos tras 5 intentos fallidos. El personal recupera su contraseña por correo (`/equipo/olvide-mi-clave`) o administración le asigna una nueva desde `/admin/equipo`.
 - El rate limiting del login es de 5 intentos por minuto y se registra en el log.
 
 ---

@@ -4,110 +4,44 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Posta;
-use App\Models\Ciudadano;
 use App\Models\VacunaAviso;
-use App\Models\Cita;
 use App\Models\CampanaPreventiva;
 use App\Services\AgendaMedica;
-use Illuminate\Support\Facades\Session;
+use App\Support\CachePortal;
 use Illuminate\Support\Facades\Http;
 
 /**
  * Portal público: portada, acceso ciudadano y páginas informativas.
  *
- * La ciudadanía no crea cuenta; se identifica con su DNI y consulta sus
- * citas y la información publicada por la microred.
+ * El acceso ciudadano (DNI + código) vive en CiudadanoController.
  */
 class HampiController extends Controller
 {
     /** Portada con indicadores del día y acceso por DNI. */
     public function index(AgendaMedica $agenda)
     {
-        // Limpiar cualquier sesión anterior
-        Session::forget(['ciudadano_dni', 'ciudadano_id']);
+        $datos = CachePortal::recordar('portada', function () use ($agenda) {
+            return [
+                // Indicadores reales para la portada (sin datos inventados)
+                'stats' => [
+                    'turnos' => $agenda->total($agenda->delDia()),
+                    'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
+                    'postas' => Posta::where('estado_activo', true)->count(),
+                ],
+                'proximaCampana' => CampanaPreventiva::activas()
+                    ->orderBy('fecha_inicio')
+                    ->get()
+                    ->first(fn (CampanaPreventiva $campana) => $campana->estado !== 'Finalizada'),
+            ];
+        });
 
-        $medicosHoy = $agenda->delDia();
-
-        // Indicadores reales para la portada (sin datos inventados)
-        $stats = [
-            'turnos' => $agenda->total($medicosHoy),
-            'vacunas' => VacunaAviso::where('stock_estado', 'Disponible')->count(),
-            'postas' => Posta::where('estado_activo', true)->count(),
-        ];
-
-        $proximaCampana = CampanaPreventiva::activas()
-            ->orderBy('fecha_inicio')
-            ->get()
-            ->first(fn (CampanaPreventiva $campana) => $campana->estado !== 'Finalizada');
-
-        return view('hampi.login', compact('stats', 'proximaCampana'));
-    }
-
-    /**
-     * Registra o actualiza la ficha del ciudadano y abre su sesión.
-     *
-     * RENIEC es opcional: si no responde, se conservan los nombres que ya
-     * existan o los que el usuario escribió manualmente.
-     */
-    public function accesoPorDni(Request $request)
-    {
-        $dni = $request->input('dni', '72345678');
-        $nombres = trim(strip_tags((string) $request->input('nombres_reniec', '')));
-        $apellidos = trim(strip_tags((string) $request->input('apellidos_reniec', '')));
-
-        $ciudadano = Ciudadano::firstOrNew(['dni' => $dni]);
-
-        // Si la ficha ya existe (por ejemplo, creada por un médico), no la
-        // sobrescribimos con los valores de respaldo cuando RENIEC no responde.
-        if (! $ciudadano->exists) {
-            $ciudadano->nombres = $nombres !== '' ? $nombres : 'Ciudadano(a)';
-            $ciudadano->apellidos = $apellidos !== '' ? $apellidos : 'de Socabaya';
-        } else {
-            if ($nombres !== '') {
-                $ciudadano->nombres = $nombres;
-            }
-
-            if ($apellidos !== '') {
-                $ciudadano->apellidos = $apellidos;
-            }
-        }
-
-        $ciudadano->save();
-
-        Session::put('ciudadano_dni', $ciudadano->dni);
-
-        return redirect()->route('ciudadano.panel');
-    }
-
-    /** Panel del ciudadano con sus próximas citas e historial. */
-    public function panelCiudadano()
-    {
-        $dni = Session::get('ciudadano_dni');
-
-        if (! $dni) {
-            return redirect('/#acceso');
-        }
-
-        $ciudadano = Ciudadano::where('dni', $dni)->first();
-
-        if (! $ciudadano) {
-            Session::forget('ciudadano_dni');
-
-            return redirect('/#acceso');
-        }
-
-        $citas = Cita::with(['posta', 'medico'])
-            ->where('ciudadano_id', $ciudadano->id)
-            ->orderBy('fecha_hora')
-            ->get();
-
-        return view('hampi.panel_paciente', compact('ciudadano', 'citas'));
+        return view('hampi.login', $datos);
     }
 
     /** Rol de médicos del día, separado por turno. */
     public function verMedicos(AgendaMedica $agenda)
     {
-        $medicos = $agenda->delDia();
+        $medicos = CachePortal::recordar('agenda-hoy', fn () => $agenda->delDia());
         $turnosManana = $agenda->manana($medicos);
         $turnosTarde = $agenda->tarde($medicos);
 
@@ -117,32 +51,25 @@ class HampiController extends Controller
     /** Pizarrín público de vacunas y disponibilidad. */
     public function verPizarrin()
     {
-        $vacunas = VacunaAviso::with('posta')->orderBy('es_urgente', 'desc')->get();
+        $vacunas = CachePortal::recordar('pizarrin', fn () => VacunaAviso::with('posta')->orderBy('es_urgente', 'desc')->get());
         return view('hampi.pizarrin', compact('vacunas'));
     }
 
     /** Directorio de establecimientos activos de la microred. */
     public function verPostas()
     {
-        $postas = Posta::where('estado_activo', true)->get();
+        $postas = CachePortal::recordar('postas', fn () => Posta::where('estado_activo', true)->orderBy('nombre')->get());
         return view('hampi.postas', compact('postas'));
     }
 
     /** Campañas preventivas activas publicadas por la microred. */
     public function verCampanasPreventivas()
     {
-        $campanas = CampanaPreventiva::activas()
+        $campanas = CachePortal::recordar('campanas', fn () => CampanaPreventiva::activas()
             ->orderBy('fecha_inicio')
-            ->get();
+            ->get());
 
         return view('hampi.campanas', compact('campanas'));
-    }
-
-    /** Cierra la sesión ciudadana sin afectar al personal autenticado. */
-    public function logoutCiudadano()
-    {
-        Session::forget(['ciudadano_dni', 'ciudadano_id']);
-        return redirect('/');
     }
 
     /**
@@ -153,11 +80,18 @@ class HampiController extends Controller
      */
     public function consultarDniReniec($dni)
     {
-        if (!preg_match('/^[0-9]{8}$/', $dni)) {
+        if (! preg_match('/^[0-9]{8}$/', $dni)) {
             return response()->json(['success' => false, 'mensaje' => 'El DNI debe tener 8 dígitos'], 400);
         }
 
         $token = config('services.reniec.token');
+
+        if (! $token) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'Validación con RENIEC no configurada. Escribe tus nombres manualmente.',
+            ], 404);
+        }
 
         try {
             $respuesta = Http::withHeaders([
@@ -171,7 +105,7 @@ class HampiController extends Controller
                 
                 return response()->json([
                     'success' => true,
-                    'nombres' => $datos['nombres'],
+                    'nombres' => $datos['nombres'] ?? '',
                     'apellidos' => ($datos['apellidoPaterno'] ?? '') . ' ' . ($datos['apellidoMaterno'] ?? ''),
                     'origen' => 'Padrón RENIEC Oficial'
                 ]);

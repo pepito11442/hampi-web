@@ -9,8 +9,15 @@
     <meta name="description" content="@yield('meta_description', 'Hampi conecta a los vecinos de Socabaya con su microred de salud: médicos de turno, vacunas, campañas y directorio de postas.')">
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.webmanifest">
 
-    <script>
+    {{-- Fuentes del primer pantallazo: se piden en paralelo con el CSS. --}}
+    <link rel="preload" href="/fonts/hampi/instrument-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/hampi/archivo-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/hampi/martian-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+
+    <script nonce="{{ Vite::cspNonce() }}">
         document.documentElement.classList.add('js');
     </script>
 
@@ -97,10 +104,13 @@
                         <span class="hidden sm:inline">Mis citas</span>
                         <span class="sm:hidden">Panel</span>
                     </a>
-                    <a href="/cerrar-sesion-ciudadano" class="btn btn-ghost btn-sm hidden lg:inline-flex">
-                        <x-icon name="log-out" class="h-4 w-4" />
-                        Salir
-                    </a>
+                    <form action="{{ route('ciudadano.logout') }}" method="POST" class="hidden lg:block">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost btn-sm">
+                            <x-icon name="log-out" class="h-4 w-4" />
+                            Salir
+                        </button>
+                    </form>
                 @elseif ($enPantallaDeAcceso)
                     <a href="/" class="btn btn-secondary btn-sm" aria-label="Portal ciudadano">
                         <x-icon name="arrow-left" class="h-4 w-4" />
@@ -138,7 +148,10 @@
                 @endforeach
                 @if(session('ciudadano_dni'))
                     <a href="/mi-panel" class="nav-link border-b border-ink-200 {{ request()->is('mi-panel') ? 'nav-link-active' : '' }}">Mi panel de citas</a>
-                    <a href="/cerrar-sesion-ciudadano" class="nav-link border-b border-ink-200 text-stamp-700">Cerrar sesión ciudadana</a>
+                    <form action="{{ route('ciudadano.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link w-full border-b border-ink-200 text-left text-stamp-700">Cerrar sesión ciudadana</button>
+                    </form>
                 @endif
 
                 @auth
@@ -155,6 +168,10 @@
                     <a href="{{ route('empleado.login') }}" class="nav-link">Acceso del personal (DNI)</a>
                 @endauth
             </nav>
+            <p class="container-page flex items-center gap-2 border-t border-ink-200 py-3 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-600">
+                <x-icon name="clock" class="h-4 w-4 shrink-0 text-brand-700" />
+                Lun a vie 07:00–19:30 · Sáb 07:00–15:00
+            </p>
         </div>
     </header>
 
@@ -163,6 +180,36 @@
             <div role="status" class="flex items-start gap-3 border border-brand-300 bg-brand-50 p-4 text-sm text-brand-900">
                 <x-icon name="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-brand-700" />
                 <p>{{ session('mensaje') }}</p>
+            </div>
+        </div>
+    @endif
+
+    @if(session('aviso'))
+        <div class="relative z-10 container-page pt-5">
+            <div role="status" class="notice notice-warning flex items-start gap-3 text-sm">
+                <x-icon name="info" class="mt-0.5 h-5 w-5 shrink-0" />
+                <p>{{ session('aviso') }}</p>
+            </div>
+        </div>
+    @endif
+
+    @if(session('codigo_ciudadano'))
+        @php $entrega = session('codigo_ciudadano'); @endphp
+        <div class="relative z-10 container-page pt-5">
+            <div role="alert" class="border-2 border-ink-950 bg-paper-50 p-4 sm:p-5">
+                <p class="mono-label flex items-center gap-2 text-brand-800">
+                    <x-icon name="key-round" class="h-4 w-4" />
+                    Código de acceso al portal · entrégalo al paciente
+                </p>
+                <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <p class="text-sm text-ink-700">{{ $entrega['nombre'] }} · DNI {{ $entrega['dni'] }}</p>
+                        <p class="mt-1 font-mono text-4xl font-semibold tracking-[0.3em] text-ink-950" data-codigo>{{ $entrega['codigo'] }}</p>
+                    </div>
+                    <p class="max-w-sm text-xs leading-relaxed text-ink-600">
+                        Se muestra una sola vez. Con su DNI y este código el paciente verá y pedirá citas en el portal. El código anterior (si tenía) ya no funciona.
+                    </p>
+                </div>
             </div>
         </div>
     @endif
@@ -258,5 +305,10 @@
     @endunless
 
     @stack('scripts')
+    <script nonce="{{ Vite::cspNonce() }}">
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+        }
+    </script>
 </body>
 </html>

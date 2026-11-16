@@ -131,7 +131,7 @@
                         <div class="grid gap-5 p-4 sm:p-5 lg:grid-cols-12 lg:items-center">
                             <div class="flex items-start gap-4 lg:col-span-5">
                                 @if ($user->foto_url)
-                                    <img src="{{ $user->foto_url }}" alt="Foto de {{ $user->name }}" class="h-16 w-16 shrink-0 border border-ink-300 object-cover">
+                                    <img src="{{ $user->foto_url }}" alt="Foto de {{ $user->name }}" class="h-16 w-16 shrink-0 border border-ink-300 object-cover" width="64" height="64" loading="lazy" decoding="async">
                                 @else
                                     <span class="grid h-16 w-16 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-display text-lg font-bold text-brand-800">
                                         {{ $user->iniciales() }}
@@ -175,7 +175,7 @@
                                 <form
                                     action="{{ route('admin.horarios.generar') }}"
                                     method="POST"
-                                    @if ($turnosAsignados > 0) onsubmit="return confirm('Esto reemplazará el horario de {{ $meses[$mes] }} de {{ $user->name }}. ¿Continuar?');" @endif
+                                    @if ($turnosAsignados > 0) data-confirm="Esto reemplazará el horario de {{ $meses[$mes] }} de {{ $user->name }}. ¿Continuar?" @endif
                                 >
                                     @csrf
                                     <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -188,7 +188,7 @@
                                 </form>
 
                                 @if ($turnosAsignados > 0)
-                                    <form action="{{ route('admin.horarios.destroy', [$user, $anio, $mes]) }}" method="POST" onsubmit="return confirm('¿Eliminar el horario de {{ $meses[$mes] }} de {{ $user->name }}?');">
+                                    <form action="{{ route('admin.horarios.destroy', [$user, $anio, $mes]) }}" method="POST" data-confirm="¿Eliminar el horario de {{ $meses[$mes] }} de {{ $user->name }}?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm">

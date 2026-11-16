@@ -173,6 +173,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Código de demostración para entrar al portal ciudadano.
+        $ciudadano->asignarCodigo('246810');
+
         $medicoDemo = collect($usuariosPersonal)->firstWhere('role', User::ROL_DOCTOR);
 
         Cita::updateOrCreate(

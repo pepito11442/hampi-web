@@ -37,6 +37,13 @@ return [
 
     'mailers' => [
 
+        // API HTTPS de Brevo: funciona aunque el hosting bloquee SMTP.
+        'brevo' => [
+            'transport' => 'brevo',
+            'key' => env('BREVO_API_KEY'),
+        ],
+
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),

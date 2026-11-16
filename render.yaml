@@ -1,0 +1,74 @@
+# Blueprint de Render: crea el servicio web gratuito de Hampi.
+# La base de datos (Aiven MySQL gratis) se crea aparte; ver DESPLIEGUE.md.
+services:
+  - type: web
+    name: hampi
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Hampi
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        sync: false            # https://hampi.onrender.com (tu URL de Render)
+      - key: APP_TIMEZONE
+        value: America/Lima
+      - key: APP_LOCALE
+        value: es
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+
+      # Base de datos (Aiven for MySQL, plan Free)
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_DATABASE
+        value: defaultdb
+      - key: DB_USERNAME
+        value: avnadmin
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_CA
+        sync: false            # contenido completo del ca.pem de Aiven
+
+      # Sesiones en la base (el disco del contenedor se borra al dormir)
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      # Correo (Brevo por API HTTPS; Render gratis bloquea SMTP)
+      - key: MAIL_MAILER
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false            # correo verificado como remitente en Brevo
+      - key: MAIL_FROM_NAME
+        value: "Hampi · Microred Socabaya"
+
+      # Opcionales
+      - key: RENIEC_API_TOKEN
+        sync: false
+      - key: SEED_DEMO
+        value: "true"          # cambia a "false" cuando cargues datos reales

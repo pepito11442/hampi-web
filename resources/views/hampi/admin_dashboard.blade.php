@@ -75,6 +75,98 @@
                 </div>
             </section>
 
+            {{-- Citas: actividad reciente y entrega de códigos del portal --}}
+            <div class="mt-6 grid gap-6 xl:grid-cols-12">
+                <section class="border border-ink-300 bg-paper-50 xl:col-span-8" data-reveal>
+                    <div class="flex flex-wrap items-end justify-between gap-3 border-b-2 border-ink-950 p-4 sm:p-5">
+                        <div>
+                            <p class="mono-label">Últimos 14 días</p>
+                            <h2 class="mt-1 flex items-center gap-2 font-display text-xl font-bold text-ink-950">
+                                <x-icon name="bar-chart" class="h-5 w-5 text-brand-700" />
+                                Citas de la microred
+                            </h2>
+                        </div>
+                        <div class="flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-600">
+                            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-brand-700" aria-hidden="true"></span> Atendidas</span>
+                            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-ink-300" aria-hidden="true"></span> Otras</span>
+                        </div>
+                    </div>
+
+                    <dl class="grid grid-cols-2 border-b border-ink-200 sm:grid-cols-5">
+                        <div class="border-b border-r border-ink-200 p-4 sm:border-b-0">
+                            <dt class="mono-label">Hoy</dt>
+                            <dd class="stat-number mt-1">{{ $estadisticas['hoy'] }}</dd>
+                        </div>
+                        <div class="border-b border-ink-200 p-4 sm:border-b-0 sm:border-r">
+                            <dt class="mono-label">Próx. 7 días</dt>
+                            <dd class="stat-number mt-1">{{ $estadisticas['proximos7'] }}</dd>
+                        </div>
+                        <div class="border-b border-r border-ink-200 p-4 sm:border-b-0">
+                            <dt class="mono-label">Pedidas en línea</dt>
+                            <dd class="stat-number mt-1">{{ $estadisticas['enLinea'] }}</dd>
+                        </div>
+                        <div class="border-b border-ink-200 p-4 sm:border-b-0 sm:border-r">
+                            <dt class="mono-label">Sin cerrar</dt>
+                            <dd class="stat-number mt-1 {{ $estadisticas['sinCerrar'] ? 'text-stamp-700' : '' }}">{{ $estadisticas['sinCerrar'] }}</dd>
+                        </div>
+                        <div class="col-span-2 p-4 sm:col-span-1">
+                            <dt class="mono-label">Atención</dt>
+                            <dd class="stat-number mt-1">{{ $estadisticas['tasaAtencion'] !== null ? $estadisticas['tasaAtencion'].'%' : '—' }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="p-4 sm:p-5">
+                        <ol class="flex h-36 items-end gap-1 sm:gap-2" aria-label="Citas por día en los últimos 14 días">
+                            @foreach ($estadisticas['serie'] as $dia)
+                                @php
+                                    $alto = (int) round($dia['total'] * 100 / $estadisticas['maximo']);
+                                    $altoAtendidas = $dia['total'] ? (int) round($dia['atendidas'] * 100 / $dia['total']) : 0;
+                                @endphp
+                                <li class="flex h-full flex-1 flex-col justify-end" title="{{ $dia['etiqueta'] }}: {{ $dia['total'] }} citas, {{ $dia['atendidas'] }} atendidas">
+                                    <span class="sr-only">{{ $dia['etiqueta'] }}: {{ $dia['total'] }} citas, {{ $dia['atendidas'] }} atendidas</span>
+                                    <span class="flex w-full flex-col justify-end bg-ink-300" style="height: {{ max($alto, $dia['total'] ? 4 : 1) }}%">
+                                        <span class="block w-full bg-brand-700" style="height: {{ $altoAtendidas }}%"></span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <div class="mt-2 flex gap-1 font-mono text-[9px] uppercase text-ink-500 sm:gap-2" aria-hidden="true">
+                            @foreach ($estadisticas['serie'] as $dia)
+                                <span class="flex-1 truncate text-center">{{ $dia['etiqueta'] }}</span>
+                            @endforeach
+                        </div>
+                        <p class="mt-3 text-xs leading-relaxed text-ink-500">
+                            "Sin cerrar" son citas pasadas que nadie marcó como atendidas o canceladas: suelen ser inasistencias. {{ $estadisticas['canceladas'] }} canceladas en el periodo.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="border-2 border-ink-950 bg-paper-50 xl:col-span-4" data-reveal>
+                    <div class="border-b border-ink-300 p-4 sm:p-5">
+                        <p class="mono-label">Ventanilla</p>
+                        <h2 class="mt-1 flex items-center gap-2 font-display text-xl font-bold text-ink-950">
+                            <x-icon name="key-round" class="h-5 w-5 text-brand-700" />
+                            Código del portal
+                        </h2>
+                        <p class="mt-2 text-sm leading-relaxed text-ink-600">
+                            Verifica el DNI físico de la persona y genérale un código para ver y pedir sus citas en línea. El código anterior deja de funcionar.
+                        </p>
+                    </div>
+                    <form action="{{ route('admin.ciudadanos.codigo') }}" method="POST" class="space-y-3 p-4 sm:p-5" data-confirm="¿Generar un código nuevo para este DNI? El anterior dejará de funcionar.">
+                        @csrf
+                        <div>
+                            <label for="dni_codigo" class="label">DNI del ciudadano</label>
+                            <input type="text" name="dni" id="dni_codigo" value="{{ old('dni') }}" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" required data-solo-digitos class="input font-mono tracking-[0.18em]" placeholder="8 dígitos">
+                            @error('dni_codigo') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">
+                            <x-icon name="key-round" class="h-4 w-4" />
+                            Generar código
+                        </button>
+                    </form>
+                </section>
+            </div>
+
             <div class="mt-6 grid gap-6 xl:grid-cols-12">
                 {{-- Rol de hoy --}}
                 <section class="border border-ink-300 bg-paper-50 xl:col-span-7" data-reveal>
@@ -122,7 +214,7 @@
                                                     @csrf
                                                     <select
                                                         name="estado"
-                                                        onchange="this.form.submit()"
+                                                        data-autosubmit
                                                         aria-label="Cambiar estado de {{ $turno->medico_nombre }}"
                                                         class="min-h-10 cursor-pointer border border-ink-300 bg-paper-50 px-2.5 text-xs font-semibold text-ink-700"
                                                     >
@@ -132,7 +224,7 @@
                                                     </select>
                                                 </form>
 
-                                                <form action="/admin/turnos/{{ $turno->manual_id }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar a este médico del rol?')">
+                                                <form action="/admin/turnos/{{ $turno->manual_id }}" method="POST" data-confirm="¿Seguro que deseas eliminar a este médico del rol?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="inline-flex h-10 w-10 items-center justify-center border border-ink-300 text-ink-500 transition-colors hover:border-stamp-300 hover:bg-stamp-50 hover:text-stamp-700" title="Eliminar médico" aria-label="Eliminar a {{ $turno->medico_nombre }} del rol">
@@ -248,7 +340,7 @@
                                             </p>
                                         </div>
 
-                                        <form action="/admin/pizarrin/{{ $vacuna->id }}" method="POST" onsubmit="return confirm('¿Seguro que deseas retirar este aviso de vacuna?')" class="shrink-0">
+                                        <form action="/admin/pizarrin/{{ $vacuna->id }}" method="POST" data-confirm="¿Seguro que deseas retirar este aviso de vacuna?" class="shrink-0">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="inline-flex h-10 w-10 items-center justify-center border border-ink-300 text-ink-500 transition-colors hover:border-stamp-300 hover:bg-stamp-50 hover:text-stamp-700" title="Retirar aviso" aria-label="Retirar el aviso {{ $vacuna->titulo }}">

@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Storage;
  * Cuenta de acceso del personal de salud y la administración.
  *
  * Los roles se definen en constantes: administración entra con correo y
- * el personal de salud con DNI + contraseña. Los ciudadanos no tienen
- * cuenta y se identifican solo con su DNI.
+ * el personal de salud con DNI + contraseña. Los ciudadanos no usan esta
+ * tabla: entran con DNI + código (ver Ciudadano).
  */
 class User extends Authenticatable
 {
@@ -45,12 +45,15 @@ class User extends Authenticatable
         'titulos',
         'experiencia',
         'foto_perfil',
+        'foto_data',
+        'foto_mime',
         'activo',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'foto_data',
     ];
 
     protected function casts(): array
@@ -100,11 +103,16 @@ class User extends Authenticatable
     /**
      * URL pública de la foto de perfil.
      *
-     * Devuelve null si no hay foto o si el archivo ya no existe en el
-     * disco público, para que la vista use las iniciales como respaldo.
+     * Primero usa la foto guardada en la base (sobrevive a los reinicios
+     * del hosting). Si no hay, intenta el archivo antiguo del disco
+     * público. Devuelve null para que la vista use las iniciales.
      */
     public function getFotoUrlAttribute(): ?string
     {
+        if ($this->foto_data) {
+            return route('fotos.show', ['user' => $this->id, 'version' => $this->fotoVersion()], false);
+        }
+
         if (! $this->foto_perfil) {
             return null;
         }
@@ -112,6 +120,12 @@ class User extends Authenticatable
         $disk = Storage::disk('public');
 
         return $disk->exists($this->foto_perfil) ? $disk->url($this->foto_perfil) : null;
+    }
+
+    /** Huella corta del contenido de la foto, usada en la URL para la caché. */
+    public function fotoVersion(): string
+    {
+        return substr(md5((string) $this->foto_data), 0, 12);
     }
 
     /** Iniciales del nombre para el avatar de respaldo. */

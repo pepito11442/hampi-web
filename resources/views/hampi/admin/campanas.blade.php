@@ -166,7 +166,7 @@
                                                     </button>
                                                 </form>
 
-                                                <form action="{{ route('admin.campanas.destroy', $campana) }}" method="POST" onsubmit="return confirm('¿Eliminar la campaña «{{ $campana->titulo }}»?');">
+                                                <form action="{{ route('admin.campanas.destroy', $campana) }}" method="POST" data-confirm="¿Eliminar la campaña «{{ $campana->titulo }}»?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="inline-flex h-10 w-10 items-center justify-center border border-ink-300 text-ink-500 transition-colors hover:border-stamp-300 hover:bg-stamp-50 hover:text-stamp-700" aria-label="Eliminar campaña {{ $campana->titulo }}">

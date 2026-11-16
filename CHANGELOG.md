@@ -4,6 +4,43 @@ Todos los cambios relevantes de este proyecto se registran aquí.
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Fechas en `AAAA-MM-DD`.
 
+## [2026-11-15] — Seguridad del acceso ciudadano, autoagendado y despliegue gratuito
+
+### Seguridad
+
+- **El DNI solo ya no abre el panel ciudadano.** Se pide además un **código de acceso de 6 dígitos** guardado con hash. Bloqueo de 5 minutos tras 5 intentos fallidos, `throttle` en las rutas y regeneración de la sesión al entrar.
+- Una ficha creada por el personal no se puede "reclamar" desde internet: el código se entrega en la posta (al agendar la cita, con el botón **Código portal** del médico o desde la **Ventanilla** del panel administrativo).
+- Se eliminó el DNI por defecto (`72345678`) que entraba si el campo llegaba vacío, y el ingreso ya no sobrescribe los nombres de fichas existentes.
+- Cerrar sesión ciudadana ahora es `POST` con CSRF (antes `GET`). Visitar la portada ya no cierra la sesión.
+- Cabeceras **Content-Security-Policy con nonce**, **HSTS** en HTTPS y `Permissions-Policy`. Se quitaron todos los `onsubmit`/`onchange` en línea (ahora `data-confirm` y `data-autosubmit`).
+- Recuperación de contraseña del personal por correo (`/equipo/olvide-mi-clave`), sin revelar qué cuentas existen.
+
+### Añadido
+
+- **Autoagendado ciudadano** (`/mi-panel/nueva-cita`): elige médico, día y hora entre los bloques libres de los próximos 30 días; máximo 3 citas activas; cancelación de citas propias.
+- Botones **A mi calendario** (archivo `.ics` con recordatorio 2 h antes), **Enviar por WhatsApp** y **Cómo llegar** (Google Maps) en el panel ciudadano; **Cómo llegar** también en el directorio de postas.
+- Estadísticas de citas en el panel administrativo: hoy, próximos 7 días, pedidas en línea, sin cerrar (posibles inasistencias), tasa de atención y gráfico de 14 días.
+- **PWA**: manifest, íconos y service worker; las páginas públicas abren sin señal y hay una página de "sin conexión".
+- Columna `citas.origen` (personal/ciudadano) e índices en `citas.fecha_hora`, `citas(user_id, fecha_hora)` y `vacuna_avisos.stock_estado`.
+- Pruebas `CiudadanoAccesoTest` (21 casos): acceso, bloqueo, registro, códigos, autoagendado, cancelación, `.ics`, CSP y recuperación de contraseña.
+
+### Rendimiento
+
+- Caché de 60 s para portada, médicos de hoy, pizarrín, postas y campañas; se invalida al instante cuando el personal cambia datos.
+- Fotos de perfil reducidas a 400×400 WebP (de varios MB a ~30 KB) y guardadas en la base; se sirven con caché de un año.
+- `preload` de las fuentes principales, `loading="lazy"` y dimensiones en las fotos, OPcache sin revisión de archivos en producción.
+
+### Despliegue
+
+- `Dockerfile` (PHP 8.3 + Apache + OPcache, assets con Node y dependencias con Composer en etapas separadas), `render.yaml`, `docker/entrypoint.sh` (migra con reintentos, siembra solo si la base está vacía, `optimize`).
+- Soporte TLS para MySQL gestionado (`MYSQL_ATTR_SSL_CA` / `DB_SSL_CA`) y transporte de correo **Brevo por API HTTPS** (Render gratis bloquea SMTP).
+- Flujos de GitHub Actions: pruebas en cada push y ping cada 10 minutos para que el plan gratuito no se duerma.
+- Guía completa en [`DESPLIEGUE.md`](DESPLIEGUE.md).
+
+### Pendiente
+
+- Actualizar a Laravel 12 (`composer require laravel/framework:^12.0 -W`): no se pudo hacer en este entorno porque no tenía acceso a Packagist.
+
 ## [2026-11-13] — Guía de instalación local para WSL2
 
 ### Cambiado

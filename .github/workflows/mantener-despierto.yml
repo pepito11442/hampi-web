@@ -1,0 +1,23 @@
+# Visita el portal cada 10 minutos para que el plan gratuito de Render no
+# lo duerma (se duerme tras 15 minutos sin tráfico y tarda ~1 minuto en
+# despertar). También mantiene activa la base gratuita de Aiven.
+#
+# Configura la URL en: Settings → Secrets and variables → Actions →
+# Variables → New variable → HAMPI_URL = https://tu-app.onrender.com
+#
+# Nota: GitHub puede retrasar los cron unos minutos y los desactiva si el
+# repositorio pasa 60 días sin actividad. Como respaldo usa cron-job.org.
+name: Mantener despierto
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    if: ${{ vars.HAMPI_URL != '' }}
+    steps:
+      - name: Visitar /up
+        run: curl -fsS --max-time 90 --retry 2 "${{ vars.HAMPI_URL }}/up" -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n"

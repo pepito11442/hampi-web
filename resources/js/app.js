@@ -170,6 +170,8 @@ function initCitaSlots() {
     if (!form) return;
 
     const fecha = form.querySelector('[data-citas-fecha]');
+    const medico = form.querySelector('[data-citas-medico]');
+    const bloqueado = form.hasAttribute('data-citas-bloqueado');
     const hora = form.querySelector('[data-citas-hora]');
     const resumen = form.querySelector('[data-citas-resumen]');
     const submit = form.querySelector('[data-citas-submit]');
@@ -185,7 +187,7 @@ function initCitaSlots() {
 
     const setDisabled = (disabled) => {
         hora.disabled = disabled;
-        if (submit) submit.disabled = disabled;
+        if (submit) submit.disabled = disabled || bloqueado;
     };
 
     const renderOptions = (slots) => {
@@ -218,7 +220,10 @@ function initCitaSlots() {
         setStatus('Consultando horarios…');
 
         try {
-            const response = await fetch(`${url}?fecha=${encodeURIComponent(fecha.value)}`, {
+            const params = new URLSearchParams({ fecha: fecha.value });
+            if (medico) params.set('medico', medico.value);
+
+            const response = await fetch(`${url}?${params}`, {
                 credentials: 'same-origin',
                 headers: { Accept: 'application/json' },
                 signal: request.signal,
@@ -249,6 +254,73 @@ function initCitaSlots() {
     };
 
     fecha.addEventListener('change', cargar);
+    medico?.addEventListener('change', cargar);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Confirmaciones y envíos automáticos (sin JavaScript en línea, apto CSP)     */
+/* -------------------------------------------------------------------------- */
+function initConfirmaciones() {
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest?.('form[data-confirm]');
+        if (form && !window.confirm(form.dataset.confirm)) {
+            event.preventDefault();
+        }
+    });
+
+    document.querySelectorAll('[data-autosubmit]').forEach((control) => {
+        control.addEventListener('change', () => control.form?.requestSubmit());
+    });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Campos que solo aceptan dígitos (DNI y códigos)                             */
+/* -------------------------------------------------------------------------- */
+function initSoloDigitos() {
+    document.querySelectorAll('[data-solo-digitos]').forEach((input) => {
+        input.addEventListener('input', () => {
+            const max = Number(input.getAttribute('maxlength')) || undefined;
+            const limpio = input.value.replace(/\D/g, '').slice(0, max);
+            if (limpio !== input.value) input.value = limpio;
+        });
+    });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Autocompletar nombres con RENIEC al crear el código (opcional)              */
+/* -------------------------------------------------------------------------- */
+function initReniec() {
+    const form = document.querySelector('[data-reniec-form]');
+    if (!form) return;
+
+    const dni = form.querySelector('[data-reniec-dni]');
+    const nombres = form.querySelector('[data-reniec-nombres]');
+    const apellidos = form.querySelector('[data-reniec-apellidos]');
+    const estado = form.querySelector('[data-reniec-estado]');
+    let ultimo = '';
+
+    dni?.addEventListener('input', async () => {
+        if (dni.value.length !== 8 || dni.value === ultimo) return;
+        ultimo = dni.value;
+        estado.textContent = 'Buscando…';
+
+        try {
+            const respuesta = await fetch(`/api/consultar-dni/${encodeURIComponent(dni.value)}`, {
+                headers: { Accept: 'application/json' },
+            });
+            const data = await respuesta.json();
+
+            if (data.success) {
+                if (!nombres.value) nombres.value = data.nombres || '';
+                if (!apellidos.value) apellidos.value = (data.apellidos || '').trim();
+                estado.textContent = 'Datos encontrados';
+            } else {
+                estado.textContent = 'Escribe tus nombres';
+            }
+        } catch {
+            estado.textContent = 'Escribe tus nombres';
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -258,4 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPasswordToggles();
     initStockFilters();
     initCitaSlots();
+    initConfirmaciones();
+    initSoloDigitos();
+    initReniec();
 });

@@ -60,72 +60,70 @@
                     </h1>
 
                     <p class="mt-4 max-w-xl text-base leading-relaxed text-ink-600">
-                        Médicos de turno, vacunas, campañas y establecimientos de la Microred Socabaya. Sin crear una cuenta: entra con tu DNI.
+                        Médicos de turno, vacunas, campañas y establecimientos de la Microred Socabaya. Entra con tu DNI y tu código para ver y pedir tus citas.
                     </p>
 
-                    <form id="acceso" action="/ingreso-dni" method="POST" class="mt-6 scroll-mt-24 border border-ink-300 bg-paper-100/70 p-4 sm:p-5 lg:scroll-mt-32">
+                    <form action="{{ route('ciudadano.login') }}" method="POST" class="mt-6 border border-ink-300 bg-paper-100/70 p-4 sm:p-5" novalidate>
                         @csrf
 
-                        <div class="flex flex-wrap items-end justify-between gap-2">
-                            <label for="dni" class="label mb-0">Ingresa tu DNI</label>
-                            <span id="estado-reniec" aria-live="polite" class="font-mono text-[10px] text-ink-500"></span>
+                        <div id="acceso" class="scroll-mt-24 lg:scroll-mt-32">
+                            <p class="label mb-0">Entra a tu panel de citas</p>
                         </div>
 
-                        <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-                            <div class="relative flex-1">
+                        <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                            <div>
+                                <label for="dni" class="label">DNI</label>
                                 <input
                                     type="text"
                                     name="dni"
                                     id="dni"
+                                    value="{{ old('dni') }}"
                                     maxlength="8"
                                     inputmode="numeric"
                                     pattern="[0-9]{8}"
-                                    autocomplete="off"
+                                    autocomplete="username"
                                     required
                                     placeholder="8 dígitos"
-                                    aria-describedby="dni-ayuda"
-                                    class="input font-mono tracking-[0.22em]"
+                                    data-solo-digitos
+                                    class="input font-mono text-lg tracking-[0.18em]"
                                 >
-                                <span id="spinner" class="absolute inset-y-0 right-3 hidden items-center text-brand-700">
-                                    <x-icon name="loader" class="h-5 w-5 animate-spin" />
-                                </span>
                             </div>
-
-                            <button type="submit" id="btn-ingresar" class="btn btn-primary shrink-0">
-                                <span>Entrar a mi panel</span>
+                            <div>
+                                <label for="codigo" class="label">Código de acceso</label>
+                                <input
+                                    type="password"
+                                    name="codigo"
+                                    id="codigo"
+                                    maxlength="6"
+                                    inputmode="numeric"
+                                    pattern="[0-9]{6}"
+                                    autocomplete="current-password"
+                                    required
+                                    placeholder="6 dígitos"
+                                    data-solo-digitos
+                                    class="input font-mono text-lg tracking-[0.3em]"
+                                >
+                            </div>
+                            <button type="submit" class="btn btn-primary min-h-12 shrink-0 text-base">
+                                <span>Entrar</span>
                                 <x-icon name="arrow-right" class="h-4 w-4" />
                             </button>
                         </div>
 
-                        <p id="dni-ayuda" class="mt-2 text-xs leading-relaxed text-ink-500">
-                            8 dígitos. Si la validación no responde, puedes escribir tus nombres y apellidos.
+                        @if ($errors->has('dni') || $errors->has('codigo'))
+                            <div role="alert" class="notice notice-warning mt-3 flex items-start gap-2 text-sm leading-relaxed">
+                                <x-icon name="alert-circle" class="mt-0.5 h-4 w-4 shrink-0" />
+                                <span>{{ $errors->first('dni') ?: $errors->first('codigo') }}</span>
+                            </div>
+                        @endif
+
+                        <p class="mt-3 text-sm leading-relaxed text-ink-600">
+                            ¿Primera vez? <a href="{{ route('ciudadano.registro') }}" class="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800">Crea tu código</a>.
+                            ¿Ya te atendieron o lo olvidaste? Pídelo en tu posta con tu DNI.
                         </p>
 
-                        <div id="caja-identidad" class="mt-4 hidden border border-brand-200 bg-brand-50 p-4">
-                            <p class="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-brand-800">
-                                <x-icon name="user" class="h-3.5 w-3.5" />
-                                Revisa tus datos antes de entrar
-                            </p>
-
-                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label for="nombres_reniec" class="label">Nombres</label>
-                                    <input type="text" name="nombres_reniec" id="nombres_reniec" class="input bg-paper-50">
-                                </div>
-                                <div>
-                                    <label for="apellidos_reniec" class="label">Apellidos</label>
-                                    <input type="text" name="apellidos_reniec" id="apellidos_reniec" class="input bg-paper-50">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="error-reniec" class="notice notice-warning mt-4 hidden items-start gap-2 text-xs leading-relaxed">
-                            <x-icon name="alert-circle" class="mt-0.5 h-4 w-4 shrink-0" />
-                            <span>No pudimos validar tu DNI en este momento. Puedes escribir tus nombres y apellidos para continuar.</span>
-                        </div>
-
-                        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.05em] text-ink-500">
-                            <span class="flex items-center gap-1.5"><x-icon name="lock" class="h-3.5 w-3.5" /> Acceso sin contraseña</span>
+                        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-500">
+                            <span class="flex items-center gap-1.5"><x-icon name="lock" class="h-3.5 w-3.5" /> Tus citas solo las ves tú</span>
                             <span class="flex items-center gap-1.5"><x-icon name="badge-check" class="h-3.5 w-3.5" /> Datos de demostración</span>
                         </div>
                     </form>
@@ -255,14 +253,14 @@
             <div class=" border-t-2 border-ink-950 lg:col-span-8">
                 <details class="faq-item group border-b border-ink-200">
                     <summary class="flex min-h-14 cursor-pointer items-center justify-between gap-4 py-4 font-display text-base font-bold text-ink-950 transition-colors hover:text-brand-700">
-                        ¿Necesito crear una cuenta para usar el portal?
+                        ¿Necesito una cuenta para usar el portal?
                         <span class="grid h-8 w-8 shrink-0 place-items-center border border-ink-300 text-ink-600 group-open:border-brand-700 group-open:bg-brand-700 group-open:text-paper-50">
                             <x-icon name="plus" class="h-4 w-4 group-open:hidden" />
                             <x-icon name="minus" class="hidden h-4 w-4 group-open:block" />
                         </span>
                     </summary>
                     <p class="max-w-2xl pb-5 text-sm leading-relaxed text-ink-600">
-                        No. Solo necesitas tu DNI. El portal intenta validar tus datos con RENIEC y, si el servicio no está disponible, puedes escribir tus nombres y apellidos para continuar.
+                        Para ver médicos, vacunas, campañas y postas no necesitas nada. Para ver o pedir tus citas usas tu DNI y un código de 6 dígitos: lo creas tú la primera vez o te lo entregan en la posta. Así nadie más puede ver tus citas aunque conozca tu DNI.
                     </p>
                 </details>
 
@@ -317,13 +315,13 @@
                     La información de la microred, sin filas para preguntar.
                 </h2>
                 <p class="mt-4 max-w-md text-sm leading-relaxed text-paper-100/75">
-                    Consulta el rol de hoy, revisa el pizarrín o ubica tu establecimiento. Si necesitas atención, acércate con tu DNI.
+                    Consulta el rol de hoy, revisa el pizarrín o pide tu cita en línea con tu DNI y tu código.
                 </p>
                 <div class="mt-6 flex flex-wrap gap-2">
                     <a href="#acceso" class="btn bg-paper-50 text-ink-950 hover:bg-paper-200">
                         <x-icon name="id-card" class="h-4 w-4" />
                         Ingresar con DNI
-                    </a>
+                    </a>    
                     <a href="/medicos-hoy" class="btn border-paper-50/30 text-paper-50 hover:bg-paper-50/10">
                         Ver médicos de hoy
                     </a>
@@ -356,77 +354,3 @@
         </div>
     </section>
 @endsection
-
-@push('scripts')
-    <script>
-        (function () {
-            const inputDni = document.getElementById('dni');
-            const spinner = document.getElementById('spinner');
-            const cajaIdentidad = document.getElementById('caja-identidad');
-            const estadoReniec = document.getElementById('estado-reniec');
-            const inputNombres = document.getElementById('nombres_reniec');
-            const inputApellidos = document.getElementById('apellidos_reniec');
-            const errorReniec = document.getElementById('error-reniec');
-
-            if (!inputDni) return;
-
-            const ocultarIdentidad = () => {
-                cajaIdentidad.classList.add('hidden');
-                errorReniec.classList.add('hidden');
-                errorReniec.classList.remove('flex');
-            };
-
-            const mostrarIdentidad = () => {
-                cajaIdentidad.classList.remove('hidden');
-                window.requestAnimationFrame(() => inputNombres.focus());
-            };
-
-            const consultarReniec = async (dni) => {
-                spinner.classList.remove('hidden');
-                spinner.classList.add('flex');
-                estadoReniec.textContent = 'Buscando…';
-                estadoReniec.className = 'font-mono text-[10px] text-brand-700';
-
-                try {
-                    const respuesta = await fetch(`/api/consultar-dni/${encodeURIComponent(dni)}`);
-                    const data = await respuesta.json();
-
-                    if (data.success) {
-                        inputNombres.value = data.nombres || '';
-                        inputApellidos.value = data.apellidos || '';
-                        mostrarIdentidad();
-                        estadoReniec.textContent = 'Datos encontrados';
-                        estadoReniec.className = 'font-mono text-[10px] text-brand-700';
-                    } else {
-                        mostrarIdentidad();
-                        errorReniec.classList.remove('hidden');
-                        errorReniec.classList.add('flex');
-                        estadoReniec.textContent = 'Completa tus datos';
-                        estadoReniec.className = 'font-mono text-[10px] text-maize-700';
-                    }
-                } catch (error) {
-                    mostrarIdentidad();
-                    errorReniec.classList.remove('hidden');
-                    errorReniec.classList.add('flex');
-                    estadoReniec.textContent = 'Sin conexión';
-                    estadoReniec.className = 'font-mono text-[10px] text-maize-700';
-                } finally {
-                    spinner.classList.add('hidden');
-                    spinner.classList.remove('flex');
-                }
-            };
-
-            inputDni.addEventListener('input', function () {
-                this.value = this.value.replace(/\D/g, '').slice(0, 8);
-
-                if (this.value.length === 8) {
-                    consultarReniec(this.value);
-                } else {
-                    ocultarIdentidad();
-                    estadoReniec.textContent = '';
-                    spinner.classList.add('hidden');
-                }
-            });
-        })();
-    </script>
-@endpush

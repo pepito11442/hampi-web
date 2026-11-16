@@ -29,6 +29,9 @@
                     {{ $cita->ciudadano->nombres }} {{ $cita->ciudadano->apellidos }}
                 </h3>
                 <span class="badge {{ $estados[$cita->estado] ?? 'badge-slate' }}">{{ $cita->estado }}</span>
+                @if (($cita->origen ?? 'personal') === 'ciudadano')
+                    <span class="badge badge-slate">Pedida en línea</span>
+                @endif
             </div>
 
             <p class="mt-1 text-xs leading-relaxed text-ink-600">
@@ -48,6 +51,14 @@
 
     @if ($mostrarAcciones && $activa)
         <div class="flex flex-wrap gap-2 sm:col-span-3 sm:justify-end">
+            <form action="{{ route('empleado.citas.codigo', $cita) }}" method="POST" data-confirm="¿Generar un código nuevo para {{ $cita->ciudadano->nombres }}? El código anterior dejará de funcionar.">
+                @csrf
+                <button type="submit" class="btn btn-ghost btn-sm" title="Código para que el paciente vea sus citas en el portal">
+                    <x-icon name="key-round" class="h-4 w-4" />
+                    Código portal
+                </button>
+            </form>
+
             @if ($pasada)
                 <form action="{{ route('empleado.citas.estado', $cita) }}" method="POST">
                     @csrf
@@ -59,7 +70,7 @@
                 </form>
             @endif
 
-            <form action="{{ route('empleado.citas.estado', $cita) }}" method="POST" onsubmit="return confirm('¿Cancelar esta cita? El bloque volverá a quedar disponible.');">
+            <form action="{{ route('empleado.citas.estado', $cita) }}" method="POST" data-confirm="¿Cancelar esta cita? El bloque volverá a quedar disponible.">
                 @csrf
                 <input type="hidden" name="estado" value="Cancelada">
                 <button type="submit" class="btn btn-danger btn-sm">

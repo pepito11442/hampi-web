@@ -86,6 +86,10 @@
                 Mantener mi sesión iniciada
             </label>
 
+            <p class="text-right">
+                <a href="{{ route('password.request') }}" class="text-sm font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800">¿Olvidaste tu contraseña?</a>
+            </p>
+
             <button type="submit" class="btn btn-primary w-full">
                 <span>Ingresar a mi panel</span>
                 <x-icon name="arrow-right" class="h-4 w-4" />

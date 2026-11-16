@@ -158,6 +158,8 @@ class HorarioController extends Controller
             ])
             ->delete();
 
+        \App\Support\CachePortal::limpiar();
+
         return redirect()
             ->route('admin.horarios.index', [
                 'user_id' => $empleado->id,

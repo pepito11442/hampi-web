@@ -165,7 +165,7 @@
                                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                         <div class="flex items-start gap-3">
                                             @if ($empleado->foto_url)
-                                                <img src="{{ $empleado->foto_url }}" alt="Foto de {{ $empleado->name }}" class="h-12 w-12 shrink-0 border border-ink-300 object-cover">
+                                                <img src="{{ $empleado->foto_url }}" alt="Foto de {{ $empleado->name }}" class="h-12 w-12 shrink-0 border border-ink-300 object-cover" width="48" height="48" loading="lazy" decoding="async">
                                             @else
                                                 <span class="grid h-12 w-12 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-display text-sm font-bold text-brand-800">
                                                     {{ $empleado->iniciales() }}
@@ -287,7 +287,7 @@
                                                 </div>
                                             </form>
 
-                                            <form action="{{ route('admin.equipo.destroy', $empleado) }}" method="POST" class="mt-3 flex justify-end border-t border-ink-200 pt-3" onsubmit="return confirm('¿Eliminar la cuenta de {{ $empleado->name }}? También se borrarán sus horarios. Esta acción no se puede deshacer.');">
+                                            <form action="{{ route('admin.equipo.destroy', $empleado) }}" method="POST" class="mt-3 flex justify-end border-t border-ink-200 pt-3" data-confirm="¿Eliminar la cuenta de {{ $empleado->name }}? También se borrarán sus horarios. Esta acción no se puede deshacer.">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

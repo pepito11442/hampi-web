@@ -248,7 +248,7 @@
                         <section class="border border-ink-300 bg-paper-50" data-reveal>
                             <div class="flex items-center gap-3 border-b-2 border-ink-950 p-4">
                                 @if ($medico->foto_url)
-                                    <img src="{{ $medico->foto_url }}" alt="Foto de {{ $medico->name }}" class="h-12 w-12 shrink-0 border border-ink-300 object-cover">
+                                    <img src="{{ $medico->foto_url }}" alt="Foto de {{ $medico->name }}" class="h-12 w-12 shrink-0 border border-ink-300 object-cover" width="48" height="48" loading="lazy" decoding="async">
                                 @else
                                     <span class="grid h-12 w-12 shrink-0 place-items-center border border-ink-300 bg-paper-100 font-display text-sm font-bold text-brand-800">
                                         {{ $medico->iniciales() }}
