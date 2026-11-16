@@ -67,7 +67,7 @@
                     </p>
                 </div>
 
-                <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
                     @foreach ($vacunas as $vacuna)
                         @php
                             [$stockClass, $stockIcon] = $stockStyles[$vacuna->stock_estado] ?? ['badge-slate', 'info'];

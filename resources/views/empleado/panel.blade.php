@@ -64,10 +64,10 @@
                 </div>
             @endif
 
-            <div class="grid gap-6 lg:grid-cols-12">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div class="space-y-6 lg:col-span-8">
                     {{-- Resumen mensual --}}
-                    <section class="grid border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-3" data-reveal>
+                    <section class="grid grid-cols-1 border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-3" data-reveal>
                         <div class="border-b border-ink-200 p-4 sm:border-b-0 sm:border-r">
                             <p class="mono-label">Horas asignadas</p>
                             <div class="mt-2 flex items-baseline gap-1.5">
@@ -148,7 +148,7 @@
                             <input type="hidden" name="anio" value="{{ $anio }}">
                             <input type="hidden" name="mes" value="{{ $mes }}">
 
-                            <div class="grid gap-4 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label for="email" class="label">Correo</label>
                                     <input type="email" name="email" id="email" required value="{{ old('email', $user->email) }}" class="input">
@@ -180,7 +180,7 @@
                                 @error('biografia') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
                             </div>
 
-                            <div class="grid gap-4 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label for="titulos" class="label">Títulos</label>
                                     <textarea name="titulos" id="titulos" rows="4" maxlength="2000" class="input" placeholder="Ej. Médico Cirujano, Universidad Nacional de San Agustín">{{ old('titulos', $user->titulos) }}</textarea>

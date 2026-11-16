@@ -52,7 +52,7 @@
             @endif
 
             {{-- Resumen del día: una sola franja, no cinco tarjetas iguales. --}}
-            <section class="grid border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-2 xl:grid-cols-4" data-reveal>
+            <section class="grid grid-cols-1 border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-2 xl:grid-cols-4" data-reveal>
                 <div class="border-b border-ink-200 p-4 sm:border-r xl:border-b-0">
                     <p class="mono-label">Médicos en rol de hoy</p>
                     <p class="stat-number mt-2">{{ $medicosHoy->count() }}</p>
@@ -167,7 +167,7 @@
                 </section>
             </div>
 
-            <div class="mt-6 grid gap-6 xl:grid-cols-12">
+            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
                 {{-- Rol de hoy --}}
                 <section class="border border-ink-300 bg-paper-50 xl:col-span-7" data-reveal>
                     <div class="flex flex-wrap items-end justify-between gap-3 border-b-2 border-ink-950 p-4 sm:p-5">

@@ -49,7 +49,7 @@
                 <span class="text-paper-100/65">Folio MR-SOC-{{ now()->format('ymd') }}</span>
             </div>
 
-            <div class="grid gap-7 p-5 sm:p-8 lg:grid-cols-12 lg:gap-x-10 ">
+            <div class="grid grid-cols-1 gap-7 p-5 sm:p-8 lg:grid-cols-12 lg:gap-x-10">
                 <div class="lg:col-span-8">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <p class="mono-label">Atención primaria / Socabaya, Arequipa</p>
@@ -165,7 +165,7 @@
                 </div>
 
                 <div class="lg:col-span-8">
-                    <div class="grid border-t-2 border-ink-950 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 border-t-2 border-ink-950 sm:grid-cols-3">
                         <a href="/medicos-hoy" class="group flex min-h-28 flex-col justify-between border-b border-ink-200 py-4 pr-4 transition-colors hover:bg-paper-100 sm:border-b-0 sm:border-r sm:px-4 sm:first:pl-0">
                             <span class="mono-label">Médicos en rol</span>
                             <span class="mt-3 flex items-end justify-between gap-2">
@@ -201,7 +201,7 @@
 
     {{-- SERVICIOS: índice de la hoja --}}
     <section class="container-page py-12 sm:py-16">
-        <div class="sheet p-5 sm:p-8 grid gap-8 lg:grid-cols-12">
+        <div class="sheet p-5 sm:p-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
             <div class="lg:col-span-4 lg:pr-8">
                 <h2 class="section-title text-3xl sm:text-4xl">Lo que puedes resolver aquí</h2>
                 <p class="section-lead mt-3">
@@ -238,7 +238,7 @@
 
     {{-- FAQ: preguntas al pie de la hoja --}}
     <section class="container-page py-12 sm:py-16">
-        <div class="sheet p-5 sm:p-8 grid gap-8 lg:grid-cols-12">
+        <div class="sheet p-5 sm:p-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
             <div class="lg:col-span-4">
                 <h2 class="section-title text-3xl sm:text-4xl">Antes de venir</h2>
                 <p class="section-lead mt-3">
@@ -308,7 +308,7 @@
 
     {{-- CIERRE: ventanilla de atención --}}
     <section class="container-page pb-16 sm:pb-20">
-        <div class="grid border-2 border-ink-950 bg-ink-950 text-paper-50 lg:grid-cols-2" data-reveal>
+        <div class="grid grid-cols-1 border-2 border-ink-950 bg-ink-950 text-paper-50 lg:grid-cols-2" data-reveal>
             <div class="p-6 sm:p-9">
                 <span class="border-2 border-signal-400 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-signal-300">Ventanilla</span>
                 <h2 class="mt-5 max-w-lg text-balance text-3xl font-bold leading-[1.02] tracking-[-0.04em] sm:text-4xl">

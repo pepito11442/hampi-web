@@ -59,7 +59,7 @@
                 >
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="nombres" class="label">Nombres</label>
                     <input type="text" name="nombres" id="nombres" value="{{ old('nombres') }}" required maxlength="120" autocomplete="given-name" class="input" data-reniec-nombres>
@@ -75,7 +75,7 @@
                 <input type="tel" name="telefono" id="telefono" value="{{ old('telefono') }}" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="Ej. 987 654 321" class="input">
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="codigo" class="label">Elige tu código</label>
                     <input type="password" name="codigo" id="codigo" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="new-password" placeholder="6 dígitos" data-solo-digitos class="input font-mono text-lg tracking-[0.3em]">

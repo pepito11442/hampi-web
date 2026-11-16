@@ -26,7 +26,7 @@
         </x-slot:hero>
 
         <div class="container-page py-6 md:py-9">
-            <section class="grid border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-3" data-reveal>
+            <section class="grid grid-cols-1 border-y-2 border-ink-950 bg-paper-50 sm:grid-cols-3" data-reveal>
                 <div class="border-b border-ink-200 p-4 sm:border-b-0 sm:border-r">
                     <p class="mono-label">Citas de hoy</p>
                     <p class="stat-number mt-2">{{ $citasHoy->count() }}</p>

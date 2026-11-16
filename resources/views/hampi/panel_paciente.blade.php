@@ -69,10 +69,10 @@
                 </div>
             @enderror
 
-            <div class="grid gap-6 lg:grid-cols-12">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div class="space-y-7 lg:col-span-8">
                     @if ($proxima)
-                        <article class="grid border-2 border-ink-950 bg-paper-50 sm:grid-cols-12" data-reveal>
+                        <article class="grid grid-cols-1 border-2 border-ink-950 bg-paper-50 sm:grid-cols-12" data-reveal>
                             <div class="flex items-end justify-between gap-3 border-b border-ink-950 bg-brand-900 p-5 text-paper-50 sm:col-span-3 sm:flex-col sm:items-start sm:justify-between sm:border-b-0 sm:border-r sm:p-6">
                                 <div>
                                     <p class="mono-label text-paper-100/70">Próxima atención</p>
@@ -112,7 +112,7 @@
 
                                 <p class="mt-4 text-sm text-ink-600">Lleva tu DNI físico y llega 15 minutos antes.</p>
 
-                                <div class="mt-5 grid gap-2 border-t border-ink-200 pt-4 sm:grid-cols-3">
+                                <div class="mt-5 grid grid-cols-1 gap-2 border-t border-ink-200 pt-4 sm:grid-cols-3">
                                     <a href="{{ route('ciudadano.citas.ics', $proxima) }}" class="btn btn-secondary btn-sm justify-center">
                                         <x-icon name="calendar" class="h-4 w-4" />
                                         A mi calendario
@@ -163,7 +163,7 @@
                                             && $cita->fecha_hora->isFuture()
                                             && in_array($cita->estado, $activos, true);
                                     @endphp
-                                    <article class="grid gap-3 py-4 sm:grid-cols-12 sm:items-start">
+                                    <article class="grid grid-cols-1 gap-3 py-4 sm:grid-cols-12 sm:items-start">
                                         <p class="font-mono text-xs uppercase leading-relaxed tracking-[0.05em] text-ink-600 sm:col-span-3">
                                             {{ $cita->fecha_hora ? $cita->fecha_hora->locale('es')->isoFormat('ddd D MMM YYYY') : 'Fecha por confirmar' }}
                                             @if ($cita->fecha_hora)
@@ -222,7 +222,7 @@
                                 {{ mb_substr($ciudadano->nombres, 0, 1) }}{{ mb_substr($ciudadano->apellidos, 0, 1) }}
                             </span>
                             <div class="min-w-0">
-                                <h2 class="truncate font-display text-base font-bold text-ink-950">{{ $ciudadano->nombres }} {{ $ciudadano->apellidos }}</h2>
+                                <h2 class="font-display text-base font-bold leading-snug text-ink-950 [overflow-wrap:anywhere]">{{ $ciudadano->nombres }} {{ $ciudadano->apellidos }}</h2>
                                 <p class="font-mono text-xs uppercase tracking-[0.05em] text-ink-500">DNI {{ $ciudadano->dni }}</p>
                             </div>
                         </div>

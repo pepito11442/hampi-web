@@ -37,7 +37,7 @@
         </x-slot:hero>
 
         <div class="container-page py-8 md:py-12">
-            <div class="grid gap-6 lg:grid-cols-12">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div class="space-y-7 lg:col-span-8">
                     @foreach ([
                         [

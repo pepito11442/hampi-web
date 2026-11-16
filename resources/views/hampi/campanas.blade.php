@@ -50,7 +50,7 @@
                 </x-empty-state>
             @else
                 @if ($destacada)
-                    <article class="grid border-2 border-ink-950 bg-paper-50 lg:grid-cols-12" data-reveal>
+                    <article class="grid grid-cols-1 border-2 border-ink-950 bg-paper-50 lg:grid-cols-12" data-reveal>
                         <div class="p-5 sm:p-7 lg:col-span-7">
                             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-ink-300 pb-3">
                                 <span class="mono-label">Cartel de campaña / {{ $destacada->periodo }}</span>
@@ -65,7 +65,7 @@
                                 {{ $destacada->descripcion }}
                             </p>
 
-                            <dl class="mt-6 grid gap-0 border-t border-ink-300 sm:grid-cols-2">
+                            <dl class="mt-6 grid grid-cols-1 gap-0 border-t border-ink-300 sm:grid-cols-2">
                                 <div class="border-b border-ink-200 py-3 sm:border-r sm:pr-4">
                                     <dt class="mono-label">Dirigido a</dt>
                                     <dd class="mt-1 text-sm font-semibold text-ink-800">{{ $destacada->grupo_objetivo ?: 'Público general' }}</dd>
@@ -133,7 +133,7 @@
 
                         <div class="divide-y divide-ink-200">
                             @foreach ($resto as $campana)
-                                <article class="grid gap-3 py-5 sm:grid-cols-12 sm:items-start">
+                                <article class="grid grid-cols-1 gap-3 py-5 sm:grid-cols-12 sm:items-start">
                                     <div class="sm:col-span-2">
                                         <p class="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-brand-800">{{ $campana->fecha_inicio?->locale('es')->isoFormat('D MMM') ?? 'Por confirmar' }}</p>
                                         <p class="mt-1 font-mono text-[10px] text-ink-500">{{ $campana->periodo }}</p>
@@ -157,7 +157,7 @@
             @endif
 
             <section class="mt-10 border-t-2 border-ink-950" data-reveal>
-                <div class="grid gap-6 py-6 lg:grid-cols-12">
+                <div class="grid grid-cols-1 gap-6 py-6 lg:grid-cols-12">
                     <div class="lg:col-span-4">
                         <h2 class="font-display text-2xl font-bold tracking-[-0.03em] text-ink-950">¿Cómo accedo a una campaña?</h2>
                         <p class="mt-2 max-w-sm text-sm leading-relaxed text-ink-600">
@@ -173,7 +173,7 @@
                         ] as $paso)
                             <li class="grid grid-cols-12 gap-3 border-b border-ink-200 py-4">
                                 <span class="col-span-2 font-mono text-[11px] text-ink-500 sm:col-span-1">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                                <div class="col-span-10 grid gap-1 sm:col-span-11 sm:grid-cols-12">
+                                <div class="col-span-10 grid grid-cols-1 gap-1 sm:col-span-11 sm:grid-cols-12">
                                     <h3 class="font-display text-base font-bold text-ink-950 sm:col-span-4">{{ $paso['title'] }}</h3>
                                     <p class="text-sm leading-relaxed text-ink-600 sm:col-span-8">{{ $paso['text'] }}</p>
                                 </div>

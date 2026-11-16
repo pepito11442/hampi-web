@@ -225,7 +225,7 @@
     </main>
 
     <footer class="relative z-10 mt-auto border-t-2 border-ink-950 bg-paper-50 {{ $esPanel ? '' : 'pb-20 lg:pb-0' }}">
-        <div class="container-page grid gap-10 py-12 md:grid-cols-12 md:py-14">
+        <div class="container-page grid grid-cols-1 gap-10 py-12 md:grid-cols-12 md:py-14">
             <div class="md:col-span-4">
                 <x-site-logo subtitulo="Microred Socabaya · Arequipa" />
                 <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-600">

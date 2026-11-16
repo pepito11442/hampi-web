@@ -64,7 +64,7 @@
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-6 lg:grid-cols-12 ">
+            <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
                 {{-- Crear cuenta --}}
                 <section class="border border-ink-300 bg-paper-50 lg:col-span-5 xl:col-span-4" data-reveal>
                     <div class="border-b-2 border-ink-950 p-4">
@@ -84,7 +84,7 @@
                             <input type="text" name="name" id="name" required value="{{ old('name') }}" placeholder="Ej. Dra. María Paredes" class="input">
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="dni" class="label">DNI</label>
                                 <input type="text" name="dni" id="dni" required value="{{ old('dni') }}" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" class="input font-mono tracking-[0.15em]">
@@ -108,7 +108,7 @@
                             <input type="text" name="especialidad" id="especialidad" value="{{ old('especialidad') }}" placeholder="Ej. Medicina General, Pediatría, Enfermería" class="input">
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="telefono" class="label">Teléfono</label>
                                 <input type="text" name="telefono" id="telefono" value="{{ old('telefono') }}" placeholder="Ej. 987 654 321" class="input">
@@ -119,7 +119,7 @@
                             </div>
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="password" class="label">Contraseña</label>
                                 <input type="password" name="password" id="password" required autocomplete="new-password" placeholder="Mínimo 8 caracteres" class="input">
@@ -190,7 +190,7 @@
                                         </a>
                                     </div>
 
-                                    <dl class="mt-4 grid gap-x-6 gap-y-2 border-t border-ink-200 pt-3 text-xs sm:grid-cols-2">
+                                    <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 border-t border-ink-200 pt-3 text-xs sm:grid-cols-2">
                                         <div class="flex items-center gap-2">
                                             <dt class="mono-label">DNI</dt>
                                             <dd class="font-mono font-semibold tracking-[0.08em] text-ink-800">{{ $empleado->dni }}</dd>
@@ -222,7 +222,7 @@
                                             <form action="{{ route('admin.equipo.update', $empleado) }}" method="POST" class="space-y-4">
                                                 @csrf
 
-                                                <div class="grid gap-4 sm:grid-cols-2">
+                                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
                                                         <label for="name-{{ $empleado->id }}" class="label">Nombre completo</label>
                                                         <input type="text" name="name" id="name-{{ $empleado->id }}" required value="{{ $empleado->name }}" class="input">
@@ -233,7 +233,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="grid gap-4 sm:grid-cols-2">
+                                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
                                                         <label for="email-{{ $empleado->id }}" class="label">Correo</label>
                                                         <input type="email" name="email" id="email-{{ $empleado->id }}" required value="{{ $empleado->email }}" class="input">
@@ -247,7 +247,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="grid gap-4 sm:grid-cols-2">
+                                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
                                                         <label for="especialidad-{{ $empleado->id }}" class="label">Especialidad</label>
                                                         <input type="text" name="especialidad" id="especialidad-{{ $empleado->id }}" value="{{ $empleado->especialidad }}" class="input">
@@ -263,7 +263,7 @@
                                                     <input type="text" name="establecimiento" id="establecimiento-{{ $empleado->id }}" value="{{ $empleado->establecimiento }}" class="input">
                                                 </div>
 
-                                                <div class="grid gap-4 sm:grid-cols-2">
+                                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
                                                         <label for="password-{{ $empleado->id }}" class="label">Nueva contraseña <span class="normal-case tracking-normal text-ink-500">(opcional)</span></label>
                                                         <input type="password" name="password" id="password-{{ $empleado->id }}" autocomplete="new-password" placeholder="Dejar vacío para mantener" class="input">

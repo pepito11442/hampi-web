@@ -86,7 +86,7 @@
             @else
                 {{-- Selector de trabajador y periodo --}}
                 <section class="mt-5 border border-ink-300 bg-paper-50 p-4" data-reveal>
-                    <form action="{{ route('admin.horarios.index') }}" method="GET" class="grid gap-4 md:grid-cols-12 md:items-end">
+                    <form action="{{ route('admin.horarios.index') }}" method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-12 md:items-end">
                         @if ($rol !== 'todos')
                             <input type="hidden" name="rol" value="{{ $rol }}">
                         @endif
@@ -128,7 +128,7 @@
                 @if ($user)
                     {{-- Resumen del trabajador --}}
                     <section class="mt-5 border border-ink-300 bg-paper-50" data-reveal>
-                        <div class="grid gap-5 p-4 sm:p-5 lg:grid-cols-12 lg:items-center">
+                        <div class="grid grid-cols-1 gap-5 p-4 sm:p-5 lg:grid-cols-12 lg:items-center">
                             <div class="flex items-start gap-4 lg:col-span-5">
                                 @if ($user->foto_url)
                                     <img src="{{ $user->foto_url }}" alt="Foto de {{ $user->name }}" class="h-16 w-16 shrink-0 border border-ink-300 object-cover" width="64" height="64" loading="lazy" decoding="async">

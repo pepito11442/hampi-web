@@ -46,7 +46,7 @@
                             $telefonoDigitos = preg_replace('/\D+/', '', (string) $posta->telefono);
                         @endphp
 
-                        <article class="grid gap-4 py-5 transition-colors hover:bg-paper-50 lg:grid-cols-12 lg:gap-5" data-reveal>
+                        <article class="grid grid-cols-1 gap-4 py-5 transition-colors hover:bg-paper-50 lg:grid-cols-12 lg:gap-5" data-reveal>
                             <div class="flex items-start justify-between gap-3 lg:col-span-1 lg:block">
                                 <span class="font-mono text-[11px] text-ink-500">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                                 <span class="badge badge-slate mt-2 block w-fit">Cat. {{ $posta->categoria }}</span>
@@ -60,7 +60,7 @@
                                 </p>
                             </div>
 
-                            <dl class="grid gap-3 border-t border-ink-200 pt-3 text-sm sm:grid-cols-3 lg:col-span-4 lg:border-t-0 lg:pt-0">
+                            <dl class="grid grid-cols-1 gap-3 border-t border-ink-200 pt-3 text-sm sm:grid-cols-3 lg:col-span-4 lg:border-t-0 lg:pt-0">
                                 <div>
                                     <dt class="mono-label">Dirección</dt>
                                     <dd class="mt-1 leading-relaxed text-ink-700">{{ $posta->direccion }}</dd>

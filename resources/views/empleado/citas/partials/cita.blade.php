@@ -10,7 +10,7 @@
     $iniciales = mb_substr($cita->ciudadano->nombres, 0, 1).mb_substr($cita->ciudadano->apellidos, 0, 1);
 @endphp
 
-<li class="grid gap-3 border-b border-ink-200 py-4 last:border-b-0 sm:grid-cols-12 sm:items-start">
+<li class="grid grid-cols-1 gap-3 border-b border-ink-200 py-4 last:border-b-0 sm:grid-cols-12 sm:items-start">
     <div class="sm:col-span-3">
         <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-brand-800">
             {{ $cita->fecha_hora->locale('es')->isoFormat('ddd D MMM YYYY') }}

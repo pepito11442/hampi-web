@@ -81,7 +81,7 @@
             </section>
 
             @if ($dni !== '' && ! $errorDni)
-                <div class="mt-6 grid gap-6 lg:grid-cols-12">
+                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
                     <div class="space-y-6 lg:col-span-8">
                         @if ($paciente)
                             <section class="border border-brand-200 bg-brand-50 p-4" data-reveal>
@@ -134,7 +134,7 @@
 
                             <div class="space-y-5 p-4">
                                 @unless ($paciente)
-                                    <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label for="nombres" class="label">Nombres</label>
                                             <input type="text" name="nombres" id="nombres" value="{{ old('nombres') }}" class="input" required>
@@ -153,7 +153,7 @@
                                     </div>
                                 @endunless
 
-                                <div class="grid gap-4 sm:grid-cols-2">
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div class="sm:col-span-2">
                                         <label for="posta_id" class="label">Establecimiento</label>
                                         <select name="posta_id" id="posta_id" class="input" required @disabled($postas->isEmpty())>

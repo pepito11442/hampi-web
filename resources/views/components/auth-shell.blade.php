@@ -6,7 +6,7 @@
 ])
 
 <div class="container-page py-8 sm:py-12">
-    <div class="mx-auto grid max-w-5xl border border-ink-300 bg-paper-50 shadow-lift lg:grid-cols-2">
+    <div class="mx-auto grid grid-cols-1 max-w-5xl border border-ink-300 bg-paper-50 shadow-lift lg:grid-cols-2">
         <div class="relative hidden overflow-hidden bg-brand-900 p-9 text-paper-50 lg:flex lg:flex-col lg:justify-between">
             <div class="pointer-events-none absolute inset-0 bg-dot-grid opacity-30" aria-hidden="true"></div>
 

@@ -40,7 +40,7 @@
                 </div>
             @endif
 
-            <div class="grid gap-6 lg:grid-cols-12">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 {{-- Formulario --}}
                 <section class="border border-ink-300 bg-paper-50 lg:col-span-5 xl:col-span-4" data-reveal>
                     <div class="border-b-2 border-ink-950 p-4">
@@ -75,7 +75,7 @@
                             <input type="text" name="lugar" id="lugar" value="{{ old('lugar', 'C.S. San Martín de Socabaya') }}" class="input">
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="fecha_inicio" class="label">Fecha de inicio</label>
                                 <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ old('fecha_inicio') }}" class="input">
@@ -130,7 +130,7 @@
                                     };
                                 @endphp
 
-                                <article class="grid gap-4 py-5 sm:grid-cols-12" data-reveal style="--reveal-delay: {{ $loop->index * 30 }}ms">
+                                <article class="grid grid-cols-1 gap-4 py-5 sm:grid-cols-12" data-reveal style="--reveal-delay: {{ $loop->index * 30 }}ms">
                                     <div class="sm:col-span-3">
                                         <div class="flex h-20 w-20 flex-col items-center justify-center border border-ink-300 bg-paper-100">
                                             <span class="font-display text-3xl font-extrabold leading-none text-ink-950">
@@ -178,7 +178,7 @@
 
                                         <p class="mt-3 text-xs leading-relaxed text-ink-600">{{ $campana->descripcion }}</p>
 
-                                        <dl class="mt-3 grid gap-x-6 gap-y-2 border-t border-ink-200 pt-3 text-xs sm:grid-cols-2">
+                                        <dl class="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 border-t border-ink-200 pt-3 text-xs sm:grid-cols-2">
                                             <div class="flex items-start gap-2">
                                                 <dt class="mono-label">Dirigido a</dt>
                                                 <dd class="text-ink-700">{{ $campana->grupo_objetivo ?: 'Público general' }}</dd>
