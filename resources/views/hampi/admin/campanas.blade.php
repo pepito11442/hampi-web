@@ -67,7 +67,7 @@
 
                         <div>
                             <label for="descripcion" class="label">Descripción</label>
-                            <textarea name="descripcion" id="descripcion" rows="4" required class="input" placeholder="Describe la actividad, los servicios incluidos y las recomendaciones para participar.">{{ old('descripcion') }}</textarea>
+                            <textarea name="descripcion" maxlength="2000" id="descripcion" rows="4" required class="input" placeholder="Describe la actividad, los servicios incluidos y las recomendaciones para participar.">{{ old('descripcion') }}</textarea>
                         </div>
 
                         <div>

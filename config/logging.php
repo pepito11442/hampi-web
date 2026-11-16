@@ -113,6 +113,16 @@ return [
             'processors' => [PsrLogMessageProcessor::class],
         ],
 
+        // Medición de rendimiento (LOG_PERF): siempre a stderr, sin depender de LOG_LEVEL.
+        'perf' => [
+            'driver' => 'monolog',
+            'level' => 'debug',
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => 'php://stderr',
+            ],
+        ],
+
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),

@@ -8,6 +8,7 @@ use App\Models\Horario;
 use App\Models\Posta;
 use App\Models\User;
 use App\Services\AgendaCitas;
+use App\Support\CachePortal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -69,11 +70,15 @@ class EmpleadoCitaController extends Controller
             $paciente = Ciudadano::where('dni', $dni)->first();
         }
 
-        $fecha = $this->fechaDelFormulario($request->query('fecha', old('fecha', '')), $medico, $agenda);
-        $horario = $agenda->horarioDelDia($medico, $fecha);
-        $bloques = $agenda->slots($medico, $fecha);
+        [$fecha, $horario, $bloques] = $this->fechaDelFormulario($request->query('fecha', old('fecha', '')), $medico, $agenda);
 
-        $postas = Posta::where('estado_activo', true)->orderBy('nombre')->get();
+        if ($bloques === null) {
+            $horario = $agenda->horarioDelDia($medico, $fecha);
+            $bloques = $agenda->slots($medico, $fecha, $horario);
+        }
+
+        // Misma consulta y caché que el directorio público de postas.
+        $postas = CachePortal::recordar('postas', fn () => Posta::where('estado_activo', true)->orderBy('nombre')->get());
         $postaPredeterminada = $postas->firstWhere('nombre', $medico->establecimiento)?->id
             ?? $postas->first()?->id;
 
@@ -284,13 +289,18 @@ class EmpleadoCitaController extends Controller
 
     /**
      * Fecha inicial: la indicada, o el primer turno próximo del médico.
+     *
+     * Devuelve [fecha, horario, bloques]; horario y bloques son null cuando
+     * todavía hay que calcularlos para la fecha elegida.
+     *
+     * @return array{0: Carbon, 1: ?Horario, 2: ?array}
      */
-    private function fechaDelFormulario(?string $fecha, User $medico, AgendaCitas $agenda): Carbon
+    private function fechaDelFormulario(?string $fecha, User $medico, AgendaCitas $agenda): array
     {
         if ($fecha && Carbon::hasFormat($fecha, 'Y-m-d')) {
             $fechaCarbon = Carbon::createFromFormat('!Y-m-d', $fecha)->startOfDay();
 
-            return $fechaCarbon->lt(today()) ? today() : $fechaCarbon;
+            return [$fechaCarbon->lt(today()) ? today() : $fechaCarbon, null, null];
         }
 
         $proximosHorarios = Horario::where('user_id', $medico->id)
@@ -299,15 +309,11 @@ class EmpleadoCitaController extends Controller
             ->get();
 
         // Si el turno de hoy ya terminó, abre el formulario en el próximo día
-        // que realmente tenga bloques libres.
-        foreach ($proximosHorarios as $horario) {
-            $dia = $horario->fecha->copy()->startOfDay();
-
-            if (! empty($agenda->slots($medico, $dia))) {
-                return $dia;
-            }
+        // que realmente tenga bloques libres (una sola consulta de citas).
+        if ($primerDia = $agenda->primerDiaConCupo($medico, $proximosHorarios)) {
+            return [$primerDia['fecha'], $primerDia['horario'], $primerDia['bloques']];
         }
 
-        return $proximosHorarios->last()?->fecha?->copy()->startOfDay() ?? today();
+        return [$proximosHorarios->last()?->fecha?->copy()->startOfDay() ?? today(), null, null];
     }
 }

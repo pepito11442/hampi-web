@@ -7,6 +7,7 @@ use App\Models\Horario;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 
 /**
  * Reglas de disponibilidad de la agenda médica.
@@ -35,18 +36,17 @@ class AgendaCitas
     /**
      * Genera los bloques de 30 minutos disponibles dentro del turno del médico.
      *
+     * Si ya se tiene el horario del día se puede pasar para ahorrar la consulta.
+     *
      * @return array<int, array{hora: string, etiqueta: string}>
      */
-    public function slots(User $medico, CarbonInterface $fecha): array
+    public function slots(User $medico, CarbonInterface $fecha, ?Horario $horario = null): array
     {
-        $horario = $this->horarioDelDia($medico, $fecha);
+        $horario ??= $this->horarioDelDia($medico, $fecha);
 
         if (! $horario || ! $horario->hora_inicio || ! $horario->hora_fin) {
             return [];
         }
-
-        $inicioTurno = Carbon::parse($fecha->toDateString().' '.$horario->hora_inicio);
-        $finTurno = Carbon::parse($fecha->toDateString().' '.$horario->hora_fin);
 
         $ocupadas = Cita::where('user_id', $medico->id)
             ->whereDate('fecha_hora', $fecha->toDateString())
@@ -54,6 +54,59 @@ class AgendaCitas
             ->get(['fecha_hora'])
             ->map(fn (Cita $cita) => $cita->fecha_hora->format('H:i'))
             ->all();
+
+        return $this->bloquesLibres($fecha, $horario, $ocupadas);
+    }
+
+    /**
+     * Primer día con bloques libres entre los horarios dados.
+     *
+     * Hace una sola consulta de citas para todo el rango en lugar de dos
+     * consultas por día.
+     *
+     * @param  Collection<int, Horario>  $horarios  ordenados por fecha
+     * @return array{fecha: Carbon, horario: Horario, bloques: array}|null
+     */
+    public function primerDiaConCupo(User $medico, Collection $horarios): ?array
+    {
+        $horarios = $horarios->filter(fn (Horario $h) => $h->hora_inicio && $h->hora_fin)->values();
+
+        if ($horarios->isEmpty()) {
+            return null;
+        }
+
+        $ocupadasPorDia = Cita::where('user_id', $medico->id)
+            ->whereIn('estado', self::ESTADOS_ACTIVOS)
+            ->whereBetween('fecha_hora', [
+                Carbon::parse($horarios->first()->fecha)->startOfDay(),
+                Carbon::parse($horarios->last()->fecha)->endOfDay(),
+            ])
+            ->get(['fecha_hora'])
+            ->groupBy(fn (Cita $cita) => $cita->fecha_hora->toDateString())
+            ->map(fn ($citas) => $citas->map(fn (Cita $cita) => $cita->fecha_hora->format('H:i'))->all());
+
+        foreach ($horarios as $horario) {
+            $dia = Carbon::parse($horario->fecha)->startOfDay();
+            $bloques = $this->bloquesLibres($dia, $horario, $ocupadasPorDia->get($dia->toDateString(), []));
+
+            if (! empty($bloques)) {
+                return ['fecha' => $dia, 'horario' => $horario, 'bloques' => $bloques];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Bloques del turno que no han pasado ni están ocupados.
+     *
+     * @param  array<int, string>  $ocupadas  horas "H:i" ya reservadas
+     * @return array<int, array{hora: string, etiqueta: string}>
+     */
+    private function bloquesLibres(CarbonInterface $fecha, Horario $horario, array $ocupadas): array
+    {
+        $inicioTurno = Carbon::parse($fecha->toDateString().' '.$horario->hora_inicio);
+        $finTurno = Carbon::parse($fecha->toDateString().' '.$horario->hora_fin);
 
         $bloques = [];
         $ahora = now();

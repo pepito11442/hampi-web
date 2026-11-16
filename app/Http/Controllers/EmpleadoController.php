@@ -129,7 +129,8 @@ class EmpleadoController extends Controller
             try {
                 $foto = $fotos->procesar($request->file('foto_perfil'));
             } catch (\RuntimeException) {
-                return back()->withErrors(['foto_perfil' => 'No pudimos leer esa imagen. Prueba con otra foto.'])->withInput();
+                return back()->withErrors(['foto_perfil' => 'No pudimos leer esa imagen. Prueba con otra foto.'])
+                    ->withInput($request->except(['biografia', 'titulos', 'experiencia']));
             }
 
             // La foto antigua del disco ya no se usa.

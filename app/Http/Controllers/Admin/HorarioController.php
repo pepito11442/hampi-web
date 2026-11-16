@@ -33,11 +33,7 @@ class HorarioController extends Controller
 
         $personal = $consulta->get();
 
-        $conteos = [
-            'todos' => User::whereIn('role', User::ROLES_PERSONAL)->count(),
-            'doctores' => User::where('role', User::ROL_DOCTOR)->count(),
-            'enfermeros' => User::whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA])->count(),
-        ];
+        $conteos = User::conteosPersonal();
 
         $user = null;
 

@@ -63,9 +63,23 @@ return [
             'engine' => null,
             // Bases gestionadas (Aiven, TiDB, etc.) exigen TLS: MYSQL_ATTR_SSL_CA
             // apunta al certificado CA del proveedor.
+            //
+            // DB_PERSISTENT=true reutiliza la conexión entre peticiones del mismo
+            // proceso de Apache (prefork): se evita repetir la conexión TCP y el
+            // saludo TLS con la base remota. Cada proceso guarda como máximo una
+            // conexión (MaxRequestWorkers en docker/mpm.conf) y PDO comprueba que
+            // siga viva antes de reutilizarla.
+            //
+            // DB_EMULATE_PREPARES=true arma la consulta en PHP y la envía en un
+            // solo viaje (sin "prepare" + "execute" en el servidor). Es seguro con
+            // utf8mb4 y desde PHP 8.1 los números siguen llegando como int/float.
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => (bool) env('DB_PERSISTENT', false),
+                PDO::ATTR_EMULATE_PREPARES => (bool) env('DB_EMULATE_PREPARES', false),
             ]) : [],
+            // El nombre de la base ya va en el DSN: el "use `db`" extra sobra.
+            'use_db_after_connecting' => false,
         ],
 
         'pgsql' => [

@@ -23,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Conexiones persistentes sin repetir SET NAMES/sql_mode en cada petición.
+        $this->app->bind('db.connector.mysql', \App\Support\ConectorMySql::class);
     }
 
     /**

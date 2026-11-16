@@ -34,11 +34,7 @@ class EquipoController extends Controller
 
         $equipo = $consulta->get();
 
-        $conteos = [
-            'todos' => User::whereIn('role', User::ROLES_PERSONAL)->count(),
-            'doctores' => User::where('role', User::ROL_DOCTOR)->count(),
-            'enfermeros' => User::whereIn('role', [User::ROL_ENFERMERO, User::ROL_ENFERMERA])->count(),
-        ];
+        $conteos = User::conteosPersonal();
 
         return view('hampi.admin.equipo', compact('equipo', 'rol', 'conteos'));
     }

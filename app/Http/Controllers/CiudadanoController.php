@@ -201,12 +201,16 @@ class CiudadanoController extends Controller
             ?? $medicos->first();
 
         $fecha = $this->fechaValida($request->query('fecha'));
+        $primerDia = $medico && ! $request->filled('fecha')
+            ? $this->primerDiaConCupo($medico, $agenda)
+            : null;
 
-        if ($medico && ! $request->filled('fecha')) {
-            $fecha = $this->primerDiaConCupo($medico, $agenda) ?? $fecha;
+        if ($primerDia) {
+            $fecha = $primerDia['fecha'];
+            $bloques = $primerDia['bloques'];
+        } else {
+            $bloques = $medico ? $agenda->slots($medico, $fecha) : [];
         }
-
-        $bloques = $medico ? $agenda->slots($medico, $fecha) : [];
         $citasActivas = $this->citasActivas($ciudadano);
 
         return view('hampi.ciudadano_cita', compact(
@@ -384,22 +388,15 @@ class CiudadanoController extends Controller
             ->get(['id', 'name', 'especialidad', 'establecimiento']);
     }
 
-    private function primerDiaConCupo(User $medico, AgendaCitas $agenda): ?Carbon
+    /** @return array{fecha: Carbon, horario: \App\Models\Horario, bloques: array}|null */
+    private function primerDiaConCupo(User $medico, AgendaCitas $agenda): ?array
     {
-        $fechas = $medico->horarios()
+        $horarios = $medico->horarios()
             ->whereBetween('fecha', [today()->toDateString(), today()->addDays(self::DIAS_RESERVA)->toDateString()])
             ->orderBy('fecha')
-            ->pluck('fecha');
+            ->get();
 
-        foreach ($fechas as $fecha) {
-            $dia = Carbon::parse($fecha)->startOfDay();
-
-            if (! empty($agenda->slots($medico, $dia))) {
-                return $dia;
-            }
-        }
-
-        return null;
+        return $agenda->primerDiaConCupo($medico, $horarios);
     }
 
     private function fechaValida(?string $fecha): Carbon

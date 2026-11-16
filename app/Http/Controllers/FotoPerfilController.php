@@ -17,7 +17,8 @@ class FotoPerfilController extends Controller
         $usuario = User::query()
             ->whereKey($user)
             ->whereNotNull('foto_data')
-            ->first(['id', 'foto_data', 'foto_mime']);
+            ->select(['id', 'foto_data', 'foto_mime', 'foto_version'])
+            ->first();
 
         abort_unless($usuario && hash_equals($usuario->fotoVersion(), $version), 404);
 

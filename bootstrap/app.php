@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->prepend(\App\Http\Middleware\MedirPeticion::class);
+        $middleware->append(\App\Http\Middleware\SolicitudEspeculativa::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         $middleware->alias([
@@ -27,5 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // La sesión vive en una cookie cifrada (máx. ~4 KB): los textos largos
+        // no se devuelven al formulario tras un error de validación.
+        $exceptions->dontFlash(['biografia', 'titulos', 'experiencia', 'descripcion']);
     })->create();

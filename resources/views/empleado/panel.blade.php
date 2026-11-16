@@ -176,19 +176,19 @@
 
                             <div>
                                 <label for="biografia" class="label">Biografía</label>
-                                <textarea name="biografia" id="biografia" rows="4" class="input" placeholder="Cuéntale a la comunidad sobre tu formación y tu trabajo.">{{ old('biografia', $user->biografia) }}</textarea>
+                                <textarea name="biografia" id="biografia" rows="4" maxlength="2000" class="input" placeholder="Cuéntale a la comunidad sobre tu formación y tu trabajo.">{{ old('biografia', $user->biografia) }}</textarea>
                                 @error('biografia') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
                                     <label for="titulos" class="label">Títulos</label>
-                                    <textarea name="titulos" id="titulos" rows="4" class="input" placeholder="Ej. Médico Cirujano, Universidad Nacional de San Agustín">{{ old('titulos', $user->titulos) }}</textarea>
+                                    <textarea name="titulos" id="titulos" rows="4" maxlength="2000" class="input" placeholder="Ej. Médico Cirujano, Universidad Nacional de San Agustín">{{ old('titulos', $user->titulos) }}</textarea>
                                     @error('titulos') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                     <label for="experiencia" class="label">Experiencia</label>
-                                    <textarea name="experiencia" id="experiencia" rows="4" class="input" placeholder="Ej. 5 años en atención primaria y control CRED.">{{ old('experiencia', $user->experiencia) }}</textarea>
+                                    <textarea name="experiencia" id="experiencia" rows="4" maxlength="2000" class="input" placeholder="Ej. 5 años en atención primaria y control CRED.">{{ old('experiencia', $user->experiencia) }}</textarea>
                                     @error('experiencia') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
                                 </div>
                             </div>

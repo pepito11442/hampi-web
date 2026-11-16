@@ -4,6 +4,25 @@ Todos los cambios relevantes de este proyecto se registran aquí.
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Fechas en `AAAA-MM-DD`.
 
+## [2026-11-16] — Navegación más rápida en Render + Aiven
+
+Medido con 70 ms de ida y vuelta y TLS entre la app y MySQL (Render Oregon ↔ base remota), páginas con caché caliente: **76 → 27 consultas** y **16,7 s → 2,7 s** de servidor sumando las 14 páginas principales. Las páginas públicas ya no tocan la base (≈ 700 ms → 5 ms).
+
+### Rendimiento
+
+- **Sesión en cookie cifrada** (`SESSION_DRIVER=cookie`): se eliminan las 2 consultas a `sessions` de cada página. Los textos largos (biografía, títulos, experiencia, descripción de campañas) no se devuelven a la sesión tras un error de validación, para no pasar el límite de 4 KB de la cookie; los campos tienen `maxlength="2000"`.
+- **Conexión persistente con MySQL** (`DB_PERSISTENT`): sin nuevo saludo TCP + TLS en cada petición. Un conector propio (`App\Support\ConectorMySql`) aplica `SET NAMES`/`sql_mode` solo al abrir la conexión física, y se quitó el `use db` redundante.
+- **Una sola ida y vuelta por consulta** (`DB_EMULATE_PREPARES`).
+- **Agenda sin N+1**: el primer día con cupo se calcula con una sola consulta de citas para todo el rango (antes, 2 consultas por día revisado).
+- `users.foto_data` ya no se carga en ninguna consulta salvo la que sirve la foto (scope `SinFotoData` y nueva columna `foto_version`).
+- Conteos del personal en una consulta agrupada y en caché; el panel administrativo reutiliza las cachés del portal (agenda de hoy, vacunas, horarios del mes).
+- **Speculation Rules**: al pasar el mouse, prerender de las páginas públicas y prefetch de las del panel. Excluye descargas `.ics`, fotos, API y enlaces de restablecer contraseña; cerrar sesión y demás acciones son formularios POST. Las respuestas especulativas no modifican la sesión (`SolicitudEspeculativa`).
+
+### Añadido
+
+- Middleware de medición `MedirPeticion` (`LOG_PERF=true|sql`): tiempo, consultas y posibles N+1 por petición en stderr.
+- Pruebas `RendimientoTest` (7 casos).
+
 ## [2026-11-15] — Seguridad del acceso ciudadano, autoagendado y despliegue gratuito
 
 ### Seguridad

@@ -35,7 +35,7 @@ git push
 ## 2. Crea la base de datos en Aiven
 
 1. Crea una cuenta en <https://console.aiven.io> (no pide tarjeta).
-2. **Create service → MySQL → Free plan**. Elige la región más cercana a la de Render (por ejemplo, `do-nyc` o `aws-us-east`).
+2. **Create service → MySQL → Free plan**. Elige la región **más cercana a la de Render** (Oregon, costa oeste de EE. UU.) entre las que ofrezca el plan gratuito. Cada consulta cruza esa distancia: una base en la costa este suma ~70 ms por consulta.
 3. Espera a que el estado diga **Running** (2–5 minutos).
 4. En la pestaña **Overview → Connection information** copia:
    - **Host** → `DB_HOST`
@@ -68,6 +68,15 @@ Sin Brevo la app funciona igual; administración puede asignar contraseñas nuev
 | `DB_SSL_CA` | El certificado CA completo de Aiven |
 | `BREVO_API_KEY`, `MAIL_FROM_ADDRESS` | Los de Brevo (o déjalos vacíos) |
 | `RENIEC_API_TOKEN` | Opcional: token de apis.net.pe para autocompletar nombres |
+
+Variables de rendimiento que ya trae `render.yaml` (no hace falta tocarlas):
+
+| Variable | Valor | Para qué |
+| --- | --- | --- |
+| `SESSION_DRIVER` | `cookie` | La sesión va cifrada en la cookie: ninguna página consulta la base solo por la sesión |
+| `DB_PERSISTENT` | `true` | Reutiliza la conexión TLS con Aiven entre peticiones (máx. 10, una por proceso de Apache) |
+| `DB_EMULATE_PREPARES` | `true` | Cada consulta es un solo viaje a la base en vez de dos |
+| `LOG_PERF` | `true` | Escribe en **Logs** el tiempo y las consultas de cada página. Ponlo en `false` cuando ya no lo necesites |
 
 4. Pulsa **Apply**. La primera construcción tarda ~5–8 minutos (compila los assets, instala Composer y las extensiones de PHP).
 5. Al arrancar, el contenedor:
@@ -108,6 +117,19 @@ Cuando cargues datos reales:
 ## Actualizaciones
 
 Cada `git push` a la rama principal vuelve a desplegar (autoDeploy). Las migraciones nuevas se aplican solas al arrancar.
+
+## Medir el rendimiento
+
+Con `LOG_PERF=true`, cada petición deja una línea en Render → **Logs**:
+
+```
+perf {"ruta":"GET /admin/dashboard","estado":200,"especulativa":false,"ms":223.4,"consultas":2,"ms_sql":141.2,"n_mas_1":[]}
+```
+
+- `ms`: tiempo total en el servidor; `ms_sql`: parte gastada esperando a la base.
+- `n_mas_1`: consultas con la misma forma repetidas 3 veces o más (posible N+1).
+- `especulativa`: `true` si fue una precarga del navegador al pasar el mouse.
+- Con `LOG_PERF=sql` también lista cada consulta.
 
 ## Solución de problemas
 

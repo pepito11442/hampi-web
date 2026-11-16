@@ -67,6 +67,9 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'America/Lima'),
 
+    // Medición temporal de tiempo y consultas por petición (MedirPeticion).
+    'log_perf' => env('LOG_PERF', false) === 'sql' ? 'sql' : (bool) env('LOG_PERF', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

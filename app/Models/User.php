@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\SinFotoData;
+use App\Support\CachePortal;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,6 +34,16 @@ class User extends Authenticatable
     /** Roles que atienden pacientes y tienen horario mensual. */
     public const ROLES_PERSONAL = ['doctor', 'enfermero', 'enfermera'];
 
+    /**
+     * Columnas que se cargan por defecto: todas menos foto_data (ver
+     * SinFotoData). Una prueba verifica que coincidan con la tabla.
+     */
+    public const COLUMNAS_SIN_FOTO = [
+        'id', 'name', 'email', 'email_verified_at', 'password', 'role', 'establecimiento',
+        'remember_token', 'created_at', 'updated_at', 'dni', 'telefono', 'especialidad',
+        'biografia', 'titulos', 'experiencia', 'foto_perfil', 'activo', 'foto_mime', 'foto_version',
+    ];
+
     protected $fillable = [
         'name',
         'dni',
@@ -55,6 +67,20 @@ class User extends Authenticatable
         'remember_token',
         'foto_data',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new SinFotoData);
+
+        // La huella se actualiza sola cuando cambia la foto.
+        static::saving(function (User $usuario) {
+            if ($usuario->isDirty('foto_data')) {
+                $usuario->foto_version = $usuario->foto_data
+                    ? substr(md5((string) $usuario->foto_data), 0, 12)
+                    : null;
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -109,8 +135,8 @@ class User extends Authenticatable
      */
     public function getFotoUrlAttribute(): ?string
     {
-        if ($this->foto_data) {
-            return route('fotos.show', ['user' => $this->id, 'version' => $this->fotoVersion()], false);
+        if ($this->foto_version) {
+            return route('fotos.show', ['user' => $this->id, 'version' => $this->foto_version], false);
         }
 
         if (! $this->foto_perfil) {
@@ -125,7 +151,30 @@ class User extends Authenticatable
     /** Huella corta del contenido de la foto, usada en la URL para la caché. */
     public function fotoVersion(): string
     {
-        return substr(md5((string) $this->foto_data), 0, 12);
+        return (string) $this->foto_version;
+    }
+
+    /**
+     * Totales del personal por grupo, en una sola consulta agrupada y con
+     * caché (se invalida al guardar o borrar cualquier usuario).
+     *
+     * @return array{todos: int, doctores: int, enfermeros: int}
+     */
+    public static function conteosPersonal(): array
+    {
+        return CachePortal::recordar('conteos-personal', function () {
+            $porRol = static::query()
+                ->whereIn('role', self::ROLES_PERSONAL)
+                ->selectRaw('role, count(*) as total')
+                ->groupBy('role')
+                ->pluck('total', 'role');
+
+            return [
+                'todos' => (int) $porRol->sum(),
+                'doctores' => (int) ($porRol[self::ROL_DOCTOR] ?? 0),
+                'enfermeros' => (int) (($porRol[self::ROL_ENFERMERO] ?? 0) + ($porRol[self::ROL_ENFERMERA] ?? 0)),
+            ];
+        });
     }
 
     /** Iniciales del nombre para el avatar de respaldo. */

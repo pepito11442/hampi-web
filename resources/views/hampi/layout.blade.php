@@ -22,6 +22,8 @@
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @include('hampi.partials.speculation')
 </head>
 <body class="flex min-h-screen flex-col bg-paper-100 text-ink-800">
     <a href="#contenido" class="skip-link">Saltar al contenido principal</a>

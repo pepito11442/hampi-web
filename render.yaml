@@ -44,10 +44,15 @@ services:
         sync: false
       - key: DB_SSL_CA
         sync: false            # contenido completo del ca.pem de Aiven
+      - key: DB_PERSISTENT
+        value: "true"          # reutiliza la conexión TLS entre peticiones
+      - key: DB_EMULATE_PREPARES
+        value: "true"          # un viaje a la base por consulta en vez de dos
 
-      # Sesiones en la base (el disco del contenedor se borra al dormir)
+      # Sesión cifrada dentro de la cookie: no consulta la base en cada
+      # página y sobrevive a los reinicios del contenedor.
       - key: SESSION_DRIVER
-        value: database
+        value: cookie
       - key: SESSION_SECURE_COOKIE
         value: "true"
       - key: SESSION_LIFETIME
@@ -70,5 +75,7 @@ services:
       # Opcionales
       - key: RENIEC_API_TOKEN
         sync: false
+      - key: LOG_PERF
+        value: "true"          # medición temporal: tiempo y consultas por página en Logs
       - key: SEED_DEMO
         value: "true"          # cambia a "false" cuando cargues datos reales

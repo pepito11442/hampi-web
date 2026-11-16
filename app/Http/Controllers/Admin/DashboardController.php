@@ -8,6 +8,7 @@ use App\Models\Horario;
 use App\Models\User;
 use App\Models\VacunaAviso;
 use App\Services\AgendaMedica;
+use App\Support\CachePortal;
 
 /**
  * Panel general de administración.
@@ -20,14 +21,16 @@ class DashboardController extends Controller
     /** Muestra el resumen operativo del día. */
     public function index(AgendaMedica $agenda)
     {
-        $vacunas = VacunaAviso::all();
-        $medicosHoy = $agenda->delDia();
+        // Estos datos se invalidan al instante cuando el personal los cambia
+        // (CachePortal); la agenda comparte la caché del portal público.
+        $vacunas = CachePortal::recordar('vacunas-admin', fn () => VacunaAviso::all());
+        $medicosHoy = CachePortal::recordar('agenda-hoy', fn () => $agenda->delDia());
         $turnosAtendiendo = $agenda->atendiendo($medicosHoy);
-        $personalCount = User::whereIn('role', User::ROLES_PERSONAL)->count();
-        $horariosMes = Horario::whereBetween('fecha', [
+        $personalCount = User::conteosPersonal()['todos'];
+        $horariosMes = CachePortal::recordar('horarios-mes:'.now()->format('Y-m'), fn () => Horario::whereBetween('fecha', [
             now()->startOfMonth()->toDateString(),
             now()->endOfMonth()->toDateString(),
-        ])->count();
+        ])->count());
 
         $estadisticas = $this->estadisticasCitas();
 
