@@ -76,7 +76,7 @@
             </section>
 
             {{-- Citas: actividad reciente y entrega de códigos del portal --}}
-            <div class="mt-6 grid gap-6 xl:grid-cols-12">
+            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
                 <section class="border border-ink-300 bg-paper-50 xl:col-span-8" data-reveal>
                     <div class="flex flex-wrap items-end justify-between gap-3 border-b-2 border-ink-950 p-4 sm:p-5">
                         <div>
