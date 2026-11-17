@@ -131,6 +131,19 @@ return [
     |
     */
 
-    'serializable_classes' => false,
+    // Solo las clases que guarda CachePortal (lista cerrada, no "true"):
+    // así se mantiene la protección contra gadget chains (A08).
+    'serializable_classes' => [
+        App\Models\CampanaPreventiva::class,
+        App\Models\Horario::class,
+        App\Models\Posta::class,
+        App\Models\User::class,
+        App\Models\VacunaAviso::class,
+        App\Services\MedicoDelDia::class,
+        Illuminate\Database\Eloquent\Collection::class,
+        Illuminate\Support\Collection::class,
+        Illuminate\Support\Carbon::class,
+        Carbon\Carbon::class,
+    ],
 
 ];
