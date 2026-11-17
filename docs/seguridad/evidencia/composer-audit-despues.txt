@@ -1,0 +1,14 @@
+# composer audit — DESPUÉS de la corrección (17-11-2026)
+# laravel/framework v11.57.0 → v12.73.0 · symfony/* 7.4.19–7.4.21 → 7.4.22–7.4.23
+
+$ grep -n "laravel/framework" composer.json
+12:        "laravel/framework": "^12.0",
+
+$ composer audit
+No security vulnerability advisories found.
+
+$ npm audit
+found 0 vulnerabilities
+
+$ php artisan test
+Tests:    79 passed (427 assertions)

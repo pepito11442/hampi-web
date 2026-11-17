@@ -1,0 +1,21 @@
+# curl -sI https://hampi-bqb8.onrender.com   (17-11-2026 15:50 UTC, ANTES de desplegar las correcciones)
+# Valores de cookies recortados.
+
+HTTP/2 200
+content-type: text/html; charset=utf-8
+cache-control: no-cache, private
+content-security-policy: default-src 'self'; script-src 'self' 'nonce-…'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: cloudflare
+set-cookie: XSRF-TOKEN=…; expires=…; Max-Age=7200; path=/; secure; samesite=lax
+set-cookie: hampi-session=…; expires=…; Max-Age=7200; path=/; secure; httponly; samesite=lax
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-frame-options: SAMEORIGIN
+
+# Lectura:
+# - OK: HSTS, nosniff, Referrer-Policy, Permissions-Policy, CSP con nonce en scripts.
+# - OK (CP-12): cookie de sesión con Secure, HttpOnly y SameSite=Lax. XSRF-TOKEN sin HttpOnly es lo esperado (la lee JS).
+# - H-05: x-frame-options SAMEORIGIN y frame-ancestors 'self'.
+# - H-06: style-src con 'unsafe-inline'.

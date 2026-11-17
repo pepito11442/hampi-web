@@ -1,0 +1,14 @@
+# curl -s -i https://hampi-bqb8.onrender.com/api/consultar-dni/72345678   (una sola vez, sin cookies ni sesión)
+# 17-11-2026 15:50 UTC, ANTES de desplegar las correcciones. Nombre de la persona tapado.
+
+HTTP/2 200
+content-type: application/json
+access-control-allow-origin: *
+x-ratelimit-limit: 10
+x-ratelimit-remaining: 9
+
+{"success":true,"nombres":"J*****","apellidos":"P***** T*****","origen":"Padrón RENIEC Oficial"}
+
+# Lectura:
+# - H-02: sin sesión ni token, la API devuelve el nombre real de un DNI cualquiera (10 por minuto por IP).
+# - H-07: access-control-allow-origin: *  → cualquier sitio web puede leer la respuesta desde el navegador de su visitante.

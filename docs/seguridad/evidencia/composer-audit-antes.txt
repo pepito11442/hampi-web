@@ -1,0 +1,18 @@
+# composer audit — ANTES de la corrección (17-11-2026, Laravel 11.57.0)
+# Comando: composer audit --format=json  (resumen)
+
+Found 13 security vulnerability advisories affecting 6 packages.
+
+laravel/framework          low     CVE-2026-128083    Laravel: Task Output Injection - Concurrency Process
+laravel/framework          low     CVE-2026-102279    Laravel: XSS in Debug Page Information
+laravel/framework          medium  PKSA-m5cs-t1y6-qpcs Laravel Framework: Temporary Signed URL Path Confusion
+laravel/framework          high    PKSA-3r5d-mb8f-1qw9 Laravel Framework: CRLF injection in default email rule 
+laravel/framework          s/d     CVE-2026-48019     Laravel CRLF injection in default email rule
+symfony/http-foundation    s/d     CVE-2026-121619    The "private_ranges" Trusted Proxies Shortcut Trusts Clients Presenting an IPv4-Mapped, 6to4, Teredo or NAT64 Address as Reverse Proxies
+symfony/http-foundation    s/d     CVE-2026-118514    CVE-2026-118514: HEAD Requests Bypass the methods Option of security.access_control Rules and Firewalls: Incomplete Fix for CVE-2026-45075
+symfony/http-foundation    s/d     PKSA-pr6q-2w5s-kzzf Path Rules Enforced in Front of PHP Can Be Bypassed by Appending the Path to the Script Name
+symfony/http-foundation    s/d     PKSA-b2gg-vk1g-6d5q Generated URLs Can Point to a Host Chosen by the Client
+symfony/http-kernel        s/d     CVE-2026-123339    Inline Fragments Let Untrusted Forwarded Headers Set the Host, Scheme and Port of the URLs Generated for the Main Request
+symfony/mime               medium  CVE-2026-45070     CVE-2026-45070: Email Header Injection via Non-Token Characters in Mime Parameter Names
+symfony/routing            s/d     CVE-2026-118516    CVE-2026-118516: Host Placeholders Can Match the Start of the Path in Compiled URL Matchers, Bypassing Path-Based Access Control
+symfony/yaml               s/d     CVE-2026-123792    Exponential and Quadratic Parse Times in the YAML Parser Let a Single Document Hold a Process
