@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HampiController::class, 'index'])->name('inicio');
 Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec'])
-    ->middleware('throttle:10,1');
+    ->middleware('throttle:3,1');
 
 // Acceso ciudadano: DNI + código de 6 dígitos.
 Route::post('/ingreso-dni', [CiudadanoController::class, 'login'])

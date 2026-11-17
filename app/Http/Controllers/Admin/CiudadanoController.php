@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ciudadano;
+use App\Support\Auditoria;
 use Illuminate\Http\Request;
 
 /**
@@ -30,10 +31,17 @@ class CiudadanoController extends Controller
             ])->withInput();
         }
 
+        $codigo = $ciudadano->generarCodigo();
+
+        Auditoria::registrar('codigo.generado', [
+            'ciudadano_afectado' => $ciudadano->id,
+            'origen' => 'ventanilla',
+        ]);
+
         return back()->with('codigo_ciudadano', [
             'dni' => $ciudadano->dni,
             'nombre' => $ciudadano->nombre_completo,
-            'codigo' => $ciudadano->generarCodigo(),
+            'codigo' => $codigo,
         ]);
     }
 }

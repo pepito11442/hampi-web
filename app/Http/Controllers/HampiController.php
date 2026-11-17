@@ -7,7 +7,9 @@ use App\Models\Posta;
 use App\Models\VacunaAviso;
 use App\Models\CampanaPreventiva;
 use App\Services\AgendaMedica;
+use App\Support\Auditoria;
 use App\Support\CachePortal;
+use App\Support\TokenReniec;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -78,10 +80,30 @@ class HampiController extends Controller
      * Es un servicio opcional: si no hay token o la API falla, el
      * formulario permite completar los nombres manualmente.
      */
-    public function consultarDniReniec($dni)
+    public function consultarDniReniec(Request $request, $dni)
     {
         if (! preg_match('/^[0-9]{8}$/', $dni)) {
             return response()->json(['success' => false, 'mensaje' => 'El DNI debe tener 8 dígitos'], 400);
+        }
+
+        // Solo quien abrió "Crear mi código" puede consultar, y una sola vez
+        // por formulario: así el endpoint no sirve para enumerar nombres.
+        $tokenRecibido = (string) $request->header('X-Reniec-Token', '');
+        $tokenSesion = $request->hasSession() ? (string) $request->session()->pull(TokenReniec::CLAVE_SESION, '') : '';
+        $valido = $tokenRecibido !== ''
+            && hash_equals($tokenSesion, $tokenRecibido)
+            && TokenReniec::consumir($tokenRecibido);
+
+        Auditoria::registrar('reniec.consulta', [
+            'dni' => Auditoria::dniOculto($dni),
+            'permitida' => $valido,
+        ]);
+
+        if (! $valido) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'Escribe tus nombres manualmente.',
+            ], 403);
         }
 
         $token = config('services.reniec.token');

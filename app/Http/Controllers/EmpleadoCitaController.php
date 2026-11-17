@@ -8,6 +8,7 @@ use App\Models\Horario;
 use App\Models\Posta;
 use App\Models\User;
 use App\Services\AgendaCitas;
+use App\Support\Auditoria;
 use App\Support\CachePortal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -184,6 +185,14 @@ class EmpleadoCitaController extends Controller
             ]);
         });
 
+        if ($codigoNuevo) {
+            Auditoria::registrar('codigo.generado', [
+                'ciudadano_afectado' => $cita->ciudadano_id,
+                'cita_id' => $cita->id,
+                'origen' => 'cita_nueva',
+            ]);
+        }
+
         return redirect()
             ->route('empleado.citas.index')
             ->with('mensaje', 'Cita agendada para '.$cita->ciudadano->nombres.' '.$cita->ciudadano->apellidos.' el '.$fechaHora->locale('es')->isoFormat('ddd D MMM, h:mm a').'.')
@@ -206,6 +215,12 @@ class EmpleadoCitaController extends Controller
 
         $ciudadano = $cita->ciudadano;
         $codigo = $ciudadano->generarCodigo();
+
+        Auditoria::registrar('codigo.generado', [
+            'ciudadano_afectado' => $ciudadano->id,
+            'cita_id' => $cita->id,
+            'origen' => 'agenda_medico',
+        ]);
 
         return redirect()
             ->route('empleado.citas.index')
@@ -239,7 +254,14 @@ class EmpleadoCitaController extends Controller
             ]);
         }
 
+        $anterior = $cita->estado;
         $cita->update(['estado' => $datos['estado']]);
+
+        Auditoria::registrar('cita.estado_cambiado', [
+            'cita_id' => $cita->id,
+            'de' => $anterior,
+            'a' => $datos['estado'],
+        ]);
 
         return redirect()
             ->route('empleado.citas.index')

@@ -23,7 +23,7 @@
             El código protege tu información de salud. Guárdalo bien y no lo compartas.
         </x-slot:lead>
 
-        <form action="{{ route('ciudadano.registro.store') }}" method="POST" class="mt-7 space-y-5" data-reniec-form>
+        <form action="{{ route('ciudadano.registro.store') }}" method="POST" class="mt-7 space-y-5" data-reniec-form data-reniec-token="{{ $tokenReniec }}">
             @csrf
 
             @if ($errors->any())

@@ -26,7 +26,8 @@ class SecurityHeaders
 
         $respuesta = $next($request);
 
-        $respuesta->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        // El portal nunca se muestra dentro de un <iframe> (clickjacking).
+        $respuesta->headers->set('X-Frame-Options', 'DENY');
         $respuesta->headers->set('X-Content-Type-Options', 'nosniff');
         $respuesta->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $respuesta->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
@@ -39,14 +40,15 @@ class SecurityHeaders
             $respuesta->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 "script-src 'self' 'nonce-{$nonce}'",
-                // Algunos componentes usan style="" (barras del gráfico, etc.).
-                "style-src 'self' 'unsafe-inline'",
+                // Sin 'unsafe-inline': las alturas y anchos dinámicos (gráfico,
+                // barras de progreso) se aplican desde app.js vía data-*.
+                "style-src 'self' 'nonce-{$nonce}'",
                 "img-src 'self' data:",
                 "font-src 'self'",
                 "connect-src 'self'",
                 "manifest-src 'self'",
                 "worker-src 'self'",
-                "frame-ancestors 'self'",
+                "frame-ancestors 'none'",
                 "form-action 'self'",
                 "base-uri 'self'",
                 "object-src 'none'",

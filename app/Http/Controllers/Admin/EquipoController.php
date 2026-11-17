@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Auditoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -57,7 +58,12 @@ class EquipoController extends Controller
         $datos['activo'] = true;
         $datos['establecimiento'] = ($datos['establecimiento'] ?? null) ?: 'C.S. San Martín de Socabaya';
 
-        User::create($datos);
+        $nuevo = User::create($datos);
+
+        Auditoria::registrar('usuario.creado', [
+            'usuario_afectado' => $nuevo->id,
+            'rol_asignado' => $nuevo->role,
+        ]);
 
         return back()->with('mensaje', 'Cuenta creada. El trabajador ya puede ingresar con su DNI.');
     }
@@ -78,7 +84,9 @@ class EquipoController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        if (! empty($datos['password'])) {
+        $cambiaClave = ! empty($datos['password']);
+
+        if ($cambiaClave) {
             $datos['password'] = Hash::make($datos['password']);
         } else {
             unset($datos['password']);
@@ -87,7 +95,21 @@ class EquipoController extends Controller
         $datos['activo'] = $request->boolean('activo');
         $datos['establecimiento'] = ($datos['establecimiento'] ?? null) ?: $empleado->establecimiento;
 
+        $rolAnterior = $empleado->role;
+        $activoAnterior = (bool) $empleado->activo;
         $empleado->update($datos);
+
+        if ($cambiaClave) {
+            Auditoria::registrar('contrasena.cambiada', ['usuario_afectado' => $empleado->id, 'origen' => 'admin']);
+        }
+
+        if ($rolAnterior !== $empleado->role || $activoAnterior !== (bool) $empleado->activo) {
+            Auditoria::registrar('usuario.permisos_cambiados', [
+                'usuario_afectado' => $empleado->id,
+                'rol' => [$rolAnterior, $empleado->role],
+                'activo' => [$activoAnterior, (bool) $empleado->activo],
+            ]);
+        }
 
         return back()->with('mensaje', 'Datos del trabajador actualizados.');
     }
@@ -101,7 +123,10 @@ class EquipoController extends Controller
             Storage::disk('public')->delete($empleado->foto_perfil);
         }
 
+        $id = $empleado->id;
         $empleado->delete();
+
+        Auditoria::registrar('usuario.eliminado', ['usuario_afectado' => $id]);
 
         return back()->with('mensaje', 'Cuenta del trabajador eliminada junto con su historial de horarios.');
     }

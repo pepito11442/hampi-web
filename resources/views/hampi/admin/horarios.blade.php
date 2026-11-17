@@ -164,7 +164,7 @@
                                     </span>
                                 </div>
                                 <div class="mt-3 h-2 w-full bg-ink-100" role="progressbar" aria-valuemin="0" aria-valuemax="150" aria-valuenow="{{ $horasTotales }}" aria-label="Avance de horas del trabajador">
-                                    <div class="h-full bg-brand-700 transition-[width] duration-500" style="width: {{ $progreso }}%"></div>
+                                    <div class="h-full bg-brand-700 transition-[width] duration-500" data-ancho="{{ $progreso }}"></div>
                                 </div>
                                 <p class="mt-1.5 font-mono text-[9px] uppercase tracking-[0.05em] text-ink-500">
                                     {{ $horasTotales >= 150 ? 'Cumple la meta mensual de 150 horas' : 'Aún no se alcanzan las 150 horas' }}

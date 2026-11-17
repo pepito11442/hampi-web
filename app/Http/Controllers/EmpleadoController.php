@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Horario;
 use App\Models\User;
+use App\Support\Auditoria;
 use Carbon\Carbon;
 use App\Services\FotoPerfil;
 use Illuminate\Http\Request;
@@ -143,7 +144,13 @@ class EmpleadoController extends Controller
             $datos['foto_mime'] = $foto['mime'];
         }
 
+        $correoAnterior = $user->email;
         $user->update($datos);
+
+        // El correo es la vía de recuperación de la cuenta.
+        if ($correoAnterior !== $user->email) {
+            Auditoria::registrar('usuario.correo_cambiado', ['usuario_afectado' => $user->id]);
+        }
 
         [$anio, $mes] = $this->periodo($request);
 

@@ -8,6 +8,8 @@ use App\Models\Posta;
 use App\Models\User;
 use App\Services\AgendaCitas;
 use App\Services\CalendarioIcs;
+use App\Support\Auditoria;
+use App\Support\TokenReniec;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,9 +95,11 @@ class CiudadanoController extends Controller
     }
 
     /** Formulario para crear el código la primera vez. */
-    public function showRegistro()
+    public function showRegistro(Request $request)
     {
-        return view('hampi.registro');
+        return view('hampi.registro', [
+            'tokenReniec' => TokenReniec::emitir($request),
+        ]);
     }
 
     /**
@@ -337,7 +341,14 @@ class CiudadanoController extends Controller
             return back()->withErrors(['cita' => 'Esta cita ya no se puede cancelar.']);
         }
 
+        $anterior = $cita->estado;
         $cita->update(['estado' => 'Cancelada']);
+
+        Auditoria::registrar('cita.estado_cambiado', [
+            'cita_id' => $cita->id,
+            'de' => $anterior,
+            'a' => 'Cancelada',
+        ]);
 
         return redirect()->route('ciudadano.panel')->with('mensaje', 'Cancelaste tu cita. El horario quedó libre para otra persona.');
     }

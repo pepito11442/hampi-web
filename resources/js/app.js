@@ -287,6 +287,23 @@ function initSoloDigitos() {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Tamaños dinámicos sin style="" (la CSP no permite estilos en línea)         */
+/* -------------------------------------------------------------------------- */
+function initEstilosDinamicos() {
+    const porcentaje = (valor) => `${Math.min(Math.max(Number(valor) || 0, 0), 100)}%`;
+
+    document.querySelectorAll('[data-alto]').forEach((el) => {
+        el.style.height = porcentaje(el.dataset.alto);
+    });
+    document.querySelectorAll('[data-ancho]').forEach((el) => {
+        el.style.width = porcentaje(el.dataset.ancho);
+    });
+    document.querySelectorAll('[data-reveal-delay]').forEach((el) => {
+        el.style.setProperty('--reveal-delay', `${Number(el.dataset.revealDelay) || 0}ms`);
+    });
+}
+
+/* -------------------------------------------------------------------------- */
 /* Autocompletar nombres con RENIEC al crear el código (opcional)              */
 /* -------------------------------------------------------------------------- */
 function initReniec() {
@@ -297,16 +314,18 @@ function initReniec() {
     const nombres = form.querySelector('[data-reniec-nombres]');
     const apellidos = form.querySelector('[data-reniec-apellidos]');
     const estado = form.querySelector('[data-reniec-estado]');
-    let ultimo = '';
+    // Token de un solo uso emitido con el formulario: permite una consulta.
+    let token = form.dataset.reniecToken || '';
 
     dni?.addEventListener('input', async () => {
-        if (dni.value.length !== 8 || dni.value === ultimo) return;
-        ultimo = dni.value;
+        if (dni.value.length !== 8 || !token) return;
+        const usado = token;
+        token = '';
         estado.textContent = 'Buscando…';
 
         try {
             const respuesta = await fetch(`/api/consultar-dni/${encodeURIComponent(dni.value)}`, {
-                headers: { Accept: 'application/json' },
+                headers: { Accept: 'application/json', 'X-Reniec-Token': usado },
             });
             const data = await respuesta.json();
 
@@ -324,6 +343,7 @@ function initReniec() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initEstilosDinamicos();
     initMobileMenu();
     initHeaderScroll();
     initReveal();

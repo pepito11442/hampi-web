@@ -161,7 +161,7 @@
                     @else
                         <div class="divide-y divide-ink-200">
                             @foreach ($equipo as $empleado)
-                                <article class="py-5" data-reveal style="--reveal-delay: {{ $loop->index * 30 }}ms">
+                                <article class="py-5" data-reveal data-reveal-delay="{{ $loop->index * 30 }}">
                                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                         <div class="flex items-start gap-3">
                                             @if ($empleado->foto_url)

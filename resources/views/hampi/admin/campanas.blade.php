@@ -130,7 +130,7 @@
                                     };
                                 @endphp
 
-                                <article class="grid grid-cols-1 gap-4 py-5 sm:grid-cols-12" data-reveal style="--reveal-delay: {{ $loop->index * 30 }}ms">
+                                <article class="grid grid-cols-1 gap-4 py-5 sm:grid-cols-12" data-reveal data-reveal-delay="{{ $loop->index * 30 }}">
                                     <div class="sm:col-span-3">
                                         <div class="flex h-20 w-20 flex-col items-center justify-center border border-ink-300 bg-paper-100">
                                             <span class="font-display text-3xl font-extrabold leading-none text-ink-950">

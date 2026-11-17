@@ -123,6 +123,19 @@ return [
             ],
         ],
 
+        // Auditoría de acciones sensibles (A09): siempre a stderr con nivel
+        // propio, para que LOG_LEVEL=warning en Render no la oculte.
+        'auditoria' => [
+            'driver' => 'monolog',
+            'level' => 'info',
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                // En las pruebas se manda a php://memory para no ensuciar la salida.
+                'stream' => env('LOG_AUDITORIA_STREAM', 'php://stderr'),
+            ],
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+        ],
+
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),

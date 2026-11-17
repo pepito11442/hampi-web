@@ -124,8 +124,8 @@
                                 @endphp
                                 <li class="flex h-full flex-1 flex-col justify-end" title="{{ $dia['etiqueta'] }}: {{ $dia['total'] }} citas, {{ $dia['atendidas'] }} atendidas">
                                     <span class="sr-only">{{ $dia['etiqueta'] }}: {{ $dia['total'] }} citas, {{ $dia['atendidas'] }} atendidas</span>
-                                    <span class="flex w-full flex-col justify-end bg-ink-300" style="height: {{ max($alto, $dia['total'] ? 4 : 1) }}%">
-                                        <span class="block w-full bg-brand-700" style="height: {{ $altoAtendidas }}%"></span>
+                                    <span class="flex w-full flex-col justify-end bg-ink-300" data-alto="{{ max($alto, $dia['total'] ? 4 : 1) }}">
+                                        <span class="block w-full bg-brand-700" data-alto="{{ $altoAtendidas }}"></span>
                                     </span>
                                 </li>
                             @endforeach

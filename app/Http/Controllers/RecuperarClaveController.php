@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Auditoria;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -78,6 +79,11 @@ class RecuperarClaveController extends Controller
                 ])->save();
 
                 event(new PasswordReset($usuario));
+
+                Auditoria::registrar('contrasena.cambiada', [
+                    'usuario_afectado' => $usuario->id,
+                    'origen' => 'enlace_recuperacion',
+                ]);
             }
         );
 
