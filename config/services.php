@@ -34,7 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    // RENIEC (apis.net.pe): token opcional para autocompletar nombres.
+    // RENIEC (apis.net.pe): token opcional; autocompleta nombres en la ventanilla de admisión.
     'reniec' => [
         'token' => env('RENIEC_API_TOKEN'),
         'url' => env('RENIEC_API_URL', 'https://api.apis.net.pe/v2/reniec/dni'),

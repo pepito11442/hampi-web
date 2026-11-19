@@ -80,55 +80,10 @@ class CiudadanoAccesoTest extends TestCase
         $this->assertArrayNotHasKey('codigo_acceso', $ciudadano->fresh()->toArray());
     }
 
-    public function test_una_persona_nueva_crea_su_codigo_y_entra(): void
+    public function test_ya_no_se_puede_crear_el_codigo_desde_internet(): void
     {
-        $this->post(route('ciudadano.registro.store'), [
-            'dni' => '70111222',
-            'nombres' => 'Juana',
-            'apellidos' => 'Ccama Luque',
-            'codigo' => '582047',
-            'codigo_confirmation' => '582047',
-        ])->assertRedirect(route('ciudadano.panel'));
-
-        $ciudadano = Ciudadano::where('dni', '70111222')->firstOrFail();
-        $this->assertTrue($ciudadano->verificarCodigo('582047'));
-        $this->get('/mi-panel')->assertOk()->assertSee('Juana');
-    }
-
-    public function test_no_se_puede_tomar_una_ficha_existente_desde_internet(): void
-    {
-        [, , $ciudadano] = $this->escenario();
-
-        $this->post(route('ciudadano.registro.store'), [
-            'dni' => $ciudadano->dni,
-            'nombres' => 'Otra',
-            'apellidos' => 'Persona',
-            'codigo' => '582047',
-            'codigo_confirmation' => '582047',
-        ])->assertSessionHasErrors('dni');
-
-        $this->assertFalse($ciudadano->fresh()->tieneCodigo());
-        $this->assertSame('Rosa Elena', $ciudadano->fresh()->nombres);
-    }
-
-    public function test_se_rechazan_codigos_faciles(): void
-    {
-        $this->post(route('ciudadano.registro.store'), [
-            'dni' => '70111222',
-            'nombres' => 'Juana',
-            'apellidos' => 'Ccama',
-            'codigo' => '123456',
-            'codigo_confirmation' => '123456',
-        ])->assertSessionHasErrors('codigo');
-
-        $this->post(route('ciudadano.registro.store'), [
-            'dni' => '70111222',
-            'nombres' => 'Juana',
-            'apellidos' => 'Ccama',
-            'codigo' => '111222',
-            'codigo_confirmation' => '111222',
-        ])->assertSessionHasErrors('codigo');
-
+        $this->get('/crear-codigo')->assertNotFound();
+        $this->post('/crear-codigo', ['dni' => '70111222'])->assertNotFound();
         $this->assertDatabaseMissing('ciudadanos', ['dni' => '70111222']);
     }
 
@@ -182,6 +137,49 @@ class CiudadanoAccesoTest extends TestCase
             ->assertSessionHas('codigo_ciudadano');
 
         $this->assertTrue($ciudadano->fresh()->tieneCodigo());
+    }
+
+    public function test_ventanilla_registra_a_una_persona_nueva_con_su_nombre(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.ciudadanos.codigo'), ['dni' => '70111222'])
+            ->assertSessionHasErrors('dni_codigo');
+        $this->assertDatabaseMissing('ciudadanos', ['dni' => '70111222']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.ciudadanos.codigo'), [
+                'dni' => '70111222',
+                'nombres' => 'Juana',
+                'apellidos' => 'Ccama Luque',
+            ])->assertSessionHas('codigo_ciudadano');
+
+        $ciudadano = Ciudadano::where('dni', '70111222')->firstOrFail();
+        $this->assertSame('Juana', $ciudadano->nombres);
+        $this->assertTrue($ciudadano->tieneCodigo());
+    }
+
+    public function test_ventanilla_autocompleta_con_reniec_solo_para_el_personal(): void
+    {
+        config(['services.reniec.token' => 'token-de-prueba']);
+        \Illuminate\Support\Facades\Http::fake(['*' => \Illuminate\Support\Facades\Http::response([
+            'nombres' => 'JUANA', 'apellidoPaterno' => 'CCAMA', 'apellidoMaterno' => 'LUQUE',
+        ])]);
+
+        $this->getJson('/admin/ciudadanos/reniec/70111222')->assertUnauthorized();
+
+        $admin = User::factory()->admin()->create();
+        $this->actingAs($admin)->getJson('/admin/ciudadanos/reniec/70111222')
+            ->assertOk()
+            ->assertJson(['success' => true, 'existe' => false, 'nombres' => 'JUANA', 'apellidos' => 'CCAMA LUQUE']);
+
+        [, , $ciudadano] = $this->escenario();
+        $this->actingAs($admin)->getJson('/admin/ciudadanos/reniec/'.$ciudadano->dni)
+            ->assertOk()
+            ->assertJson(['existe' => true, 'nombres' => $ciudadano->nombres]);
+
+        \Illuminate\Support\Facades\Http::assertSentCount(1);
     }
 
     public function test_el_ciudadano_reserva_un_horario_libre(): void
@@ -296,7 +294,7 @@ class CiudadanoAccesoTest extends TestCase
         $this->get('/')->assertOk();
         $this->get('/mi-panel')->assertOk();
 
-        $this->get('/cerrar-sesion-ciudadano')->assertStatus(405);
+        $this->get('/cerrar-sesion-ciudadano')->assertNotFound();
 
         $this->post(route('ciudadano.logout'))->assertRedirect(route('inicio'));
         $this->get('/mi-panel')->assertRedirect(route('inicio').'#acceso');

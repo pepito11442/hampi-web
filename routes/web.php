@@ -23,17 +23,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HampiController::class, 'index'])->name('inicio');
-Route::get('/api/consultar-dni/{dni}', [HampiController::class, 'consultarDniReniec'])
-    ->middleware('throttle:3,1');
 
 // Acceso ciudadano: DNI + código de 6 dígitos.
 Route::post('/ingreso-dni', [CiudadanoController::class, 'login'])
     ->middleware('throttle:10,1')
     ->name('ciudadano.login');
-Route::get('/crear-codigo', [CiudadanoController::class, 'showRegistro'])->name('ciudadano.registro');
-Route::post('/crear-codigo', [CiudadanoController::class, 'registrar'])
-    ->middleware('throttle:5,10')
-    ->name('ciudadano.registro.store');
 Route::post('/cerrar-sesion-ciudadano', [CiudadanoController::class, 'logout'])->name('ciudadano.logout');
 
 Route::middleware('ciudadano')->group(function () {
@@ -131,6 +125,10 @@ Route::middleware(['auth', 'role:admin,admision'])
 
         // Código de acceso del portal ciudadano (entrega en ventanilla).
         Route::post('/ciudadanos/codigo', [AdminCiudadanoController::class, 'codigo'])->name('ciudadanos.codigo');
+        // Autocompletar nombres con RENIEC (solo personal con sesión).
+        Route::get('/ciudadanos/reniec/{dni}', [AdminCiudadanoController::class, 'reniec'])
+            ->middleware('throttle:20,1')
+            ->name('ciudadanos.reniec');
 
         // Rol de médicos del día.
         Route::post('/turnos/guardar', [AdminTurnoController::class, 'store'])->name('turno.store');

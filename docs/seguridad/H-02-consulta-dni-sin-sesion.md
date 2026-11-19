@@ -51,3 +51,7 @@ PHPUnit (`tests/Feature/HallazgosSeguridadTest.php`):
 - `test_h02_cada_consulta_queda_registrada_con_dni_oculto`.
 
 Tras desplegar: repetir el `curl` del paso 1 (esperado `403`) y el caso CP-15 del plan.
+
+## Actualización (19/11/2026): riesgo residual cerrado
+
+Se quitó el registro en línea ("Crea tu código"). Ya no existen `GET/POST /crear-codigo`, `/api/consultar-dni/{dni}` ni `app/Support/TokenReniec.php`. El autocompletado con RENIEC se movió a la ventanilla de admisión: `GET /admin/ciudadanos/reniec/{dni}` exige sesión con rol admin o admisión, tiene un límite de 20 consultas por minuto y queda en la auditoría. El código de acceso solo lo entrega la posta (ventanilla o médico) después de ver el DNI físico. Prueba de regresión: `test_h02_la_consulta_reniec_ya_no_existe`.

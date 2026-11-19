@@ -12,16 +12,15 @@ class SecurityTest extends TestCase
     // Esta línea crea automáticamente las tablas para las pruebas:
     use RefreshDatabase;
 
-    // 1. Probar que la API rechaza intentos de Inyección SQL en el DNI
+    // 1. Probar que el acceso ciudadano rechaza inyección SQL en el DNI
     public function test_rechaza_inyeccion_sql_en_dni(): void
     {
-        $response = $this->getJson('/api/consultar-dni/\' OR \'1\'=\'1');
+        $this->post('/ingreso-dni', [
+            'dni' => "' OR '1'='1",
+            'codigo' => '000000',
+        ])->assertSessionHasErrors('dni');
 
-        $response->assertStatus(400);
-        $response->assertJson([
-            'success' => false,
-            'mensaje' => 'El DNI debe tener 8 dígitos'
-        ]);
+        $this->assertNull(session('ciudadano_id'));
     }
 
     // 2. Probar que el Rate Limiter bloquea fuerza bruta (Hydra) en el login

@@ -118,8 +118,7 @@
                         @endif
 
                         <p class="mt-3 text-sm leading-relaxed text-ink-600">
-                            ¿Primera vez? <a href="{{ route('ciudadano.registro') }}" class="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800">Crea tu código</a>.
-                            ¿Ya te atendieron o lo olvidaste? Pídelo en tu posta con tu DNI.
+                            ¿Primera vez o lo olvidaste? Pide tu código en tu posta con tu DNI.
                         </p>
 
                         <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-500">

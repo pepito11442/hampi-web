@@ -304,7 +304,7 @@ function initEstilosDinamicos() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Autocompletar nombres con RENIEC al crear el código (opcional)              */
+/* Ventanilla: autocompletar nombres con RENIEC (solo personal)                */
 /* -------------------------------------------------------------------------- */
 function initReniec() {
     const form = document.querySelector('[data-reniec-form]');
@@ -314,30 +314,32 @@ function initReniec() {
     const nombres = form.querySelector('[data-reniec-nombres]');
     const apellidos = form.querySelector('[data-reniec-apellidos]');
     const estado = form.querySelector('[data-reniec-estado]');
-    // Token de un solo uso emitido con el formulario: permite una consulta.
-    let token = form.dataset.reniecToken || '';
+    let ultimo = '';
 
     dni?.addEventListener('input', async () => {
-        if (dni.value.length !== 8 || !token) return;
-        const usado = token;
-        token = '';
+        const valor = dni.value.trim();
+        if (valor.length !== 8 || valor === ultimo) return;
+        ultimo = valor;
         estado.textContent = 'Buscando…';
 
         try {
-            const respuesta = await fetch(`/api/consultar-dni/${encodeURIComponent(dni.value)}`, {
-                headers: { Accept: 'application/json', 'X-Reniec-Token': usado },
+            const respuesta = await fetch(`${form.dataset.reniecUrl}/${encodeURIComponent(valor)}`, {
+                headers: { Accept: 'application/json' },
             });
             const data = await respuesta.json();
+            if (dni.value.trim() !== valor) return;
 
             if (data.success) {
-                if (!nombres.value) nombres.value = data.nombres || '';
-                if (!apellidos.value) apellidos.value = (data.apellidos || '').trim();
-                estado.textContent = 'Datos encontrados';
+                nombres.value = data.nombres || '';
+                apellidos.value = data.apellidos || '';
+                estado.textContent = data.existe ? 'Ya tiene ficha.' : 'Datos de RENIEC.';
             } else {
-                estado.textContent = 'Escribe tus nombres';
+                ultimo = '';
+                estado.textContent = 'Escribe los nombres.';
             }
         } catch {
-            estado.textContent = 'Escribe tus nombres';
+            ultimo = '';
+            estado.textContent = 'Escribe los nombres.';
         }
     });
 }
@@ -350,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPasswordToggles();
     initStockFilters();
     initCitaSlots();
+    initReniec();
     initConfirmaciones();
     initSoloDigitos();
-    initReniec();
 });

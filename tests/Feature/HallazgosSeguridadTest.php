@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
@@ -44,70 +43,10 @@ class HallazgosSeguridadTest extends TestCase
 
     /* H-02 · A01/A06 -------------------------------------------------------- */
 
-    public function test_h02_consultar_dni_sin_token_es_rechazado(): void
+    public function test_h02_la_consulta_reniec_ya_no_existe(): void
     {
-        $this->fakeReniec();
-
-        $this->getJson('/api/consultar-dni/72345678')
-            ->assertForbidden()
-            ->assertJsonMissing(['nombres' => 'ROSA']);
-
-        Http::assertNothingSent();
+        $this->getJson('/api/consultar-dni/45879632')->assertNotFound();
     }
-
-    public function test_h02_el_token_del_formulario_sirve_una_sola_vez(): void
-    {
-        $this->fakeReniec();
-        $token = $this->tokenDelFormulario();
-
-        $this->getJson('/api/consultar-dni/72345678', ['X-Reniec-Token' => $token])
-            ->assertOk()
-            ->assertJson(['success' => true, 'nombres' => 'ROSA']);
-
-        $this->getJson('/api/consultar-dni/72345679', ['X-Reniec-Token' => $token])
-            ->assertForbidden();
-
-        Http::assertSentCount(1);
-    }
-
-    public function test_h02_un_token_ya_usado_no_revive_reenviando_la_sesion_vieja(): void
-    {
-        $this->fakeReniec();
-        $token = $this->tokenDelFormulario();
-
-        $this->getJson('/api/consultar-dni/72345678', ['X-Reniec-Token' => $token])->assertOk();
-
-        // Simula reenviar la cookie de sesión anterior (que aún tenía el token).
-        $this->withSession(['reniec_token' => $token])
-            ->getJson('/api/consultar-dni/72345679', ['X-Reniec-Token' => $token])
-            ->assertForbidden();
-    }
-
-    public function test_h02_maximo_tres_consultas_por_minuto(): void
-    {
-        $this->fakeReniec();
-
-        for ($i = 0; $i < 3; $i++) {
-            $this->getJson('/api/consultar-dni/72345678')->assertForbidden();
-        }
-
-        $this->getJson('/api/consultar-dni/72345678')->assertStatus(429);
-    }
-
-    public function test_h02_cada_consulta_queda_registrada_con_dni_oculto(): void
-    {
-        $this->fakeReniec();
-        $token = $this->tokenDelFormulario();
-
-        $this->getJson('/api/consultar-dni/72345678', ['X-Reniec-Token' => $token])->assertOk();
-
-        $registro = $this->auditoria('reniec.consulta');
-        $this->assertSame('72****78', $registro->context['dni']);
-        $this->assertTrue($registro->context['permitida']);
-        $this->assertStringNotContainsString('72345678', json_encode($registro->context));
-    }
-
-    /* H-03 · A09 ------------------------------------------------------------ */
 
     public function test_h03_se_audita_el_codigo_generado_en_ventanilla(): void
     {
@@ -211,37 +150,12 @@ class HallazgosSeguridadTest extends TestCase
 
     public function test_h07_la_api_no_envia_cors_abierto(): void
     {
-        $this->fakeReniec();
-
         $this->withHeader('Origin', 'https://sitio-ajeno.example')
-            ->getJson('/api/consultar-dni/72345678')
+            ->getJson('/')
             ->assertHeaderMissing('Access-Control-Allow-Origin');
     }
 
     /* ---------------------------------------------------------------------- */
-
-    private function fakeReniec(): void
-    {
-        config(['services.reniec.token' => 'token-de-prueba']);
-
-        Http::fake([
-            '*' => Http::response([
-                'nombres' => 'ROSA',
-                'apellidoPaterno' => 'QUISPE',
-                'apellidoMaterno' => 'MAMANI',
-            ]),
-        ]);
-    }
-
-    private function tokenDelFormulario(): string
-    {
-        $html = $this->get(route('ciudadano.registro'))->assertOk()->getContent();
-
-        $this->assertMatchesRegularExpression('/data-reniec-token="([A-Za-z0-9]{40})"/', $html);
-        preg_match('/data-reniec-token="([A-Za-z0-9]{40})"/', $html, $coincidencia);
-
-        return $coincidencia[1];
-    }
 
     private function auditoria(string $accion): MessageLogged
     {

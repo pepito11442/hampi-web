@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\AgendaCitas;
 use App\Services\CalendarioIcs;
 use App\Support\Auditoria;
-use App\Support\TokenReniec;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +21,8 @@ use Illuminate\Validation\ValidationException;
  * Acceso y autoservicio de la ciudadanía.
  *
  * Para entrar se pide DNI + código de acceso de 6 dígitos. El código lo
- * crea la propia persona la primera vez o se lo entrega el personal de la
- * posta cuando ya tiene una ficha (por ejemplo, porque le agendaron una cita).
+ * entrega siempre el personal de la posta (ventanilla o médico) tras ver el
+ * DNI físico: no hay registro ni recuperación desde internet.
  */
 class CiudadanoController extends Controller
 {
@@ -39,12 +38,6 @@ class CiudadanoController extends Controller
     /** Días hacia adelante que se pueden reservar. */
     public const DIAS_RESERVA = 30;
 
-    /** Códigos demasiado fáciles de adivinar. */
-    private const CODIGOS_DEBILES = [
-        '000000', '111111', '222222', '333333', '444444', '555555',
-        '666666', '777777', '888888', '999999', '123456', '654321',
-        '123123', '112233', '121212',
-    ];
 
     /* ---------------------------------------------------------------------- */
     /* Acceso                                                                  */
@@ -92,77 +85,6 @@ class CiudadanoController extends Controller
         ]);
 
         return redirect()->route('ciudadano.panel');
-    }
-
-    /** Formulario para crear el código la primera vez. */
-    public function showRegistro(Request $request)
-    {
-        return view('hampi.registro', [
-            'tokenReniec' => TokenReniec::emitir($request),
-        ]);
-    }
-
-    /**
-     * Crea la ficha y el código de una persona que nunca se atendió.
-     *
-     * Si la ficha ya existe (la creó el personal), no se permite tomarla
-     * desde internet: el código se pide en la posta. Así nadie puede
-     * apropiarse de las citas de otra persona sabiendo solo su DNI.
-     */
-    public function registrar(Request $request)
-    {
-        $datos = $request->validate([
-            'dni' => ['required', 'digits:8'],
-            'nombres' => ['required', 'string', 'max:120'],
-            'apellidos' => ['required', 'string', 'max:120'],
-            'telefono' => ['nullable', 'string', 'max:20', 'regex:/^[0-9 +()-]{6,20}$/'],
-            'codigo' => ['required', 'digits:'.Ciudadano::LONGITUD_CODIGO, 'confirmed', Rule::notIn(self::CODIGOS_DEBILES)],
-        ], [
-            'dni.digits' => 'El DNI debe tener exactamente 8 dígitos.',
-            'codigo.digits' => 'El código debe tener 6 dígitos.',
-            'codigo.confirmed' => 'Los dos códigos no coinciden.',
-            'codigo.not_in' => 'Ese código es muy fácil de adivinar. Elige otro.',
-            'telefono.regex' => 'Escribe solo números en el teléfono.',
-        ]);
-
-        if (str_contains($datos['dni'], $datos['codigo'])) {
-            throw ValidationException::withMessages([
-                'codigo' => 'No uses números de tu DNI como código.',
-            ]);
-        }
-
-        $existente = Ciudadano::where('dni', $datos['dni'])->first();
-
-        if ($existente) {
-            throw ValidationException::withMessages([
-                'dni' => $existente->tieneCodigo()
-                    ? 'Este DNI ya tiene un código de acceso. Ingresa desde la portada.'
-                    : 'Ya tienes una ficha en la microred. Por tu seguridad, pide tu código de acceso en tu posta.',
-            ]);
-        }
-
-        $ciudadano = DB::transaction(function () use ($datos) {
-            $ciudadano = Ciudadano::create([
-                'dni' => $datos['dni'],
-                'nombres' => strip_tags($datos['nombres']),
-                'apellidos' => strip_tags($datos['apellidos']),
-                'telefono' => ! empty($datos['telefono']) ? strip_tags($datos['telefono']) : null,
-            ]);
-
-            $ciudadano->asignarCodigo($datos['codigo']);
-
-            return $ciudadano;
-        });
-
-        $request->session()->regenerate();
-        $request->session()->put([
-            'ciudadano_id' => $ciudadano->id,
-            'ciudadano_dni' => $ciudadano->dni,
-        ]);
-
-        return redirect()
-            ->route('ciudadano.panel')
-            ->with('mensaje', 'Listo. Guarda tu código: lo necesitarás para volver a entrar.');
     }
 
     /** Cierra la sesión ciudadana sin afectar al personal autenticado. */

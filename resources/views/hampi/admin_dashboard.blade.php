@@ -149,15 +149,27 @@
                             Código del portal
                         </h2>
                         <p class="mt-2 text-sm leading-relaxed text-ink-600">
-                            Verifica el DNI físico de la persona y genérale un código para ver y pedir sus citas en línea. El código anterior deja de funcionar.
+                            Verifica el DNI físico de la persona y genérale un código para ver y pedir sus citas en línea. Si ya tenía uno, el anterior deja de funcionar.
                         </p>
                     </div>
-                    <form action="{{ route('admin.ciudadanos.codigo') }}" method="POST" class="space-y-3 p-4 sm:p-5" data-confirm="¿Generar un código nuevo para este DNI? El anterior dejará de funcionar.">
+                    <form action="{{ route('admin.ciudadanos.codigo') }}" method="POST" class="space-y-3 p-4 sm:p-5" data-reniec-form data-reniec-url="{{ url('/admin/ciudadanos/reniec') }}" data-confirm="¿Generar un código nuevo para este DNI? El anterior dejará de funcionar.">
                         @csrf
                         <div>
                             <label for="dni_codigo" class="label">DNI del ciudadano</label>
-                            <input type="text" name="dni" id="dni_codigo" value="{{ old('dni') }}" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" required data-solo-digitos class="input font-mono tracking-[0.18em]" placeholder="8 dígitos">
+                            <input type="text" name="dni" id="dni_codigo" data-reniec-dni value="{{ old('dni') }}" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" required data-solo-digitos class="input font-mono tracking-[0.18em]" placeholder="8 dígitos">
                             @error('dni_codigo') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
+                            @error('dni') <p class="mt-1 text-xs text-stamp-700">{{ $message }}</p> @enderror
+                        </div>
+                        <p class="text-xs leading-relaxed text-ink-500">Si es su primera vez, revisa sus datos contra el DNI: <span class="font-semibold" data-reniec-estado aria-live="polite"></span></p>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                            <div>
+                                <label for="nombres_codigo" class="label">Nombres</label>
+                                <input type="text" name="nombres" id="nombres_codigo" data-reniec-nombres value="{{ old('nombres') }}" maxlength="120" autocomplete="off" class="input">
+                            </div>
+                            <div>
+                                <label for="apellidos_codigo" class="label">Apellidos</label>
+                                <input type="text" name="apellidos" id="apellidos_codigo" data-reniec-apellidos value="{{ old('apellidos') }}" maxlength="120" autocomplete="off" class="input">
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-full">
                             <x-icon name="key-round" class="h-4 w-4" />
